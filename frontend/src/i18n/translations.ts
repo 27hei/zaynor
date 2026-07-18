@@ -105,7 +105,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     'account.alertsTitle': 'Price alerts',
     'account.emptySaved': 'No saved products yet — search for a product and press "Save product".',
     'account.emptyAlerts': 'No price alerts yet — search for a product and press "Notify me if the price drops".',
-    'account.alertNote': 'Alert monitoring activates once live store price feeds are connected.',
+    'account.alertNote':
+      'Zaynor checks tracked prices in the background. Email/push delivery arrives with live store feeds.',
+    'account.alertActive': 'Active',
+    'account.alertTriggered': 'Price dropped to {price}!',
     'account.loadError': 'Could not load your items — please refresh.',
     'account.remove': 'Remove',
     'account.logout': 'Log out',
@@ -251,7 +254,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     'account.alertsTitle': 'تنبيهات الأسعار',
     'account.emptySaved': 'لا منتجات محفوظة بعد — ابحث عن منتج واضغط «حفظ المنتج».',
     'account.emptyAlerts': 'لا تنبيهات أسعار بعد — ابحث عن منتج واضغط «نبّهني إذا انخفض السعر».',
-    'account.alertNote': 'تُفعَّل مراقبة التنبيهات عند ربط مصادر أسعار المتاجر الحية.',
+    'account.alertNote':
+      'يفحص زينور الأسعار المتتبَّعة في الخلفية. إشعارات البريد/الجوال تصل مع المصادر الحية.',
+    'account.alertActive': 'نشط',
+    'account.alertTriggered': 'انخفض السعر إلى {price}!',
     'account.loadError': 'تعذّر تحميل عناصرك — حدّث الصفحة.',
     'account.remove': 'إزالة',
     'account.logout': 'تسجيل الخروج',

@@ -6,6 +6,7 @@ using Zaynor.Application.Aggregation;
 using Zaynor.Application.Auth;
 using Zaynor.Application.UserItems;
 using Zaynor.Infrastructure.Aggregation;
+using Zaynor.Infrastructure.Alerts;
 using Zaynor.Infrastructure.Auth;
 using Zaynor.Infrastructure.DataSources;
 using Zaynor.Infrastructure.Persistence;
@@ -50,6 +51,10 @@ public static class DependencyInjection
         services.AddScoped<IAggregationService, CachedAggregationService>();
         services.AddScoped<ISearchSuggestionService, SearchSuggestionService>();
         services.AddScoped<IPriceHistoryService, PriceHistoryService>();
+
+        // Spec Section 13 background job: periodic checks that fire alerts
+        // and keep history accumulating for tracked products.
+        services.AddHostedService<AlertMonitorService>();
 
         return services;
     }

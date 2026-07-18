@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Zaynor.Application.Aggregation;
 using Zaynor.Application.UserItems;
@@ -89,7 +88,7 @@ public sealed class UserItemsService : IUserItemsService
         {
             UserId = userId,
             ProductId = product.Id,
-            TargetCondition = BuildCondition(priceBaseline, currency),
+            TargetCondition = AlertConditions.BuildPriceDropBelow(priceBaseline, currency),
             IsActive = true,
             CreatedAt = DateTimeOffset.UtcNow,
         };
@@ -151,19 +150,6 @@ public sealed class UserItemsService : IUserItemsService
         _db.Products.Add(product);
         await _db.SaveChangesAsync(cancellationToken);
         return product;
-    }
-
-    private static string BuildCondition(decimal? priceBaseline, string? currency)
-    {
-        if (priceBaseline is null)
-        {
-            return "price_drop";
-        }
-
-        var amount = priceBaseline.Value.ToString(CultureInfo.InvariantCulture);
-        return string.IsNullOrWhiteSpace(currency)
-            ? $"price_drop_below:{amount}"
-            : $"price_drop_below:{amount} {currency}";
     }
 
     private static AlertDto ToAlertDto(Alert alert, string productName) => new()

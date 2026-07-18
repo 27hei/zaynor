@@ -6,6 +6,12 @@ import { useAuth } from '../auth/useAuth'
 import { useTranslation } from '../i18n/useTranslation'
 import { usePageTitle } from '../hooks/usePageTitle'
 
+/** Extracts "4308.96 SAR" from "triggered:4308.96 SAR;baseline:…", or null when not triggered. */
+function triggeredPrice(condition: string): string | null {
+  if (!condition.startsWith('triggered:')) return null
+  return condition.slice('triggered:'.length).split(';')[0] || null
+}
+
 export function AccountPage() {
   const { t, lang } = useTranslation()
   const { user, logout } = useAuth()
@@ -128,23 +134,37 @@ export function AccountPage() {
           ) : (
             <>
               <ul className="item-list">
-                {alerts.map((alert) => (
-                  <li className="item-row" key={alert.id}>
-                    <div className="item-info">
-                      <span className="item-name">{alert.productName}</span>
-                      <span className="item-date">
-                        {dateFormat.format(new Date(alert.createdAt))}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      className="item-remove"
-                      onClick={() => handleRemoveAlert(alert.id)}
-                    >
-                      {t('account.remove')}
-                    </button>
-                  </li>
-                ))}
+                {alerts.map((alert) => {
+                  const dropped = triggeredPrice(alert.targetCondition)
+                  return (
+                    <li className="item-row" key={alert.id}>
+                      <div className="item-info">
+                        <span className="item-name-row">
+                          <span className="item-name">{alert.productName}</span>
+                          {dropped ? (
+                            <span className="alert-chip alert-chip-triggered">
+                              {t('account.alertTriggered', { price: dropped })}
+                            </span>
+                          ) : (
+                            <span className="alert-chip alert-chip-active">
+                              {t('account.alertActive')}
+                            </span>
+                          )}
+                        </span>
+                        <span className="item-date">
+                          {dateFormat.format(new Date(alert.createdAt))}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="item-remove"
+                        onClick={() => handleRemoveAlert(alert.id)}
+                      >
+                        {t('account.remove')}
+                      </button>
+                    </li>
+                  )
+                })}
               </ul>
               <p className="account-note">{t('account.alertNote')}</p>
             </>
