@@ -6,6 +6,8 @@ import { Header } from './components/Header'
 import { Footer } from './components/Footer'
 import { BrandLockup } from './components/BrandLockup'
 import { SearchBar } from './components/SearchBar'
+import { NeutralityBadge } from './components/NeutralityBadge'
+import { PopularSearches } from './components/PopularSearches'
 import { RecommendationBanner } from './components/RecommendationBanner'
 import { OfferList } from './components/OfferList'
 import { OfferListSkeleton } from './components/OfferListSkeleton'
@@ -14,22 +16,24 @@ import { FeatureHighlights } from './components/FeatureHighlights'
 const TRACKED_STORES = ['Amazon.sa', 'Noon', 'Jarir', 'Extra', 'AliExpress']
 
 function App() {
+  const [query, setQuery] = useState('')
   const [result, setResult] = useState<SearchResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const activeRequest = useRef<AbortController | null>(null)
 
-  async function handleSearch(query: string) {
+  async function handleSearch(searchQuery: string) {
     // Cancel any in-flight request so stale results can't overwrite newer ones.
     activeRequest.current?.abort()
     const controller = new AbortController()
     activeRequest.current = controller
 
+    setQuery(searchQuery)
     setLoading(true)
     setError(null)
 
     try {
-      const data = await searchProducts(query, controller.signal)
+      const data = await searchProducts(searchQuery, controller.signal)
       setResult(data)
     } catch (err) {
       if ((err as Error).name === 'AbortError') return
@@ -45,6 +49,14 @@ function App() {
   const hasSearched = result !== null
   const hasResults = !!result && result.offers.length > 0
 
+  const statusMessage = loading
+    ? 'Searching stores…'
+    : hasSearched
+      ? hasResults
+        ? `${result!.offerCount} offers found for ${result!.query}`
+        : `No offers found for ${result!.query}`
+      : ''
+
   return (
     <div className="page">
       <Header />
@@ -59,7 +71,9 @@ function App() {
               where to buy.
             </p>
 
-            <SearchBar onSearch={handleSearch} disabled={loading} />
+            <SearchBar value={query} onChange={setQuery} onSearch={handleSearch} disabled={loading} />
+            <NeutralityBadge />
+            <PopularSearches onSelect={handleSearch} />
 
             <p className="hero-trust">
               Comparing offers across{' '}
@@ -73,9 +87,14 @@ function App() {
           </section>
         ) : (
           <section className="hero hero-compact">
-            <SearchBar onSearch={handleSearch} disabled={loading} />
+            <SearchBar value={query} onChange={setQuery} onSearch={handleSearch} disabled={loading} />
           </section>
         )}
+
+        {/* Screen-reader-only live status; visible feedback is rendered below. */}
+        <p className="sr-only" role="status" aria-live="polite">
+          {statusMessage}
+        </p>
 
         {error && (
           <p className="hint hint-error" role="alert">
@@ -95,7 +114,7 @@ function App() {
         )}
 
         {!loading && hasResults && (
-          <section className="results" aria-label="Search results">
+          <section className="results results-in" aria-label="Search results">
             {result!.recommendation && (
               <RecommendationBanner recommendation={result!.recommendation} />
             )}

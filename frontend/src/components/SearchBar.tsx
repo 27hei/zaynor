@@ -1,13 +1,13 @@
-import { useState, type FormEvent } from 'react'
+import type { FormEvent } from 'react'
 
 interface SearchBarProps {
+  value: string
+  onChange: (value: string) => void
   onSearch: (query: string) => void
   disabled?: boolean
 }
 
-export function SearchBar({ onSearch, disabled }: SearchBarProps) {
-  const [value, setValue] = useState('')
-
+export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProps) {
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
     const trimmed = value.trim()
@@ -24,7 +24,7 @@ export function SearchBar({ onSearch, disabled }: SearchBarProps) {
         placeholder="Search for a product, e.g. Sony PlayStation 5"
         aria-label="Search for a product"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
       />
       <button type="submit" className="search-button" disabled={disabled}>
