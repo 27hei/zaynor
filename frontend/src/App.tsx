@@ -2,9 +2,15 @@ import { useRef, useState } from 'react'
 import './App.css'
 import { searchProducts } from './api/client'
 import type { SearchResult } from './api/types'
+import { Header } from './components/Header'
+import { Footer } from './components/Footer'
 import { SearchBar } from './components/SearchBar'
 import { RecommendationBanner } from './components/RecommendationBanner'
 import { OfferList } from './components/OfferList'
+import { OfferListSkeleton } from './components/OfferListSkeleton'
+import { FeatureHighlights } from './components/FeatureHighlights'
+
+const TRACKED_STORES = ['Amazon.sa', 'Noon', 'Jarir', 'Extra', 'AliExpress']
 
 function App() {
   const [result, setResult] = useState<SearchResult | null>(null)
@@ -35,37 +41,67 @@ function App() {
     }
   }
 
-  const hasResults = result && result.offers.length > 0
+  const hasSearched = result !== null
+  const hasResults = !!result && result.offers.length > 0
 
   return (
     <div className="page">
-      <header className="masthead">
-        <h1 className="brand">ZAYNOR</h1>
-        <p className="tagline">Smart Shopping Decisions</p>
-      </header>
+      <Header />
 
       <main className="content">
-        <SearchBar onSearch={handleSearch} disabled={loading} />
+        <section className="hero">
+          <h1 className="hero-title">Compare prices. Buy with confidence.</h1>
+          <p className="hero-subtitle">
+            Search once — Zaynor checks every store, finds the lowest price, and tells you where
+            to buy.
+          </p>
 
-        {loading && <p className="hint">Searching stores…</p>}
-        {error && <p className="hint hint-error">Search failed: {error}</p>}
+          <SearchBar onSearch={handleSearch} disabled={loading} />
 
-        {!loading && !error && result && !hasResults && (
-          <p className="hint">No offers found for “{result.query}”.</p>
+          <p className="hero-trust">
+            Comparing offers across{' '}
+            {TRACKED_STORES.map((store, i) => (
+              <span key={store}>
+                <span className="hero-trust-store">{store}</span>
+                {i < TRACKED_STORES.length - 1 && <span> · </span>}
+              </span>
+            ))}
+          </p>
+        </section>
+
+        {error && (
+          <p className="hint hint-error" role="alert">
+            Search failed: {error}
+          </p>
+        )}
+
+        {loading && (
+          <section className="results" aria-label="Searching" aria-busy="true">
+            <p className="hint">Searching stores…</p>
+            <OfferListSkeleton />
+          </section>
+        )}
+
+        {!loading && !error && hasSearched && !hasResults && (
+          <p className="hint">No offers found for "{result!.query}".</p>
         )}
 
         {!loading && hasResults && (
           <section className="results" aria-label="Search results">
-            {result.recommendation && (
-              <RecommendationBanner recommendation={result.recommendation} />
+            {result!.recommendation && (
+              <RecommendationBanner recommendation={result!.recommendation} />
             )}
             <h2 className="results-heading">
-              {result.offerCount} offers for “{result.query}”
+              {result!.offerCount} offers for "{result!.query}"
             </h2>
-            <OfferList offers={result.offers} />
+            <OfferList offers={result!.offers} />
           </section>
         )}
+
+        {!loading && !hasSearched && <FeatureHighlights />}
       </main>
+
+      <Footer />
     </div>
   )
 }
