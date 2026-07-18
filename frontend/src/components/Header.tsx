@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
-import { Logo } from './Logo'
+import { BrandMark } from './BrandMark'
 import { Wordmark } from './Wordmark'
 import { LanguageToggle } from './LanguageToggle'
 import { useTranslation } from '../i18n/useTranslation'
@@ -16,7 +16,7 @@ export function Header() {
     <header className="header">
       <div className="header-inner">
         <Link to="/" className="header-brand" aria-label="Zaynor home">
-          <Logo size={34} />
+          <BrandMark size={36} />
           <Wordmark className="header-wordmark" />
         </Link>
 
