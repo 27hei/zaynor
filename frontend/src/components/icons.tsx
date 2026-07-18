@@ -1,6 +1,7 @@
-// Small stroke icons for the feature highlights (spec Section 22: Trust,
-// Intelligence, Savings, Discovery, Analysis, Alerts). Inline SVG so there's
-// no icon-library dependency for a handful of glyphs.
+// Small stroke icons for the feature highlights, matching the brand's icon
+// set (ثقة Trust, ذكاء Intelligence, توفير Savings, اكتشاف Discovery,
+// تحليل Analysis, تنبيهات Alerts). Inline SVG so there's no icon-library
+// dependency for a handful of glyphs.
 
 type IconProps = { className?: string }
 
@@ -24,15 +25,17 @@ export function TrustIcon({ className }: IconProps) {
   )
 }
 
+/** A spark/AI glyph for Intelligence — a four-point star burst. */
 export function IntelligenceIcon({ className }: IconProps) {
   return (
     <svg {...common} className={className}>
-      <path d="M12 3a4 4 0 0 0-4 4v1.2A4 4 0 0 0 6 12a4 4 0 0 0 1 2.6V17a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2.4A4 4 0 0 0 18 12a4 4 0 0 0-2-3.8V7a4 4 0 0 0-4-4z" />
-      <path d="M9 21h6" />
+      <path d="M12 3c.6 3.4 2.6 5.4 6 6-3.4.6-5.4 2.6-6 6-.6-3.4-2.6-5.4-6-6 3.4-.6 5.4-2.6 6-6z" />
+      <path d="M19 16.5c.25 1.4 1 2.15 2.4 2.4-1.4.25-2.15 1-2.4 2.4-.25-1.4-1-2.15-2.4-2.4 1.4-.25 2.15-1 2.4-2.4z" />
     </svg>
   )
 }
 
+/** A price tag for Savings. */
 export function SavingsIcon({ className }: IconProps) {
   return (
     <svg {...common} className={className}>
@@ -42,19 +45,23 @@ export function SavingsIcon({ className }: IconProps) {
   )
 }
 
+/** A magnifying glass with a spark accent for Discovery. */
 export function DiscoveryIcon({ className }: IconProps) {
   return (
     <svg {...common} className={className}>
-      <circle cx="11" cy="11" r="7" />
-      <path d="m21 21-4.3-4.3" />
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="m19.5 19.5-4-4" />
+      <path d="M18.5 4.5c.15 1 .55 1.4 1.5 1.5-.95.1-1.35.5-1.5 1.5-.15-1-.55-1.4-1.5-1.5.95-.1 1.35-.5 1.5-1.5z" />
     </svg>
   )
 }
 
+/** Rising bars with an uptrend line for Analysis. */
 export function AnalysisIcon({ className }: IconProps) {
   return (
     <svg {...common} className={className}>
-      <path d="M4 20V10M12 20V4M20 20v-7" />
+      <path d="M4 20V13M12 20V9M20 20v-6" />
+      <path d="M4 9l6-4 4 3 6-4" />
     </svg>
   )
 }

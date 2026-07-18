@@ -1,4 +1,5 @@
 import { Logo } from './Logo'
+import { Wordmark } from './Wordmark'
 
 export function Header() {
   return (
@@ -6,7 +7,7 @@ export function Header() {
       <div className="header-inner">
         <div className="header-brand">
           <Logo size={34} />
-          <span className="header-wordmark">ZAYNOR</span>
+          <Wordmark className="header-wordmark" />
         </div>
         <span className="header-tagline">Smart Shopping Decisions</span>
       </div>

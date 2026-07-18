@@ -4,6 +4,7 @@ import { searchProducts } from './api/client'
 import type { SearchResult } from './api/types'
 import { Header } from './components/Header'
 import { Footer } from './components/Footer'
+import { BrandLockup } from './components/BrandLockup'
 import { SearchBar } from './components/SearchBar'
 import { RecommendationBanner } from './components/RecommendationBanner'
 import { OfferList } from './components/OfferList'
@@ -49,25 +50,32 @@ function App() {
       <Header />
 
       <main className="content">
-        <section className="hero">
-          <h1 className="hero-title">Compare prices. Buy with confidence.</h1>
-          <p className="hero-subtitle">
-            Search once — Zaynor checks every store, finds the lowest price, and tells you where
-            to buy.
-          </p>
+        {!hasSearched ? (
+          <section className="hero">
+            <BrandLockup />
+            <h1 className="hero-title">Compare prices. Buy with confidence.</h1>
+            <p className="hero-subtitle">
+              Search once — Zaynor checks every store, finds the lowest price, and tells you
+              where to buy.
+            </p>
 
-          <SearchBar onSearch={handleSearch} disabled={loading} />
+            <SearchBar onSearch={handleSearch} disabled={loading} />
 
-          <p className="hero-trust">
-            Comparing offers across{' '}
-            {TRACKED_STORES.map((store, i) => (
-              <span key={store}>
-                <span className="hero-trust-store">{store}</span>
-                {i < TRACKED_STORES.length - 1 && <span> · </span>}
-              </span>
-            ))}
-          </p>
-        </section>
+            <p className="hero-trust">
+              Comparing offers across{' '}
+              {TRACKED_STORES.map((store, i) => (
+                <span key={store}>
+                  <span className="hero-trust-store">{store}</span>
+                  {i < TRACKED_STORES.length - 1 && <span> · </span>}
+                </span>
+              ))}
+            </p>
+          </section>
+        ) : (
+          <section className="hero hero-compact">
+            <SearchBar onSearch={handleSearch} disabled={loading} />
+          </section>
+        )}
 
         {error && (
           <p className="hint hint-error" role="alert">

@@ -1,8 +1,10 @@
+import { Wordmark } from './Wordmark'
+
 export function Footer() {
   return (
     <footer className="footer">
       <div className="footer-inner">
-        <p className="footer-brand">ZAYNOR</p>
+        <Wordmark className="footer-brand" />
         <p className="footer-note">
           Zaynor does not sell products — it helps you find the best price before you buy.
         </p>
