@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Zaynor.Application.Aggregation;
 using Zaynor.Application.Auth;
 using Zaynor.Application.UserItems;
+using Zaynor.Infrastructure.Aggregation;
 using Zaynor.Infrastructure.Auth;
 using Zaynor.Infrastructure.DataSources;
 using Zaynor.Infrastructure.Persistence;
@@ -40,6 +41,13 @@ public static class DependencyInjection
         services.AddScoped<IUserItemsService, UserItemsService>();
 
         services.AddScoped<IProductDataSource, MockProductDataSource>();
+
+        // The public engine = core AggregationService (registered by
+        // AddApplication) decorated with caching + price-history recording
+        // (spec Section 13).
+        services.AddMemoryCache();
+        services.AddScoped<IPriceHistoryRecorder, PriceHistoryRecorder>();
+        services.AddScoped<IAggregationService, CachedAggregationService>();
 
         return services;
     }

@@ -4,14 +4,15 @@ using Zaynor.Application.Aggregation;
 namespace Zaynor.Application;
 
 /// <summary>
-/// Registers the Application layer's services. Data sources themselves live in
-/// Infrastructure and are registered by <c>AddInfrastructure</c>.
+/// Registers the Application layer's services. The core engine is registered
+/// as its concrete type; Infrastructure decorates it (caching + price-history
+/// recording, spec Section 13) and binds <see cref="IAggregationService"/>.
 /// </summary>
 public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddScoped<IAggregationService, AggregationService>();
+        services.AddScoped<AggregationService>();
         return services;
     }
 }

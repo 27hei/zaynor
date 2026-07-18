@@ -98,12 +98,27 @@ The frontend is a multi-page app (React Router) with full **Arabic / English** s
 Arabic uses the Cairo typeface; English uses Inter/Sora. Language state lives in
 `src/i18n/`, auth state in `src/auth/`.
 
+## Caching & Price History
+
+Per spec Section 13, the public search engine is the core `AggregationService` decorated by
+`CachedAggregationService` (Infrastructure):
+
+- **Short-lived cache** (5 min, in-memory): repeat searches return instantly; keys use the FR3
+  normalized query so spelling variants share one entry. Swappable to Redis at scale.
+- **Price-history accumulation**: every *live* search records the observed prices into
+  `PriceHistory` (finding-or-creating the `Product` and `Store` rows on first sight, throttled to
+  one point per product+store per hour). This is the data that predictive analytics (FR12,
+  "buy now or wait?") will need months of — recording started with the first search on purpose.
+- Recording is fail-soft: a history failure can never break the search that produced it (NFR4).
+
 ## Status
 
 - **Done:** clean-architecture scaffold, domain entities (Section 15), the search → aggregate →
-  rank → recommend flow against a mock source, unit tests, SQLite persistence, JWT auth
-  (register/login/account), a full multi-page bilingual (ar/en + RTL) UI, and the About / How It
-  Works / Privacy pages needed ahead of affiliate-network applications.
-- **Next (in sequence, per Section 23):** the first real data source (replacing the mock), EF Core
-  migrations, and saved-products / price-drop alerts (the account features currently marked
-  "coming soon").
+  rank → recommend flow against a mock source, SQLite persistence, JWT auth
+  (register/login/account), saved products & price-drop alert subscriptions (FR8/FR9) end-to-end,
+  search-result caching + price-history accumulation (Section 13), a full multi-page bilingual
+  (ar/en + RTL) UI with the real brand assets, and the About / How It Works / Privacy pages needed
+  ahead of affiliate-network applications. 19 unit tests.
+- **Next (in sequence, per Section 23):** the first real data source (requires ArabClicks /
+  Amazon Associates accounts — a founder action), EF Core migrations replacing `EnsureCreated`,
+  then background jobs to evaluate alert conditions against accumulating history.
