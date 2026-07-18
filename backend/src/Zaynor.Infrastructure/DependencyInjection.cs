@@ -48,6 +48,7 @@ public static class DependencyInjection
         services.AddMemoryCache();
         services.AddScoped<IPriceHistoryRecorder, PriceHistoryRecorder>();
         services.AddScoped<IAggregationService, CachedAggregationService>();
+        services.AddScoped<ISearchSuggestionService, SearchSuggestionService>();
 
         return services;
     }

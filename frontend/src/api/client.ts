@@ -18,6 +18,18 @@ export async function searchProducts(
   return (await response.json()) as SearchResult
 }
 
+/** Autocomplete suggestions from products Zaynor has seen. */
+export async function getSuggestions(query: string, signal?: AbortSignal): Promise<string[]> {
+  const url = `${API_BASE_URL}/api/search/suggestions?q=${encodeURIComponent(query)}`
+  const response = await fetch(url, { signal })
+
+  if (!response.ok) {
+    return []
+  }
+
+  return (await response.json()) as string[]
+}
+
 /** Extracts a human-readable error message from an error response body. */
 async function readError(response: Response, fallback: string): Promise<string> {
   try {

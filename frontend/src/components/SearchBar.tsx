@@ -1,5 +1,9 @@
-import type { FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { getSuggestions } from '../api/client'
 import { useTranslation } from '../i18n/useTranslation'
+
+const DEBOUNCE_MS = 200
+const MIN_CHARS = 2
 
 interface SearchBarProps {
   value: string
@@ -8,14 +12,92 @@ interface SearchBarProps {
   disabled?: boolean
 }
 
+/**
+ * The search box with live autocomplete (competitive analysis table stakes
+ * #1). Suggestions are fetched debounced from the API, navigable by keyboard
+ * (arrows/Enter/Escape), and exposed via combobox ARIA roles.
+ */
 export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProps) {
   const { t } = useTranslation()
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [open, setOpen] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(-1)
+  const debounceTimer = useRef<number | undefined>(undefined)
+  const fetchController = useRef<AbortController | null>(null)
+  const suppressFetch = useRef(false)
+
+  // Debounced suggestion fetch as the user types.
+  useEffect(() => {
+    window.clearTimeout(debounceTimer.current)
+    fetchController.current?.abort()
+
+    if (suppressFetch.current) {
+      suppressFetch.current = false
+      return
+    }
+
+    const trimmed = value.trim()
+    if (trimmed.length < MIN_CHARS) {
+      setSuggestions([])
+      setOpen(false)
+      return
+    }
+
+    debounceTimer.current = window.setTimeout(async () => {
+      const controller = new AbortController()
+      fetchController.current = controller
+      try {
+        const found = await getSuggestions(trimmed, controller.signal)
+        // Don't show a dropdown whose only entry is exactly what's typed.
+        const useful = found.filter((s) => s.toLowerCase() !== trimmed.toLowerCase())
+        setSuggestions(useful)
+        setOpen(useful.length > 0)
+        setActiveIndex(-1)
+      } catch {
+        // Aborted or failed — suggestions are best-effort only.
+      }
+    }, DEBOUNCE_MS)
+
+    return () => window.clearTimeout(debounceTimer.current)
+  }, [value])
+
+  function close() {
+    setOpen(false)
+    setActiveIndex(-1)
+  }
+
+  function select(suggestion: string) {
+    suppressFetch.current = true
+    onChange(suggestion)
+    close()
+    onSearch(suggestion)
+  }
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
     const trimmed = value.trim()
     if (trimmed) {
+      close()
       onSearch(trimmed)
+    }
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (!open || suggestions.length === 0) {
+      return
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setActiveIndex((i) => (i + 1) % suggestions.length)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setActiveIndex((i) => (i <= 0 ? suggestions.length - 1 : i - 1))
+    } else if (event.key === 'Enter' && activeIndex >= 0) {
+      event.preventDefault()
+      select(suggestions[activeIndex])
+    } else if (event.key === 'Escape') {
+      close()
     }
   }
 
@@ -41,10 +123,42 @@ export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProp
           className="search-input"
           placeholder={t('hero.searchPlaceholder')}
           aria-label={t('hero.searchPlaceholder')}
+          role="combobox"
+          aria-expanded={open}
+          aria-controls="search-suggestions"
+          aria-autocomplete="list"
+          autoComplete="off"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={() => window.setTimeout(close, 150)}
           disabled={disabled}
         />
+
+        {open && (
+          <ul id="search-suggestions" className="search-suggestions" role="listbox">
+            {suggestions.map((suggestion, index) => (
+              <li
+                key={suggestion}
+                role="option"
+                aria-selected={index === activeIndex}
+                className={
+                  index === activeIndex
+                    ? 'search-suggestion search-suggestion-active'
+                    : 'search-suggestion'
+                }
+                // mousedown fires before the input's blur, so the click wins.
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  select(suggestion)
+                }}
+                onMouseEnter={() => setActiveIndex(index)}
+              >
+                {suggestion}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <button type="submit" className="search-button" disabled={disabled}>
         {t('hero.searchButton')}

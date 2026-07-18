@@ -14,6 +14,7 @@ import { HomeCategories } from '../components/HomeCategories'
 import { useTranslation } from '../i18n/useTranslation'
 import { useAuth } from '../auth/useAuth'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { useRecentSearches } from '../hooks/useRecentSearches'
 
 const TRACKED_STORES = ['Amazon.sa', 'Noon', 'Jarir', 'Extra', 'AliExpress']
 
@@ -31,6 +32,7 @@ export function HomePage() {
   const [actionError, setActionError] = useState<string | null>(null)
   const activeRequest = useRef<AbortController | null>(null)
   const consumedInitialQuery = useRef(false)
+  const { recent, add: addRecent, clear: clearRecent } = useRecentSearches()
 
   usePageTitle()
 
@@ -49,6 +51,7 @@ export function HomePage() {
     try {
       const data = await searchProducts(searchQuery, controller.signal)
       setResult(data)
+      addRecent(searchQuery)
     } catch (err) {
       if ((err as Error).name === 'AbortError') return
       setError((err as Error).message)
@@ -129,6 +132,25 @@ export function HomePage() {
           <SearchBar value={query} onChange={setQuery} onSearch={handleSearch} disabled={loading} />
           <NeutralityBadge />
           <PopularSearches onSelect={handleSearch} />
+
+          {recent.length > 0 && (
+            <div className="popular-searches" aria-label={t('hero.recentLabel')}>
+              <span className="popular-searches-label">{t('hero.recentLabel')}</span>
+              {recent.map((recentQuery) => (
+                <button
+                  key={recentQuery}
+                  type="button"
+                  className="popular-chip"
+                  onClick={() => handleSearch(recentQuery)}
+                >
+                  {recentQuery}
+                </button>
+              ))}
+              <button type="button" className="recent-clear" onClick={clearRecent}>
+                {t('hero.clearRecent')}
+              </button>
+            </div>
+          )}
 
           <p className="hero-trust">
             {t('hero.trustLine')}{' '}

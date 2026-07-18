@@ -27,6 +27,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'hero.searchButton': 'Search',
     'hero.neutrality': '100% impartial — every store ranked by price alone, never by commission',
     'hero.popularLabel': 'Try:',
+    'hero.recentLabel': 'Recent:',
+    'hero.clearRecent': 'Clear',
     'hero.trustLine': 'Comparing offers across',
 
     'results.searching': 'Searching stores…',
@@ -163,6 +165,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'hero.searchButton': 'بحث',
     'hero.neutrality': 'محايد ١٠٠٪ — كل متجر يُرتَّب حسب السعر فقط، لا حسب العمولة',
     'hero.popularLabel': 'جرّب:',
+    'hero.recentLabel': 'بحثت مؤخرًا:',
+    'hero.clearRecent': 'مسح',
     'hero.trustLine': 'نقارن العروض عبر',
 
     'results.searching': 'جارٍ البحث في المتاجر…',
