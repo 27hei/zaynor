@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -52,6 +53,21 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+// Per-IP rate limiting (NFR2/NFR3): generous enough for a real user —
+// including debounced autocomplete while typing — but blocks abusive floods.
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 300,
+                Window = TimeSpan.FromMinutes(1),
+            }));
+});
+
 var app = builder.Build();
 
 // Ensure the database exists. For local dev with SQLite this creates the
@@ -68,8 +84,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    // Outside dev: never leak exception details — return clean JSON (NFR3),
+    // and enforce HTTPS (dev runs plain HTTP, so no redirect noise there).
+    app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        await context.Response.WriteAsJsonAsync(new { error = "An unexpected error occurred." });
+    }));
+    app.UseHttpsRedirection();
+}
 
-app.UseHttpsRedirection();
+app.UseRateLimiter();
 
 app.UseCors(FrontendCorsPolicy);
 
