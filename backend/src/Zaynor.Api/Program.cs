@@ -101,6 +101,12 @@ else
     app.UseHttpsRedirection();
 }
 
+// When the built SPA is dropped into wwwroot, the API serves the whole site
+// from one origin (single container/tunnel); unknown paths fall back to the
+// SPA router. Harmless in dev where wwwroot is absent (Vite serves the UI).
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseRateLimiter();
 
 app.UseCors(FrontendCorsPolicy);
@@ -109,5 +115,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 app.Run();

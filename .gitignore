@@ -5,6 +5,9 @@ backend/**/obj/
 *.suo
 .vs/
 
+## Built SPA embedded into the API (build artifact)
+backend/src/Zaynor.Api/wwwroot/
+
 ## SQLite (local dev database)
 *.db
 *.db-shm
