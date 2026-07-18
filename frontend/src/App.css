@@ -98,6 +98,20 @@ html[lang='ar'] {
   color: var(--ink);
 }
 
+/* Real logo assets (cropped from brand artwork; JPEG-sourced, so multiply
+   blends their white background into our light canvas seamlessly). */
+.brand-mark-img {
+  mix-blend-mode: multiply;
+  border-radius: 6px;
+}
+
+.header-logo-word {
+  height: 17px;
+  width: auto;
+  display: block;
+  mix-blend-mode: multiply;
+}
+
 .header-nav {
   display: flex;
   align-items: center;

@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { Logo } from './Logo'
 
-// The real logo asset. Drop the app-icon (rounded-square Z mark) into
-// frontend/public as one of these names and it is used automatically; until
-// then the drawn SVG below is shown as a fallback.
-const ASSET_SOURCES = ['/zaynor-mark.svg', '/zaynor-mark.png']
+// The real logo asset (cropped from the official artwork). PNG is present
+// today; an SVG dropped in later under the same name wins automatically.
+const ASSET_SOURCES = ['/zaynor-mark.png', '/zaynor-mark.svg']
 
 interface BrandMarkProps {
   size?: number
