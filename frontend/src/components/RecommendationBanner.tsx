@@ -4,9 +4,11 @@ import { useTranslation } from '../i18n/useTranslation'
 
 interface RecommendationBannerProps {
   recommendation: Recommendation
+  /** Outbound (affiliate) URL of the best offer, so the banner itself can act. */
+  bestUrl?: string
 }
 
-export function RecommendationBanner({ recommendation }: RecommendationBannerProps) {
+export function RecommendationBanner({ recommendation, bestUrl }: RecommendationBannerProps) {
   const { t } = useTranslation()
   const { bestStoreName, bestPrice, currency, comparedStoreName, comparedPrice, savings } =
     recommendation
@@ -37,6 +39,19 @@ export function RecommendationBanner({ recommendation }: RecommendationBannerPro
           </p>
         )}
         {message && <p className="recommendation-message">{message}</p>}
+        {bestUrl && (
+          <a
+            className="reco-cta"
+            href={bestUrl}
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+          >
+            {t('reco.cta')}
+            <span aria-hidden="true" className="reco-cta-arrow">
+              →
+            </span>
+          </a>
+        )}
       </div>
     </div>
   )

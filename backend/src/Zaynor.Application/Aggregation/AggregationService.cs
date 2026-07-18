@@ -97,6 +97,8 @@ public sealed class AggregationService : IAggregationService
                 ProductUrl = offer.ProductUrl,
                 InStock = offer.InStock,
                 ImageUrl = offer.ImageUrl,
+                FreeShipping = offer.FreeShipping,
+                DeliveryDays = offer.DeliveryDays,
                 NormalizedKey = ProductNormalizer.Normalize(offer.ProductTitle),
                 IsLowestPrice = i == 0,
             });

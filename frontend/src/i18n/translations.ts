@@ -41,6 +41,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     'reco.badge': 'Best deal',
     'reco.saveUpTo': 'Save up to {amount}',
     'reco.message': 'Buy from {store} at {price} — save {savings} versus {comparedStore} at {comparedPrice}.',
+    'reco.cta': 'Go to best price',
+
+    'offer.freeShipping': 'Free shipping',
+    'offer.deliveryNextDay': 'Next-day delivery',
+    'offer.delivery': 'Delivery in {days} days',
 
     'feature.trust.title': 'Trust',
     'feature.trust.text': 'Neutral recommendations — the best deal wins, even without commission.',
@@ -113,6 +118,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     'how.step3.text': 'A clear recommendation shows the best deal and how much you save.',
     'how.step4.title': 'Buy',
     'how.step4.text': 'Go straight to the store with the best price and complete your purchase.',
+    'how.moneyTitle': 'How do we make money?',
+    'how.moneyText':
+      'When you buy through a Zaynor link, the store may pay us a small commission — at no extra cost to you. Commissions never affect our ranking: the lowest price wins, always, even when a store pays us nothing.',
 
     'privacy.title': 'Privacy Policy',
     'privacy.p1':
@@ -161,6 +169,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     'reco.badge': 'أفضل عرض',
     'reco.saveUpTo': 'وفّر حتى {amount}',
     'reco.message': 'اشترِ من {store} بسعر {price} — ووفّر {savings} مقارنةً بـ {comparedStore} بسعر {comparedPrice}.',
+    'reco.cta': 'اذهب لأفضل سعر',
+
+    'offer.freeShipping': 'شحن مجاني',
+    'offer.deliveryNextDay': 'توصيل في اليوم التالي',
+    'offer.delivery': 'التوصيل خلال {days} أيام',
 
     'feature.trust.title': 'ثقة',
     'feature.trust.text': 'توصيات محايدة — الأفضل يفوز، حتى بدون عمولة.',
@@ -233,6 +246,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     'how.step3.text': 'توصية واضحة تُظهر أفضل صفقة وكم توفّر.',
     'how.step4.title': 'اشترِ',
     'how.step4.text': 'اذهب مباشرة إلى المتجر صاحب أفضل سعر وأكمل شراءك.',
+    'how.moneyTitle': 'كيف نربح؟',
+    'how.moneyText':
+      'عندما تشتري عبر رابط زينور، قد يدفع لنا المتجر عمولة صغيرة — دون أي تكلفة إضافية عليك. العمولة لا تؤثر أبدًا على الترتيب: أقل سعر يفوز دائمًا، حتى لو لم يدفع لنا المتجر شيئًا.',
 
     'privacy.title': 'سياسة الخصوصية',
     'privacy.p1':

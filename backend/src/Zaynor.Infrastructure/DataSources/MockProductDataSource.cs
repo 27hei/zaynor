@@ -17,14 +17,16 @@ public sealed class MockProductDataSource : IProductDataSource
 {
     private const string Currency = "SAR";
 
-    // A small set of stores relevant to the Saudi market (spec Section 6, 20.3).
+    // A small set of stores relevant to the Saudi market (spec Section 6, 20.3),
+    // with plausible shipping profiles so result rows can show shipping info
+    // (spec Section 16: per-store row shows price, stock, and shipping).
     private static readonly StoreProfile[] Stores =
     [
-        new("Amazon.sa", "https://www.amazon.sa", 1.00m),
-        new("Noon", "https://www.noon.com", 1.08m),
-        new("Jarir", "https://www.jarir.com", 1.05m),
-        new("Extra", "https://www.extra.com", 1.12m),
-        new("AliExpress", "https://www.aliexpress.com", 0.94m),
+        new("Amazon.sa", "https://www.amazon.sa", 1.00m, FreeShipping: true, DeliveryDays: 1),
+        new("Noon", "https://www.noon.com", 1.08m, FreeShipping: true, DeliveryDays: 2),
+        new("Jarir", "https://www.jarir.com", 1.05m, FreeShipping: true, DeliveryDays: 3),
+        new("Extra", "https://www.extra.com", 1.12m, FreeShipping: false, DeliveryDays: 4),
+        new("AliExpress", "https://www.aliexpress.com", 0.94m, FreeShipping: false, DeliveryDays: 9),
     ];
 
     public string SourceName => "MockDataSource";
@@ -47,6 +49,8 @@ public sealed class MockProductDataSource : IProductDataSource
             Currency = Currency,
             ProductUrl = BuildAffiliateUrl(store, trimmed),
             InStock = true,
+            FreeShipping = store.FreeShipping,
+            DeliveryDays = store.DeliveryDays,
         }).ToList();
 
         return Task.FromResult<IReadOnlyList<StoreOffer>>(offers);
@@ -76,5 +80,10 @@ public sealed class MockProductDataSource : IProductDataSource
         return $"{store.BaseUrl}/search?q={slug}&aff=zaynor";
     }
 
-    private sealed record StoreProfile(string Name, string BaseUrl, decimal PriceFactor);
+    private sealed record StoreProfile(
+        string Name,
+        string BaseUrl,
+        decimal PriceFactor,
+        bool FreeShipping,
+        int DeliveryDays);
 }

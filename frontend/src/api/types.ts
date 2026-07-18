@@ -9,6 +9,8 @@ export interface AggregatedOffer {
   productUrl: string
   inStock: boolean
   imageUrl: string | null
+  freeShipping: boolean
+  deliveryDays: number | null
   normalizedKey: string
   isLowestPrice: boolean
 }

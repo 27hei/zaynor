@@ -20,6 +20,12 @@ public sealed record AggregatedOffer
 
     public string? ImageUrl { get; init; }
 
+    /// <summary>Whether the store ships this offer for free (spec Section 16: per-store row shows shipping).</summary>
+    public bool FreeShipping { get; init; }
+
+    /// <summary>Estimated delivery time in days, or null when unknown.</summary>
+    public int? DeliveryDays { get; init; }
+
     /// <summary>Normalized matching key for this offer's product (spec FR3).</summary>
     public required string NormalizedKey { get; init; }
 

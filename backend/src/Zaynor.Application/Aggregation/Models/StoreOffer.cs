@@ -21,4 +21,10 @@ public sealed record StoreOffer
     public bool InStock { get; init; } = true;
 
     public string? ImageUrl { get; init; }
+
+    /// <summary>Whether the store ships this offer for free (shown in result rows).</summary>
+    public bool FreeShipping { get; init; }
+
+    /// <summary>Estimated delivery time in days, or null when unknown.</summary>
+    public int? DeliveryDays { get; init; }
 }

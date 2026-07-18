@@ -125,7 +125,10 @@ export function HomePage() {
       {!loading && hasResults && (
         <section className="results results-in" aria-label="Search results">
           {result!.recommendation && (
-            <RecommendationBanner recommendation={result!.recommendation} />
+            <RecommendationBanner
+              recommendation={result!.recommendation}
+              bestUrl={result!.offers.find((o) => o.isLowestPrice)?.productUrl}
+            />
           )}
           <h2 className="results-heading">
             {t('results.heading', { count: result!.offerCount, query: result!.query })}

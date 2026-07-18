@@ -559,16 +559,51 @@ html[lang='ar'] {
 }
 
 .recommendation-savings {
-  margin: 0.4rem 0 0;
+  display: inline-block;
+  margin: 0.55rem 0 0;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
 }
 
 .recommendation-message {
-  margin: 0.45rem 0 0;
+  margin: 0.55rem 0 0;
   color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1.55;
+}
+
+.reco-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 11px;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.reco-cta:hover {
+  filter: brightness(0.95);
+  box-shadow: var(--shadow-md);
+}
+
+.reco-cta:active {
+  transform: translateY(1px);
+}
+
+[dir='rtl'] .reco-cta-arrow {
+  display: inline-block;
+  transform: scaleX(-1);
 }
 
 /* ============ Results ============ */
@@ -655,16 +690,28 @@ html[lang='ar'] {
   border-radius: 11px;
 }
 
-.offer-lowest .offer-avatar {
-  color: #fff;
-  background: var(--brand-strong);
-  border-color: var(--brand-strong);
+.offer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.offer-store-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
 }
 
 .offer-store {
   font-weight: 600;
   font-size: 1.05rem;
   color: var(--ink);
+}
+
+.offer-shipping {
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 .offer-tag {
@@ -693,7 +740,7 @@ html[lang='ar'] {
 .offer-price {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.18rem;
+  font-size: 1.28rem;
   letter-spacing: -0.01em;
   color: var(--ink);
   white-space: nowrap;
@@ -984,6 +1031,29 @@ html[lang='ar'] {
   margin: 0;
   line-height: 1.6;
   color: var(--text-muted);
+}
+
+/* "How we make money" transparency block — trust is the product */
+.transparency {
+  margin-top: 2rem;
+  padding: 1.6rem 1.75rem;
+  background: var(--brand-tint);
+  border: 1px solid var(--brand-tint-2);
+  border-radius: var(--radius);
+}
+
+.transparency-title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--brand-deep);
+}
+
+.transparency-text {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--text);
 }
 
 /* Categories */

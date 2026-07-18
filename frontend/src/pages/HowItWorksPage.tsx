@@ -19,6 +19,13 @@ export function HowItWorksPage() {
           </li>
         ))}
       </ol>
+
+      {/* Visible "how we make money" transparency — trust is the product
+          (competitive analysis Section 6.D). */}
+      <section className="transparency">
+        <h2 className="transparency-title">{t('how.moneyTitle')}</h2>
+        <p className="transparency-text">{t('how.moneyText')}</p>
+      </section>
     </article>
   )
 }
