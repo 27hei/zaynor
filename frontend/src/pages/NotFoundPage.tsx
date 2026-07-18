@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from '../i18n/useTranslation'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export function NotFoundPage() {
   const { t } = useTranslation()
+  usePageTitle(t('notFound.title'))
 
   return (
     <section className="not-found">

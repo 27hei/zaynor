@@ -1,9 +1,11 @@
 import { useTranslation } from '../i18n/useTranslation'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 const STEPS = ['step1', 'step2', 'step3', 'step4'] as const
 
 export function HowItWorksPage() {
   const { t } = useTranslation()
+  usePageTitle(t('how.title'))
 
   return (
     <article className="page-article">

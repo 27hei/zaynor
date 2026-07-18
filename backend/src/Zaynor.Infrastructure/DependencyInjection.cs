@@ -4,9 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Zaynor.Application.Aggregation;
 using Zaynor.Application.Auth;
+using Zaynor.Application.UserItems;
 using Zaynor.Infrastructure.Auth;
 using Zaynor.Infrastructure.DataSources;
 using Zaynor.Infrastructure.Persistence;
+using Zaynor.Infrastructure.UserItems;
 
 namespace Zaynor.Infrastructure;
 
@@ -35,6 +37,7 @@ public static class DependencyInjection
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddSingleton<ITokenService, JwtTokenService>();
+        services.AddScoped<IUserItemsService, UserItemsService>();
 
         services.AddScoped<IProductDataSource, MockProductDataSource>();
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { searchProducts } from '../api/client'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { createAlert, saveProduct, searchProducts } from '../api/client'
 import type { SearchResult } from '../api/types'
 import { BrandMark } from '../components/BrandMark'
 import { SearchBar } from '../components/SearchBar'
@@ -10,19 +10,29 @@ import { RecommendationBanner } from '../components/RecommendationBanner'
 import { OfferList } from '../components/OfferList'
 import { OfferListSkeleton } from '../components/OfferListSkeleton'
 import { FeatureHighlights } from '../components/FeatureHighlights'
+import { HomeCategories } from '../components/HomeCategories'
 import { useTranslation } from '../i18n/useTranslation'
+import { useAuth } from '../auth/useAuth'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 const TRACKED_STORES = ['Amazon.sa', 'Noon', 'Jarir', 'Extra', 'AliExpress']
 
 export function HomePage() {
   const { t } = useTranslation()
+  const { user } = useAuth()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [query, setQuery] = useState('')
   const [result, setResult] = useState<SearchResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
+  const [alertSet, setAlertSet] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
   const activeRequest = useRef<AbortController | null>(null)
   const consumedInitialQuery = useRef(false)
+
+  usePageTitle()
 
   async function handleSearch(searchQuery: string) {
     activeRequest.current?.abort()
@@ -32,6 +42,9 @@ export function HomePage() {
     setQuery(searchQuery)
     setLoading(true)
     setError(null)
+    setSaved(false)
+    setAlertSet(false)
+    setActionError(null)
 
     try {
       const data = await searchProducts(searchQuery, controller.signal)
@@ -44,6 +57,38 @@ export function HomePage() {
       if (activeRequest.current === controller) {
         setLoading(false)
       }
+    }
+  }
+
+  // Save the searched product to the signed-in user's list (spec FR9).
+  async function handleSave() {
+    if (!user) {
+      navigate('/login')
+      return
+    }
+    setActionError(null)
+    try {
+      await saveProduct(result!.query)
+      setSaved(true)
+    } catch {
+      setActionError(t('results.actionError'))
+    }
+  }
+
+  // Subscribe to a price-drop alert, recording today's lowest price as the
+  // baseline the future monitor compares against (spec FR8, Section 16/17).
+  async function handleNotify() {
+    if (!user) {
+      navigate('/login')
+      return
+    }
+    setActionError(null)
+    const best = result!.offers.find((o) => o.isLowestPrice)
+    try {
+      await createAlert(result!.query, best?.price ?? null, best?.currency ?? null)
+      setAlertSet(true)
+    } catch {
+      setActionError(t('results.actionError'))
     }
   }
 
@@ -130,14 +175,41 @@ export function HomePage() {
               bestUrl={result!.offers.find((o) => o.isLowestPrice)?.productUrl}
             />
           )}
-          <h2 className="results-heading">
-            {t('results.heading', { count: result!.offerCount, query: result!.query })}
-          </h2>
+
+          <div className="results-toolbar">
+            <h2 className="results-heading">
+              {t('results.heading', { count: result!.offerCount, query: result!.query })}
+            </h2>
+            <div className="results-actions">
+              <button
+                type="button"
+                className="action-chip"
+                onClick={handleNotify}
+                disabled={alertSet}
+              >
+                {alertSet ? t('results.notifySet') : t('results.notify')}
+              </button>
+              <button type="button" className="action-chip" onClick={handleSave} disabled={saved}>
+                {saved ? t('results.savedDone') : t('results.save')}
+              </button>
+            </div>
+          </div>
+          {actionError && (
+            <p className="hint hint-error" role="alert">
+              {actionError}
+            </p>
+          )}
+
           <OfferList offers={result!.offers} />
         </section>
       )}
 
-      {!loading && !hasSearched && <FeatureHighlights />}
+      {!loading && !hasSearched && (
+        <>
+          <FeatureHighlights />
+          <HomeCategories onSelect={handleSearch} />
+        </>
+      )}
     </>
   )
 }

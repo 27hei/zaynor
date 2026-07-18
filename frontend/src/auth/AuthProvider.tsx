@@ -2,8 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { fetchCurrentUser, loginUser, registerUser } from '../api/client'
 import type { UserDto } from '../api/types'
 import { AuthContext } from './AuthContext'
-
-const TOKEN_KEY = 'zaynor.token'
+import { clearToken, getToken, setToken } from './token'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserDto | null>(null)
@@ -11,7 +10,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // On mount, restore the session from a stored token (if still valid).
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY)
+    const token = getToken()
     if (!token) {
       setLoading(false)
       return
@@ -24,7 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (restored) {
           setUser(restored)
         } else {
-          localStorage.removeItem(TOKEN_KEY)
+          clearToken()
         }
       })
       .finally(() => {
@@ -38,18 +37,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const auth = await loginUser(email, password)
-    localStorage.setItem(TOKEN_KEY, auth.token)
+    setToken(auth.token)
     setUser(auth.user)
   }, [])
 
   const register = useCallback(async (email: string, password: string, locale: string) => {
     const auth = await registerUser(email, password, locale)
-    localStorage.setItem(TOKEN_KEY, auth.token)
+    setToken(auth.token)
     setUser(auth.user)
   }, [])
 
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY)
+    clearToken()
     setUser(null)
   }, [])
 

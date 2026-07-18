@@ -1,7 +1,9 @@
 import { useTranslation } from '../i18n/useTranslation'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export function PrivacyPage() {
   const { t } = useTranslation()
+  usePageTitle(t('privacy.title'))
 
   return (
     <article className="page-article">

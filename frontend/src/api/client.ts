@@ -1,4 +1,5 @@
-import type { AuthResponse, SearchResult, UserDto } from './types'
+import type { AlertDto, AuthResponse, SavedProductDto, SearchResult, UserDto } from './types'
+import { getToken } from '../auth/token'
 
 const API_BASE_URL = 'http://localhost:5286'
 
@@ -70,4 +71,66 @@ export async function fetchCurrentUser(token: string): Promise<UserDto | null> {
   }
 
   return (await response.json()) as UserDto
+}
+
+/** Performs an authenticated request using the stored session token. */
+async function authFetch(path: string, init?: RequestInit): Promise<Response> {
+  const token = getToken()
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      ...(init?.headers ?? {}),
+      Authorization: `Bearer ${token ?? ''}`,
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error(await readError(response, `Request failed (${response.status})`))
+  }
+
+  return response
+}
+
+// --- Saved products (spec FR9) ---
+
+export async function getSavedProducts(): Promise<SavedProductDto[]> {
+  const response = await authFetch('/api/saved')
+  return (await response.json()) as SavedProductDto[]
+}
+
+export async function saveProduct(productName: string): Promise<SavedProductDto> {
+  const response = await authFetch('/api/saved', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productName }),
+  })
+  return (await response.json()) as SavedProductDto
+}
+
+export async function removeSavedProduct(id: number): Promise<void> {
+  await authFetch(`/api/saved/${id}`, { method: 'DELETE' })
+}
+
+// --- Price-drop alerts (spec FR8) ---
+
+export async function getAlerts(): Promise<AlertDto[]> {
+  const response = await authFetch('/api/alerts')
+  return (await response.json()) as AlertDto[]
+}
+
+export async function createAlert(
+  productName: string,
+  priceBaseline: number | null,
+  currency: string | null,
+): Promise<AlertDto> {
+  const response = await authFetch('/api/alerts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productName, priceBaseline, currency }),
+  })
+  return (await response.json()) as AlertDto
+}
+
+export async function removeAlert(id: number): Promise<void> {
+  await authFetch(`/api/alerts/${id}`, { method: 'DELETE' })
 }

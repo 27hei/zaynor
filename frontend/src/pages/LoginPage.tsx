@@ -2,9 +2,11 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import { useTranslation } from '../i18n/useTranslation'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export function LoginPage() {
   const { t } = useTranslation()
+  usePageTitle(t('nav.login'))
   const { login } = useAuth()
   const navigate = useNavigate()
 

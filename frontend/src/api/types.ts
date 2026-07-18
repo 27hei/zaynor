@@ -44,3 +44,17 @@ export interface AuthResponse {
   expiresAt: string
   user: UserDto
 }
+
+export interface SavedProductDto {
+  id: number
+  productName: string
+  savedAt: string
+}
+
+export interface AlertDto {
+  id: number
+  productName: string
+  targetCondition: string
+  isActive: boolean
+  createdAt: string
+}

@@ -2,9 +2,11 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import { useTranslation } from '../i18n/useTranslation'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export function RegisterPage() {
   const { t, lang } = useTranslation()
+  usePageTitle(t('nav.register'))
   const { register } = useAuth()
   const navigate = useNavigate()
 
