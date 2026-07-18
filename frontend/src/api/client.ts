@@ -8,7 +8,8 @@ import type {
 } from './types'
 import { getToken } from '../auth/token'
 
-const API_BASE_URL = 'http://localhost:5286'
+// Configurable per environment (VITE_API_URL at build time); localhost for dev.
+const API_BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:5286'
 
 /** Calls the backend search endpoint and returns the aggregated result. */
 export async function searchProducts(

@@ -143,13 +143,63 @@ export const translations: Record<Lang, Record<string, string>> = {
     'how.moneyText':
       'When you buy through a Zaynor link, the store may pay us a small commission — at no extra cost to you. Commissions never affect our ranking: the lowest price wins, always, even when a store pays us nothing.',
 
+    'legal.updated': 'Last updated: 18 July 2026',
+
     'privacy.title': 'Privacy Policy',
-    'privacy.p1':
-      'This is a placeholder privacy policy for the development version of Zaynor. It will be replaced with a complete policy before public launch and affiliate-network applications.',
-    'privacy.p2':
-      'When you create an account, we store your email and a securely hashed password. We never store your password in plain text, and we do not sell your personal data.',
-    'privacy.p3':
-      'Outbound links to stores may carry affiliate tracking. This never changes which store we recommend — the lowest price always wins.',
+    'privacy.intro':
+      'Zaynor is a price-comparison platform. We collect as little personal data as possible, and this policy explains exactly what we collect, why, and your rights over it.',
+    'privacy.collect.title': 'What we collect',
+    'privacy.collect.text':
+      'If you create an account: your email address, a securely hashed password (never stored in plain text), and your preferred language. If you use saved products or price alerts: the products you chose to track. Search queries are processed to serve results and improve product matching.',
+    'privacy.use.title': 'How we use it',
+    'privacy.use.text':
+      'To operate your account, keep your saved products and alerts, monitor tracked prices in the background, and improve the service. We do not sell your personal data, and we do not use it for third-party advertising.',
+    'privacy.local.title': 'Data stored on your device',
+    'privacy.local.text':
+      'Your browser stores a session token (to keep you signed in), your language choice, and your recent searches. Clearing your browser storage removes them; recent searches never leave your device.',
+    'privacy.affiliate.title': 'Affiliate links',
+    'privacy.affiliate.text':
+      'Outbound "Go to store" links may carry affiliate tracking, and the store may pay Zaynor a commission at no extra cost to you. Commissions never affect our ranking: the lowest price wins, always.',
+    'privacy.sharing.title': 'Sharing',
+    'privacy.sharing.text':
+      'We do not share your personal data with third parties, except where required by law. When you click through to a store, that store’s own privacy policy applies to what you do there.',
+    'privacy.security.title': 'Security',
+    'privacy.security.text':
+      'Passwords are hashed with BCrypt, sessions use signed tokens, and the API applies rate limiting. No system is perfectly secure, but we design for data protection from the start.',
+    'privacy.rights.title': 'Your rights and contact',
+    'privacy.rights.text':
+      'You can delete your saved products and alerts from your account at any time. To request account deletion or ask any privacy question, contact us at abdluazez796@gmail.com.',
+    'privacy.changes.title': 'Changes to this policy',
+    'privacy.changes.text':
+      'We will update this page when the policy changes and revise the date above. Substantial changes will be announced on the site.',
+
+    'terms.title': 'Terms of Use',
+    'terms.intro':
+      'By using Zaynor you agree to these terms. If you do not agree, please do not use the service.',
+    'terms.service.title': 'What Zaynor is',
+    'terms.service.text':
+      'Zaynor compares product prices across third-party stores and links you to them. Zaynor does not sell products, process payments, or fulfil orders — your purchase contract is always with the store.',
+    'terms.prices.title': 'Prices and availability',
+    'terms.prices.text':
+      'Prices, stock, and shipping information come from external sources and can change or contain errors. Always verify the final price at the store before completing a purchase.',
+    'terms.affiliate.title': 'How Zaynor earns',
+    'terms.affiliate.text':
+      'Some outbound links are affiliate links that may earn Zaynor a commission at no extra cost to you. Commissions never influence ranking or recommendations.',
+    'terms.accounts.title': 'Accounts',
+    'terms.accounts.text':
+      'You are responsible for the accuracy of your account details and for keeping your password confidential. We may suspend accounts used abusively or unlawfully.',
+    'terms.use.title': 'Acceptable use',
+    'terms.use.text':
+      'Do not disrupt the service, attempt unauthorized access, scrape at abusive volumes, or use Zaynor for any unlawful purpose.',
+    'terms.liability.title': 'Liability',
+    'terms.liability.text':
+      'Zaynor is provided "as is". To the maximum extent permitted by law, we are not liable for losses arising from purchase decisions, store conduct, or price inaccuracies originating from external sources.',
+    'terms.changes.title': 'Changes to these terms',
+    'terms.changes.text':
+      'We may update these terms; the date above reflects the latest version. Continued use after changes means you accept them.',
+    'terms.law.title': 'Governing law',
+    'terms.law.text':
+      'These terms are governed by the laws of the Kingdom of Saudi Arabia.',
 
     'notFound.title': 'Page not found',
     'notFound.text': "The page you're looking for doesn't exist.",
@@ -292,13 +342,61 @@ export const translations: Record<Lang, Record<string, string>> = {
     'how.moneyText':
       'عندما تشتري عبر رابط زينور، قد يدفع لنا المتجر عمولة صغيرة — دون أي تكلفة إضافية عليك. العمولة لا تؤثر أبدًا على الترتيب: أقل سعر يفوز دائمًا، حتى لو لم يدفع لنا المتجر شيئًا.',
 
+    'legal.updated': 'آخر تحديث: ١٨ يوليو ٢٠٢٦',
+
     'privacy.title': 'سياسة الخصوصية',
-    'privacy.p1':
-      'هذه سياسة خصوصية مبدئية لنسخة التطوير من زينور. ستُستبدل بسياسة كاملة قبل الإطلاق العام وطلبات شبكات التسويق بالعمولة.',
-    'privacy.p2':
-      'عند إنشاء حساب، نخزّن بريدك الإلكتروني وكلمة مرور مُشفّرة بأمان. لا نخزّن كلمة المرور كنص صريح أبدًا، ولا نبيع بياناتك الشخصية.',
-    'privacy.p3':
-      'قد تحمل الروابط الخارجية للمتاجر تتبّعًا للعمولة. هذا لا يغيّر أبدًا المتجر الذي نوصي به — أقل سعر يفوز دائمًا.',
+    'privacy.intro':
+      'زينور منصة لمقارنة الأسعار. نجمع أقل قدر ممكن من البيانات الشخصية، وتوضح هذه السياسة بدقة ما نجمعه ولماذا، وحقوقك عليه.',
+    'privacy.collect.title': 'ما الذي نجمعه',
+    'privacy.collect.text':
+      'إذا أنشأت حسابًا: بريدك الإلكتروني، وكلمة مرور مشفّرة بأمان (لا تُخزَّن نصًا صريحًا أبدًا)، ولغتك المفضلة. وإذا استخدمت الحفظ أو التنبيهات: المنتجات التي اخترت متابعتها. وتُعالَج استعلامات البحث لعرض النتائج وتحسين مطابقة المنتجات.',
+    'privacy.use.title': 'كيف نستخدمها',
+    'privacy.use.text':
+      'لتشغيل حسابك، وحفظ منتجاتك وتنبيهاتك، ومراقبة الأسعار المتتبَّعة في الخلفية، وتحسين الخدمة. لا نبيع بياناتك الشخصية، ولا نستخدمها لإعلانات طرف ثالث.',
+    'privacy.local.title': 'بيانات مخزنة على جهازك',
+    'privacy.local.text':
+      'يخزّن متصفحك رمز الجلسة (لبقائك مسجَّلًا)، واختيار اللغة، وعمليات بحثك الأخيرة. مسح تخزين المتصفح يزيلها؛ وعمليات البحث الأخيرة لا تغادر جهازك أبدًا.',
+    'privacy.affiliate.title': 'روابط العمولة',
+    'privacy.affiliate.text':
+      'قد تحمل روابط «اذهب للمتجر» تتبّعًا للعمولة، وقد يدفع المتجر لزينور عمولة دون أي تكلفة إضافية عليك. العمولة لا تؤثر أبدًا على الترتيب: أقل سعر يفوز دائمًا.',
+    'privacy.sharing.title': 'المشاركة',
+    'privacy.sharing.text':
+      'لا نشارك بياناتك الشخصية مع أطراف ثالثة إلا حيث يلزم القانون. وعند انتقالك إلى متجر، تسري سياسة خصوصية ذلك المتجر على ما تفعله هناك.',
+    'privacy.security.title': 'الأمان',
+    'privacy.security.text':
+      'كلمات المرور مشفّرة بخوارزمية BCrypt، والجلسات برموز موقَّعة، والواجهة البرمجية محمية بحدّ معدل الطلبات. لا يوجد نظام آمن تمامًا، لكننا نصمم لحماية البيانات من البداية.',
+    'privacy.rights.title': 'حقوقك والتواصل',
+    'privacy.rights.text':
+      'يمكنك حذف منتجاتك المحفوظة وتنبيهاتك من حسابك في أي وقت. لطلب حذف الحساب أو لأي سؤال عن الخصوصية، راسلنا على abdluazez796@gmail.com.',
+    'privacy.changes.title': 'تغييرات هذه السياسة',
+    'privacy.changes.text':
+      'سنحدّث هذه الصفحة عند تغيّر السياسة مع تعديل التاريخ أعلاه، وسنعلن عن التغييرات الجوهرية في الموقع.',
+
+    'terms.title': 'شروط الاستخدام',
+    'terms.intro': 'باستخدامك زينور فأنت توافق على هذه الشروط. إن لم توافق، فلا تستخدم الخدمة.',
+    'terms.service.title': 'ما هو زينور',
+    'terms.service.text':
+      'يقارن زينور أسعار المنتجات عبر متاجر خارجية ويوصلك إليها. زينور لا يبيع المنتجات ولا يعالج المدفوعات ولا ينفّذ الطلبات — عقد شرائك دائمًا مع المتجر.',
+    'terms.prices.title': 'الأسعار والتوفر',
+    'terms.prices.text':
+      'الأسعار والمخزون ومعلومات الشحن تأتي من مصادر خارجية وقد تتغير أو تتضمن أخطاء. تحقق دائمًا من السعر النهائي في المتجر قبل إتمام الشراء.',
+    'terms.affiliate.title': 'كيف يربح زينور',
+    'terms.affiliate.text':
+      'بعض الروابط الخارجية روابط عمولة قد تُكسب زينور عمولة دون تكلفة إضافية عليك. العمولة لا تؤثر أبدًا على الترتيب أو التوصيات.',
+    'terms.accounts.title': 'الحسابات',
+    'terms.accounts.text':
+      'أنت مسؤول عن صحة بيانات حسابك وعن سرية كلمة مرورك. ويجوز لنا إيقاف الحسابات المستخدمة بشكل مسيء أو مخالف للقانون.',
+    'terms.use.title': 'الاستخدام المقبول',
+    'terms.use.text':
+      'لا تعطّل الخدمة، ولا تحاول وصولًا غير مصرّح به، ولا تجمع البيانات بأحجام مسيئة، ولا تستخدم زينور لأي غرض غير قانوني.',
+    'terms.liability.title': 'المسؤولية',
+    'terms.liability.text':
+      'يُقدَّم زينور «كما هو». وإلى الحد الأقصى الذي يسمح به القانون، لسنا مسؤولين عن خسائر ناتجة عن قرارات الشراء أو سلوك المتاجر أو أخطاء أسعار مصدرها جهات خارجية.',
+    'terms.changes.title': 'تغييرات هذه الشروط',
+    'terms.changes.text':
+      'قد نحدّث هذه الشروط، ويعكس التاريخ أعلاه أحدث نسخة. استمرارك في الاستخدام بعد التغييرات يعني قبولك لها.',
+    'terms.law.title': 'القانون الواجب التطبيق',
+    'terms.law.text': 'تخضع هذه الشروط لأنظمة المملكة العربية السعودية.',
 
     'notFound.title': 'الصفحة غير موجودة',
     'notFound.text': 'الصفحة التي تبحث عنها غير موجودة.',

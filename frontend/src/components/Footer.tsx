@@ -30,6 +30,7 @@ export function Footer() {
         <nav className="footer-col" aria-label={t('footer.legal')}>
           <h3 className="footer-col-title">{t('footer.legal')}</h3>
           <Link to="/privacy">{t('privacy.title')}</Link>
+          <Link to="/terms">{t('terms.title')}</Link>
         </nav>
       </div>
 

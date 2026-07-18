@@ -21,11 +21,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Allowed browser origins come from config (Cors:Origins) so production
+// domains are a deployment setting, not a code change; dev defaults below.
+var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>()
+    ?? ["http://localhost:5173", "http://127.0.0.1:5173"];
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCorsPolicy, policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
+        policy.WithOrigins(corsOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -70,12 +75,12 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
-// Ensure the database exists. For local dev with SQLite this creates the
-// schema from the model; migrations replace this when persistence matures.
+// Apply pending EF Core migrations on startup (spec Section 23, step 4).
+// Schema changes now ship as migrations instead of EnsureCreated snapshots.
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ZaynorDbContext>();
-    db.Database.EnsureCreated();
+    db.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.

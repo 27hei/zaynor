@@ -111,6 +111,24 @@ Per spec Section 13, the public search engine is the core `AggregationService` d
   "buy now or wait?") will need months of — recording started with the first search on purpose.
 - Recording is fail-soft: a history failure can never break the search that produced it (NFR4).
 
+## Deployment
+
+The stack is containerized and configurable per environment:
+
+- `docker-compose.yml` runs both services: copy `.env.deploy.example` to `.env`, set `JWT_KEY`
+  (required — the API refuses to start without it), then `docker compose up --build`.
+- **Frontend** bakes the API origin at build time via `VITE_API_URL` (see `frontend/.env.example`).
+- **Backend** reads everything from configuration/env: `ConnectionStrings__Default`, `Jwt__*`,
+  `Cors__Origins__N` (the browser origins allowed to call the API), `AlertMonitor__IntervalMinutes`.
+- The database schema is applied via **EF Core migrations** on startup (`Database.Migrate()`);
+  new schema changes ship as migrations (`dotnet dotnet-ef migrations add <Name>
+  --project src/Zaynor.Infrastructure --startup-project src/Zaynor.Api` from `backend/`).
+- SQLite persists on a named volume in compose; swap `ConnectionStrings__Default` to
+  PostgreSQL when scale demands (spec Section 14).
+
+For affiliate-network applications (spec Section 20) the site needs a public URL — any
+container host (Railway, Fly.io, Azure) can run the compose setup as-is.
+
 ## Status
 
 - **Done:** clean-architecture scaffold, domain entities (Section 15), the search → aggregate →
