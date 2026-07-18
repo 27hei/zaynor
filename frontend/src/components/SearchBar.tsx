@@ -21,15 +21,31 @@ export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProp
 
   return (
     <form className="search-bar" onSubmit={handleSubmit} role="search">
-      <input
-        type="search"
-        className="search-input"
-        placeholder={t('hero.searchPlaceholder')}
-        aria-label={t('hero.searchPlaceholder')}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-      />
+      <div className="search-field">
+        <svg
+          className="search-field-icon"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <input
+          type="search"
+          className="search-input"
+          placeholder={t('hero.searchPlaceholder')}
+          aria-label={t('hero.searchPlaceholder')}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+        />
+      </div>
       <button type="submit" className="search-button" disabled={disabled}>
         {t('hero.searchButton')}
       </button>

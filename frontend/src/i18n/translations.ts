@@ -19,6 +19,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'nav.account': 'My Account',
     'nav.logout': 'Log out',
 
+    'hero.eyebrow': "Saudi Arabia's smart price comparison",
     'hero.title': 'Compare prices. Buy with confidence.',
     'hero.subtitle':
       'Search once — Zaynor checks every store, finds the lowest price, and tells you where to buy.',
@@ -138,6 +139,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'nav.account': 'حسابي',
     'nav.logout': 'تسجيل الخروج',
 
+    'hero.eyebrow': 'مقارنة الأسعار الذكية في السعودية',
     'hero.title': 'قارن الأسعار. اشترِ بثقة.',
     'hero.subtitle':
       'ابحث مرة واحدة — يفحص زينور كل المتاجر، يجد أقل سعر، ويخبرك من أين تشتري.',

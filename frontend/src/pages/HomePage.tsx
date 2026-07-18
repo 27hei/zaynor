@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { searchProducts } from '../api/client'
 import type { SearchResult } from '../api/types'
-import { BrandLockup } from '../components/BrandLockup'
+import { Logo } from '../components/Logo'
 import { SearchBar } from '../components/SearchBar'
 import { NeutralityBadge } from '../components/NeutralityBadge'
 import { PopularSearches } from '../components/PopularSearches'
@@ -74,7 +74,10 @@ export function HomePage() {
     <>
       {!hasSearched ? (
         <section className="hero">
-          <BrandLockup />
+          <div className="hero-mark">
+            <Logo size={58} detailed />
+          </div>
+          <p className="hero-eyebrow">{t('hero.eyebrow')}</p>
           <h1 className="hero-title">{t('hero.title')}</h1>
           <p className="hero-subtitle">{t('hero.subtitle')}</p>
 
