@@ -137,7 +137,19 @@ html[lang='ar'] {
 }
 
 .nav-link-active {
+  position: relative;
   color: var(--brand-strong);
+}
+
+/* Active nav gets a precise underline indicator */
+.nav-link-active::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0.75rem;
+  bottom: 0.15rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--brand);
 }
 
 .header-actions {
@@ -1663,13 +1675,58 @@ html[lang='ar'] {
   transform: translate(50%, -50%);
 }
 
+/* ============ Fine details ============ */
+
+/* Brand-neutral scrollbar (WebKit) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--canvas);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--hairline-strong);
+  border-radius: 999px;
+  border: 2px solid var(--canvas);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand);
+}
+
+/* Content pages share the results' entrance rhythm */
+.page-article,
+.auth-card,
+.account {
+  animation: fade-in-up 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Feature/category icons invert on hover — a small, confident interaction */
+.feature-card:hover .feature-icon,
+.category-card:hover .category-icon {
+  background: var(--brand-strong);
+  color: #fff;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+/* The winning row's price carries the brand */
+.offer-lowest .offer-price {
+  color: var(--brand-strong);
+}
+
 /* ============ Motion ============ */
 @media (prefers-reduced-motion: reduce) {
   .results-in,
   .skeleton-line,
   .offer,
   .feature-card,
-  .category-card {
+  .category-card,
+  .page-article,
+  .auth-card,
+  .account {
     animation: none;
     transition: none;
   }

@@ -91,14 +91,14 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    // Outside dev: never leak exception details — return clean JSON (NFR3),
-    // and enforce HTTPS (dev runs plain HTTP, so no redirect noise there).
+    // Outside dev: never leak exception details — return clean JSON (NFR3).
+    // HTTPS is terminated at the hosting platform's edge (Railway/ngrok/nginx);
+    // an in-app redirect behind such proxies causes redirect loops, so none here.
     app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
     {
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
         await context.Response.WriteAsJsonAsync(new { error = "An unexpected error occurred." });
     }));
-    app.UseHttpsRedirection();
 }
 
 // When the built SPA is dropped into wwwroot, the API serves the whole site

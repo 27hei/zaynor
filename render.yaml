@@ -1,0 +1,29 @@
+# Render Blueprint — free-tier deploy of the whole site (one Docker service).
+# In Render: New → Blueprint → point at this repo. The root Dockerfile builds
+# the SPA into the API, so this single service serves everything at
+# https://<name>.onrender.com.
+#
+# Database: the free tier has no persistent disk, so SQLite data resets on
+# redeploys. For a durable free database, create a free Supabase/Neon
+# PostgreSQL and set ConnectionStrings__Default accordingly (Postgres provider
+# wiring is the next backend step once the database exists).
+
+services:
+  - type: web
+    name: zaynor
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: Jwt__Issuer
+        value: Zaynor
+      - key: Jwt__Audience
+        value: ZaynorClient
+      - key: Jwt__Key
+        generateValue: true # Render generates a strong random secret
+      - key: ConnectionStrings__Default
+        value: Data Source=/tmp/zaynor.db
+      - key: AlertMonitor__IntervalMinutes
+        value: "30"
