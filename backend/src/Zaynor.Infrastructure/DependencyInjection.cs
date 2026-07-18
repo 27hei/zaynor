@@ -49,6 +49,7 @@ public static class DependencyInjection
         services.AddScoped<IPriceHistoryRecorder, PriceHistoryRecorder>();
         services.AddScoped<IAggregationService, CachedAggregationService>();
         services.AddScoped<ISearchSuggestionService, SearchSuggestionService>();
+        services.AddScoped<IPriceHistoryService, PriceHistoryService>();
 
         return services;
     }

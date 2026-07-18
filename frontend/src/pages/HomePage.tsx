@@ -11,6 +11,8 @@ import { OfferList } from '../components/OfferList'
 import { OfferListSkeleton } from '../components/OfferListSkeleton'
 import { FeatureHighlights } from '../components/FeatureHighlights'
 import { HomeCategories } from '../components/HomeCategories'
+import { ProductSummary } from '../components/ProductSummary'
+import { PriceHistorySection } from '../components/PriceHistorySection'
 import { useTranslation } from '../i18n/useTranslation'
 import { useAuth } from '../auth/useAuth'
 import { usePageTitle } from '../hooks/usePageTitle'
@@ -191,6 +193,8 @@ export function HomePage() {
 
       {!loading && hasResults && (
         <section className="results results-in" aria-label="Search results">
+          <ProductSummary query={result!.query} offers={result!.offers} />
+
           {result!.recommendation && (
             <RecommendationBanner
               recommendation={result!.recommendation}
@@ -223,6 +227,8 @@ export function HomePage() {
           )}
 
           <OfferList offers={result!.offers} />
+
+          <PriceHistorySection key={result!.query} query={result!.query} />
         </section>
       )}
 

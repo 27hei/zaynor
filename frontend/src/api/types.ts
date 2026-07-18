@@ -45,6 +45,17 @@ export interface AuthResponse {
   user: UserDto
 }
 
+export interface PriceHistoryPoint {
+  storeName: string
+  price: number
+  recordedAt: string
+}
+
+export interface PriceHistoryResponse {
+  productName: string | null
+  points: PriceHistoryPoint[]
+}
+
 export interface SavedProductDto {
   id: number
   productName: string

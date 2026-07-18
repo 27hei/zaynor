@@ -2,18 +2,9 @@ import { useState } from 'react'
 import type { AggregatedOffer } from '../api/types'
 import { formatPrice } from '../format'
 import { useTranslation } from '../i18n/useTranslation'
+import { STORE_BRAND } from '../storeBrand'
 
 const VISIBLE_BY_DEFAULT = 3
-
-// Recognizable store identity colors so rows scan at a glance
-// (competitive analysis Section 6.C: each row leads with the store identity).
-const STORE_BRAND: Record<string, { bg: string; fg: string }> = {
-  'Amazon.sa': { bg: '#232f3e', fg: '#ff9900' },
-  Noon: { bg: '#feee00', fg: '#3a3a3a' },
-  Jarir: { bg: '#d71920', fg: '#ffffff' },
-  Extra: { bg: '#0057b8', fg: '#ffffff' },
-  AliExpress: { bg: '#e43225', fg: '#ffffff' },
-}
 
 interface OfferListProps {
   offers: AggregatedOffer[]

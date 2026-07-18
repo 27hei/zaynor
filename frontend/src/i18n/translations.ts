@@ -45,6 +45,14 @@ export const translations: Record<Lang, Record<string, string>> = {
     'results.notifySet': 'Alert set ✓',
     'results.actionError': 'That did not work — please try again.',
 
+    'summary.meta': '{count} offers · best price {price}',
+
+    'history.show': 'Show price history',
+    'history.hide': 'Hide price history',
+    'history.title': 'Price history',
+    'history.accumulating':
+      'Zaynor is still collecting price history for this product — every search adds to it. Check back soon.',
+
     'reco.badge': 'Best deal',
     'reco.saveUpTo': 'Save up to {amount}',
     'reco.message': 'Buy from {store} at {price} — save {savings} versus {comparedStore} at {comparedPrice}.',
@@ -182,6 +190,14 @@ export const translations: Record<Lang, Record<string, string>> = {
     'results.notify': 'نبّهني إذا انخفض السعر',
     'results.notifySet': 'تم ضبط التنبيه ✓',
     'results.actionError': 'لم تنجح العملية — حاول مرة أخرى.',
+
+    'summary.meta': '{count} عروض · أفضل سعر {price}',
+
+    'history.show': 'عرض تاريخ السعر',
+    'history.hide': 'إخفاء تاريخ السعر',
+    'history.title': 'تاريخ السعر',
+    'history.accumulating':
+      'ما زال زينور يجمع تاريخ الأسعار لهذا المنتج — كل عملية بحث تضيف إليه. عد قريبًا.',
 
     'reco.badge': 'أفضل عرض',
     'reco.saveUpTo': 'وفّر حتى {amount}',

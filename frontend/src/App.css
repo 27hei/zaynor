@@ -682,6 +682,39 @@ html[lang='ar'] {
   margin: 0 0 0.9rem;
 }
 
+/* Product summary header (illustration or real feed image + market glance) */
+.product-summary {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  margin-bottom: 1.25rem;
+}
+
+.product-summary-art {
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+  border-radius: 18px;
+  border: 1px solid var(--hairline);
+  object-fit: cover;
+  background: var(--brand-tint);
+}
+
+.product-summary-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.product-summary-meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
 /* Results toolbar: save / notify-me actions (spec Section 16/17) */
 .results-toolbar {
   display: flex;
@@ -887,6 +920,88 @@ html[lang='ar'] {
   color: var(--brand-strong);
   background: var(--brand-tint);
   border-color: var(--brand);
+}
+
+/* ============ Price history (progressive disclosure) ============ */
+.history-section {
+  margin-top: 1rem;
+}
+
+.history-toggle {
+  display: block;
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.history-toggle:hover {
+  color: var(--brand-strong);
+  background: var(--brand-tint);
+  border-color: var(--brand);
+}
+
+.history-panel {
+  margin-top: 0.85rem;
+  padding: 1.25rem 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.history-note {
+  margin: 0;
+  text-align: center;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  padding: 1rem 0;
+}
+
+.history-chart-wrap {
+  overflow-x: auto;
+}
+
+.history-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.history-axis {
+  font-size: 11px;
+  fill: var(--text-muted);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.history-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 0.75rem;
+  justify-content: center;
+}
+
+.history-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.history-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
 }
 
 /* ============ Skeleton ============ */

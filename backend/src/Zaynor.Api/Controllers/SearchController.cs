@@ -13,13 +13,16 @@ public class SearchController : ControllerBase
 {
     private readonly IAggregationService _aggregationService;
     private readonly ISearchSuggestionService _suggestionService;
+    private readonly IPriceHistoryService _priceHistoryService;
 
     public SearchController(
         IAggregationService aggregationService,
-        ISearchSuggestionService suggestionService)
+        ISearchSuggestionService suggestionService,
+        IPriceHistoryService priceHistoryService)
     {
         _aggregationService = aggregationService;
         _suggestionService = suggestionService;
+        _priceHistoryService = priceHistoryService;
     }
 
     /// <summary>
@@ -58,5 +61,23 @@ public class SearchController : ControllerBase
         }
 
         return Ok(await _suggestionService.GetSuggestionsAsync(q, limit: 8, cancellationToken));
+    }
+
+    /// <summary>
+    /// The accumulated price history for a product (competitive analysis
+    /// table stakes #5). Empty until searches have recorded observations.
+    /// </summary>
+    [HttpGet("history")]
+    [ProducesResponseType(typeof(PriceHistoryResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PriceHistoryResponse>> History(
+        [FromQuery] string? q,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(q))
+        {
+            return Ok(new PriceHistoryResponse { ProductName = null, Points = Array.Empty<PriceHistoryPoint>() });
+        }
+
+        return Ok(await _priceHistoryService.GetHistoryAsync(q, cancellationToken));
     }
 }

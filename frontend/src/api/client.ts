@@ -1,4 +1,11 @@
-import type { AlertDto, AuthResponse, SavedProductDto, SearchResult, UserDto } from './types'
+import type {
+  AlertDto,
+  AuthResponse,
+  PriceHistoryResponse,
+  SavedProductDto,
+  SearchResult,
+  UserDto,
+} from './types'
 import { getToken } from '../auth/token'
 
 const API_BASE_URL = 'http://localhost:5286'
@@ -28,6 +35,18 @@ export async function getSuggestions(query: string, signal?: AbortSignal): Promi
   }
 
   return (await response.json()) as string[]
+}
+
+/** The accumulated price history for a product (table stakes #5). */
+export async function getPriceHistory(query: string): Promise<PriceHistoryResponse> {
+  const url = `${API_BASE_URL}/api/search/history?q=${encodeURIComponent(query)}`
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error(`History failed (${response.status})`)
+  }
+
+  return (await response.json()) as PriceHistoryResponse
 }
 
 /** Extracts a human-readable error message from an error response body. */
