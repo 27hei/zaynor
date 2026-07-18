@@ -1,4 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
+import { BrandMark } from './BrandMark'
 import { LanguageToggle } from './LanguageToggle'
 import { useTranslation } from '../i18n/useTranslation'
 import { useAuth } from '../auth/useAuth'
@@ -13,8 +14,8 @@ export function Header() {
   return (
     <header className="header">
       <div className="header-inner">
-        {/* Wordmark only, at the far start — the icon mark stars in the hero instead. */}
         <Link to="/" className="header-brand" aria-label="Zaynor home">
+          <BrandMark size={34} />
           <img src="/zaynor-wordmark.png" alt="Zaynor" className="header-logo-word" />
         </Link>
 

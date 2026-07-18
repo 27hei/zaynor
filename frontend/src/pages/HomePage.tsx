@@ -123,62 +123,46 @@ export function HomePage() {
   return (
     <>
       {!hasSearched ? (
-        <section className="hero hero-split">
-          {/* Diagonal repeating wordmark, clipped inside the hero (decorative). */}
-          <div className="hero-ribbon-wrap" aria-hidden="true">
-            <span className="hero-ribbon">
-              ZAYNOR · ZAYNOR · ZAYNOR · ZAYNOR · ZAYNOR · ZAYNOR · ZAYNOR · ZAYNOR
-            </span>
+        <section className="hero">
+          <div className="hero-mark">
+            <BrandMark size={64} detailed />
           </div>
+          <p className="hero-eyebrow">{t('hero.eyebrow')}</p>
+          <h1 className="hero-title">{t('hero.title')}</h1>
+          <p className="hero-subtitle">{t('hero.subtitle')}</p>
 
-          <div className="hero-copy">
-            <p className="hero-eyebrow">{t('hero.eyebrow')}</p>
-            <h1 className="hero-title">{t('hero.title')}</h1>
-            <p className="hero-subtitle">{t('hero.subtitle')}</p>
+          <SearchBar value={query} onChange={setQuery} onSearch={handleSearch} disabled={loading} />
+          <NeutralityBadge />
+          <PopularSearches onSelect={handleSearch} />
 
-            <SearchBar
-              value={query}
-              onChange={setQuery}
-              onSearch={handleSearch}
-              disabled={loading}
-            />
-            <NeutralityBadge />
-            <PopularSearches onSelect={handleSearch} />
-
-            {recent.length > 0 && (
-              <div className="popular-searches" aria-label={t('hero.recentLabel')}>
-                <span className="popular-searches-label">{t('hero.recentLabel')}</span>
-                {recent.map((recentQuery) => (
-                  <button
-                    key={recentQuery}
-                    type="button"
-                    className="popular-chip"
-                    onClick={() => handleSearch(recentQuery)}
-                  >
-                    {recentQuery}
-                  </button>
-                ))}
-                <button type="button" className="recent-clear" onClick={clearRecent}>
-                  {t('hero.clearRecent')}
+          {recent.length > 0 && (
+            <div className="popular-searches" aria-label={t('hero.recentLabel')}>
+              <span className="popular-searches-label">{t('hero.recentLabel')}</span>
+              {recent.map((recentQuery) => (
+                <button
+                  key={recentQuery}
+                  type="button"
+                  className="popular-chip"
+                  onClick={() => handleSearch(recentQuery)}
+                >
+                  {recentQuery}
                 </button>
-              </div>
-            )}
-
-            <p className="hero-trust">
-              {t('hero.trustLine')}{' '}
-              {TRACKED_STORES.map((store, i) => (
-                <span key={store}>
-                  <span className="hero-trust-store">{store}</span>
-                  {i < TRACKED_STORES.length - 1 && <span> · </span>}
-                </span>
               ))}
-            </p>
-          </div>
+              <button type="button" className="recent-clear" onClick={clearRecent}>
+                {t('hero.clearRecent')}
+              </button>
+            </div>
+          )}
 
-          {/* The brand mark as the hero visual — where VOXA puts the watch. */}
-          <div className="hero-visual">
-            <BrandMark size={290} detailed />
-          </div>
+          <p className="hero-trust">
+            {t('hero.trustLine')}{' '}
+            {TRACKED_STORES.map((store, i) => (
+              <span key={store}>
+                <span className="hero-trust-store">{store}</span>
+                {i < TRACKED_STORES.length - 1 && <span> · </span>}
+              </span>
+            ))}
+          </p>
         </section>
       ) : (
         <section className="hero hero-compact">
