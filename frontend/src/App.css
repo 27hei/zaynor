@@ -1,33 +1,230 @@
-.shell {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  text-align: center;
-  font-family: system-ui, sans-serif;
-  color: #04342c;
-  background: #e1f5ee;
+:root {
+  --zaynor-green: #1d9e75;
+  --zaynor-green-dark: #0f6e56;
+  --zaynor-green-darkest: #04342c;
+  --zaynor-bg: #e1f5ee;
+  --zaynor-accent: #d85a30;
+  --surface: #ffffff;
+  --border: #cfe8de;
+  --text: #04342c;
+  --text-muted: #4a6b60;
 }
 
-.shell h1 {
+.page {
+  min-height: 100vh;
+  background: var(--zaynor-bg);
+  color: var(--text);
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+.masthead {
+  text-align: center;
+  padding: 2.5rem 1rem 1rem;
+}
+
+.brand {
   margin: 0;
   font-size: 2.5rem;
-  letter-spacing: 0.05em;
-  color: #1d9e75;
+  letter-spacing: 0.08em;
+  color: var(--zaynor-green);
 }
 
 .tagline {
-  margin: 0 0 1.5rem;
-  color: #0f6e56;
+  margin: 0.25rem 0 0;
+  color: var(--zaynor-green-dark);
   font-weight: 600;
 }
 
-.status-ok {
-  color: #1d9e75;
+.content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 1rem 4rem;
 }
 
-.status-error {
-  color: #d85a30;
+/* Search bar */
+.search-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.search-input:focus {
+  outline: 2px solid var(--zaynor-green);
+  outline-offset: 1px;
+}
+
+.search-button {
+  padding: 0.85rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--zaynor-green);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.search-button:hover:not(:disabled) {
+  background: var(--zaynor-green-dark);
+}
+
+.search-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Hints */
+.hint {
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.hint-error {
+  color: var(--zaynor-accent);
+}
+
+/* Recommendation banner */
+.recommendation {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 2px solid var(--zaynor-green);
+  border-radius: 14px;
+  margin-bottom: 1.5rem;
+}
+
+.recommendation-badge {
+  flex-shrink: 0;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: var(--zaynor-green);
+  border-radius: 999px;
+}
+
+.recommendation-headline {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--zaynor-green-darkest);
+}
+
+.recommendation-savings {
+  margin: 0.25rem 0;
+  font-weight: 600;
+  color: var(--zaynor-accent);
+}
+
+.recommendation-message {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* Results */
+.results-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem;
+}
+
+.offer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.offer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.offer-lowest {
+  border-color: var(--zaynor-green);
+  box-shadow: 0 0 0 1px var(--zaynor-green);
+}
+
+.offer-main {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.offer-store {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.offer-tag {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--zaynor-green-dark);
+  background: var(--zaynor-bg);
+  border-radius: 999px;
+}
+
+.offer-oos {
+  font-size: 0.8rem;
+  color: var(--zaynor-accent);
+}
+
+.offer-side {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.offer-price {
+  font-weight: 700;
+  font-size: 1.1rem;
+  white-space: nowrap;
+}
+
+.offer-link {
+  padding: 0.55rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--zaynor-accent);
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.offer-link:hover {
+  filter: brightness(0.95);
+}
+
+@media (max-width: 520px) {
+  .offer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

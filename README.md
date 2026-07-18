@@ -52,8 +52,31 @@ npm install
 npm run dev
 ```
 
+## Core Search Flow
+
+The MVP heart (spec Section 8) is working end-to-end against a **mock data source**:
+
+- `GET /api/search?q=<product>` fans the query out across every registered `IProductDataSource`,
+  merges the offers, sorts them cheapest-first, flags the lowest, and returns a recommendation
+  with the potential saving.
+- The frontend renders the results with a recommendation banner and "Go to store" affiliate links.
+
+The data source is currently `MockProductDataSource` (fabricated but stable prices) so the flow is
+demonstrable before any real feed is wired. Adding a real source (affiliate feed / store API) means
+implementing `IProductDataSource` and registering it in `Zaynor.Infrastructure` — the aggregation
+engine does not change.
+
+Key types:
+
+- `Zaynor.Application/Aggregation/IAggregationService.cs` — the engine contract
+- `Zaynor.Application/Aggregation/AggregationService.cs` — merge / rank / recommend
+- `Zaynor.Application/Aggregation/IProductDataSource.cs` — the source plug-in point
+- `Zaynor.Infrastructure/DataSources/MockProductDataSource.cs` — the temporary source
+
 ## Status
 
-This is the initial scaffold (Build Roadmap Phase 1, spec Section 18): solution structure, project
-references, and a health-check endpoint proving frontend ↔ backend connectivity. No domain
-entities, database, or aggregation logic yet — those come next, in sequence, per Section 23.
+- **Done:** solution scaffold, domain entities (Section 15), the search → aggregate → rank →
+  recommend flow against a mock source, search UI, and unit tests.
+- **Next (in sequence, per Section 23):** persistence layer (EF Core `DbContext` + migrations for
+  the entities), then the first real data source, then About / Privacy / How-It-Works pages ahead
+  of affiliate-network applications.

@@ -1,8 +1,14 @@
+using Zaynor.Application;
+using Zaynor.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 const string FrontendCorsPolicy = "FrontendCorsPolicy";
+
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

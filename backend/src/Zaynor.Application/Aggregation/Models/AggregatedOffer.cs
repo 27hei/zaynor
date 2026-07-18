@@ -1,0 +1,28 @@
+namespace Zaynor.Application.Aggregation.Models;
+
+/// <summary>
+/// An offer as presented in search results: a <see cref="StoreOffer"/> enriched
+/// with the product-matching key and a flag marking the cheapest offer (spec FR5).
+/// </summary>
+public sealed record AggregatedOffer
+{
+    public required string StoreName { get; init; }
+
+    public required string ProductTitle { get; init; }
+
+    public required decimal Price { get; init; }
+
+    public required string Currency { get; init; }
+
+    public required string ProductUrl { get; init; }
+
+    public bool InStock { get; init; } = true;
+
+    public string? ImageUrl { get; init; }
+
+    /// <summary>Normalized matching key for this offer's product (spec FR3).</summary>
+    public required string NormalizedKey { get; init; }
+
+    /// <summary>True for the single cheapest offer in the result set.</summary>
+    public bool IsLowestPrice { get; init; }
+}
