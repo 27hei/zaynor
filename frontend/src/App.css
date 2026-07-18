@@ -1,0 +1,33 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  font-family: system-ui, sans-serif;
+  color: #04342c;
+  background: #e1f5ee;
+}
+
+.shell h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  letter-spacing: 0.05em;
+  color: #1d9e75;
+}
+
+.tagline {
+  margin: 0 0 1.5rem;
+  color: #0f6e56;
+  font-weight: 600;
+}
+
+.status-ok {
+  color: #1d9e75;
+}
+
+.status-error {
+  color: #d85a30;
+}
