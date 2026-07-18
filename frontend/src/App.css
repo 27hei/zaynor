@@ -106,7 +106,7 @@ html[lang='ar'] {
 }
 
 .header-logo-word {
-  height: 17px;
+  height: 19px;
   width: auto;
   display: block;
   mix-blend-mode: multiply;
@@ -263,9 +263,127 @@ html[lang='ar'] {
   padding: 2rem 0 0.5rem;
 }
 
-.hero-mark {
+/* ---- Split hero: copy + search on one side, the brand mark as the hero
+   visual on the other (landing-page pattern). Breaks out of the narrow
+   content column to full landing width. ---- */
+.hero-split::before {
+  display: none; /* the split hero has its own visual glow + ribbon */
+}
+
+.hero-split {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(var(--maxw), calc(100vw - 3rem));
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: center;
+  gap: 2.5rem;
+  text-align: start;
+  padding: 4rem 0 3rem;
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-split .hero-eyebrow {
+  margin-top: 0;
+}
+
+.hero-split .hero-title {
+  margin: 0 0 1rem;
+  max-width: 15ch;
+}
+
+.hero-split .hero-subtitle {
+  margin: 0 0 2rem;
+  max-width: 44ch;
+}
+
+.hero-split .search-bar {
+  margin: 0;
+  max-width: 560px;
+}
+
+.hero-split .popular-searches {
+  justify-content: flex-start;
+}
+
+.hero-split .hero-trust {
+  text-align: start;
+}
+
+.hero-visual {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: center;
+  align-items: center;
+}
+
+.hero-visual::before {
+  content: '';
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(23, 160, 111, 0.16), transparent 68%);
+  z-index: -1;
+}
+
+.hero-visual img {
+  filter: drop-shadow(0 26px 44px rgba(4, 52, 44, 0.2));
+  mix-blend-mode: multiply;
+}
+
+/* Diagonal repeating wordmark, clipped to the hero */
+.hero-ribbon-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-ribbon {
+  position: absolute;
+  top: 18%;
+  inset-inline-start: 30%;
+  transform: rotate(-9deg);
+  font-family: var(--font-display);
+  font-size: 3.4rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+  color: rgba(23, 160, 111, 0.06);
+  user-select: none;
+}
+
+@media (max-width: 900px) {
+  .hero-split {
+    left: auto;
+    transform: none;
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 2.5rem 0 2rem;
+  }
+
+  .hero-visual {
+    order: -1;
+  }
+
+  .hero-visual img {
+    width: 170px !important;
+    height: auto !important;
+  }
+
+  .hero-visual::before {
+    width: 230px;
+    height: 230px;
+  }
 }
 
 .hero-eyebrow {
