@@ -29,3 +29,16 @@ export interface SearchResult {
   recommendation: Recommendation | null
   offerCount: number
 }
+
+export interface UserDto {
+  id: number
+  email: string
+  locale: string
+  createdAt: string
+}
+
+export interface AuthResponse {
+  token: string
+  expiresAt: string
+  user: UserDto
+}

@@ -1,4 +1,5 @@
 import type { FormEvent } from 'react'
+import { useTranslation } from '../i18n/useTranslation'
 
 interface SearchBarProps {
   value: string
@@ -8,6 +9,8 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProps) {
+  const { t } = useTranslation()
+
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
     const trimmed = value.trim()
@@ -21,14 +24,14 @@ export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProp
       <input
         type="search"
         className="search-input"
-        placeholder="Search for a product, e.g. Sony PlayStation 5"
-        aria-label="Search for a product"
+        placeholder={t('hero.searchPlaceholder')}
+        aria-label={t('hero.searchPlaceholder')}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
       />
       <button type="submit" className="search-button" disabled={disabled}>
-        Search
+        {t('hero.searchButton')}
       </button>
     </form>
   )

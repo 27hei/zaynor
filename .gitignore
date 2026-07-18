@@ -5,6 +5,11 @@ backend/**/obj/
 *.suo
 .vs/
 
+## SQLite (local dev database)
+*.db
+*.db-shm
+*.db-wal
+
 ## Node / React
 frontend/node_modules/
 frontend/dist/

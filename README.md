@@ -73,10 +73,37 @@ Key types:
 - `Zaynor.Application/Aggregation/IProductDataSource.cs` — the source plug-in point
 - `Zaynor.Infrastructure/DataSources/MockProductDataSource.cs` — the temporary source
 
+## Accounts & Persistence
+
+User accounts are live (spec FR9), backed by **EF Core + SQLite** (a local `zaynor.db` file — zero
+setup; swappable to PostgreSQL/SQL Server via config for production).
+
+- `POST /api/auth/register`, `POST /api/auth/login` — passwords hashed with **BCrypt**, sessions
+  issued as **JWT** bearer tokens.
+- `GET /api/auth/me` — the current user (requires a valid token).
+
+The schema is created on startup via `EnsureCreated()` for local dev; EF Core migrations replace
+this as persistence matures.
+
+## Pages & Bilingual UI
+
+The frontend is a multi-page app (React Router) with full **Arabic / English** support and RTL
+(spec NFR5), toggled from the header and persisted across visits:
+
+- **Home** — hero, search, recommendation, results, feature highlights.
+- **Categories**, **How It Works**, **About**, **Privacy Policy** — content pages.
+- **Log in / Sign up** — wired to the real auth API.
+- **My Account** — a protected route (redirects to login when signed out).
+
+Arabic uses the Cairo typeface; English uses Inter/Sora. Language state lives in
+`src/i18n/`, auth state in `src/auth/`.
+
 ## Status
 
-- **Done:** solution scaffold, domain entities (Section 15), the search → aggregate → rank →
-  recommend flow against a mock source, search UI, and unit tests.
-- **Next (in sequence, per Section 23):** persistence layer (EF Core `DbContext` + migrations for
-  the entities), then the first real data source, then About / Privacy / How-It-Works pages ahead
-  of affiliate-network applications.
+- **Done:** clean-architecture scaffold, domain entities (Section 15), the search → aggregate →
+  rank → recommend flow against a mock source, unit tests, SQLite persistence, JWT auth
+  (register/login/account), a full multi-page bilingual (ar/en + RTL) UI, and the About / How It
+  Works / Privacy pages needed ahead of affiliate-network applications.
+- **Next (in sequence, per Section 23):** the first real data source (replacing the mock), EF Core
+  migrations, and saved-products / price-drop alerts (the account features currently marked
+  "coming soon").

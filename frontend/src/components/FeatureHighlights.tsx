@@ -6,27 +6,30 @@ import {
   SavingsIcon,
   TrustIcon,
 } from './icons'
+import { useTranslation } from '../i18n/useTranslation'
 
 const FEATURES = [
-  { icon: TrustIcon, title: 'Trust', text: 'Neutral recommendations — the best deal wins, even without commission.' },
-  { icon: IntelligenceIcon, title: 'Intelligence', text: 'Offers are matched and organized so you compare the same product.' },
-  { icon: SavingsIcon, title: 'Savings', text: 'See exactly how much you save by buying at the lowest price.' },
-  { icon: DiscoveryIcon, title: 'Discovery', text: 'One search reaches every store Zaynor tracks, instantly.' },
-  { icon: AnalysisIcon, title: 'Analysis', text: 'Clear, sorted results — no more tab-switching to compare prices.' },
-  { icon: AlertsIcon, title: 'Alerts', text: 'Price-drop notifications are coming — track a product, get notified.' },
-]
+  { icon: TrustIcon, key: 'trust' },
+  { icon: IntelligenceIcon, key: 'intelligence' },
+  { icon: SavingsIcon, key: 'savings' },
+  { icon: DiscoveryIcon, key: 'discovery' },
+  { icon: AnalysisIcon, key: 'analysis' },
+  { icon: AlertsIcon, key: 'alerts' },
+] as const
 
 export function FeatureHighlights() {
+  const { t } = useTranslation()
+
   return (
-    <section className="features" aria-label="Why Zaynor">
+    <section className="features" aria-label={t('feature.trust.title')}>
       <div className="features-grid">
-        {FEATURES.map(({ icon: Icon, title, text }) => (
-          <div className="feature-card" key={title}>
+        {FEATURES.map(({ icon: Icon, key }) => (
+          <div className="feature-card" key={key}>
             <div className="feature-icon">
               <Icon />
             </div>
-            <h3 className="feature-title">{title}</h3>
-            <p className="feature-text">{text}</p>
+            <h3 className="feature-title">{t(`feature.${key}.title`)}</h3>
+            <p className="feature-text">{t(`feature.${key}.text`)}</p>
           </div>
         ))}
       </div>

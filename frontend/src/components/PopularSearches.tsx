@@ -1,3 +1,5 @@
+import { useTranslation } from '../i18n/useTranslation'
+
 const SUGGESTIONS = [
   'Sony PlayStation 5',
   'iPhone 15 Pro',
@@ -12,9 +14,11 @@ interface PopularSearchesProps {
 
 /** Suggested searches so a new visitor never faces a blank page (principle J). */
 export function PopularSearches({ onSelect }: PopularSearchesProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="popular-searches">
-      <span className="popular-searches-label">Try:</span>
+      <span className="popular-searches-label">{t('hero.popularLabel')}</span>
       {SUGGESTIONS.map((query) => (
         <button
           key={query}

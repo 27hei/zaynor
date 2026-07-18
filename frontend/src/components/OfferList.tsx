@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { AggregatedOffer } from '../api/types'
 import { formatPrice } from '../format'
+import { useTranslation } from '../i18n/useTranslation'
 
 const VISIBLE_BY_DEFAULT = 3
 
@@ -9,6 +10,7 @@ interface OfferListProps {
 }
 
 export function OfferList({ offers }: OfferListProps) {
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
 
   const hasMore = offers.length > VISIBLE_BY_DEFAULT
@@ -28,8 +30,8 @@ export function OfferList({ offers }: OfferListProps) {
                 {offer.storeName.charAt(0).toUpperCase()}
               </span>
               <span className="offer-store">{offer.storeName}</span>
-              {offer.isLowestPrice && <span className="offer-tag">Lowest price</span>}
-              {!offer.inStock && <span className="offer-oos">Out of stock</span>}
+              {offer.isLowestPrice && <span className="offer-tag">{t('results.lowestPrice')}</span>}
+              {!offer.inStock && <span className="offer-oos">{t('results.outOfStock')}</span>}
             </div>
             <div className="offer-side">
               <span className="offer-price">{formatPrice(offer.price, offer.currency)}</span>
@@ -39,7 +41,7 @@ export function OfferList({ offers }: OfferListProps) {
                 target="_blank"
                 rel="noopener noreferrer sponsored"
               >
-                Go to store
+                {t('results.goToStore')}
               </a>
             </div>
           </li>
@@ -48,7 +50,7 @@ export function OfferList({ offers }: OfferListProps) {
 
       {hasMore && !expanded && (
         <button type="button" className="offer-list-expand" onClick={() => setExpanded(true)}>
-          Show all {offers.length} offers ({hiddenCount} more)
+          {t('results.showAll', { total: offers.length, more: hiddenCount })}
         </button>
       )}
     </>

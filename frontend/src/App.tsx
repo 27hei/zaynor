@@ -1,135 +1,39 @@
-import { useRef, useState } from 'react'
+import { Routes, Route } from 'react-router-dom'
 import './App.css'
-import { searchProducts } from './api/client'
-import type { SearchResult } from './api/types'
-import { Header } from './components/Header'
-import { Footer } from './components/Footer'
-import { BrandLockup } from './components/BrandLockup'
-import { SearchBar } from './components/SearchBar'
-import { NeutralityBadge } from './components/NeutralityBadge'
-import { PopularSearches } from './components/PopularSearches'
-import { RecommendationBanner } from './components/RecommendationBanner'
-import { OfferList } from './components/OfferList'
-import { OfferListSkeleton } from './components/OfferListSkeleton'
-import { FeatureHighlights } from './components/FeatureHighlights'
-
-const TRACKED_STORES = ['Amazon.sa', 'Noon', 'Jarir', 'Extra', 'AliExpress']
+import { Layout } from './components/Layout'
+import { HomePage } from './pages/HomePage'
+import { AboutPage } from './pages/AboutPage'
+import { HowItWorksPage } from './pages/HowItWorksPage'
+import { PrivacyPage } from './pages/PrivacyPage'
+import { CategoriesPage } from './pages/CategoriesPage'
+import { LoginPage } from './pages/LoginPage'
+import { RegisterPage } from './pages/RegisterPage'
+import { AccountPage } from './pages/AccountPage'
+import { NotFoundPage } from './pages/NotFoundPage'
+import { ProtectedRoute } from './auth/ProtectedRoute'
 
 function App() {
-  const [query, setQuery] = useState('')
-  const [result, setResult] = useState<SearchResult | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const activeRequest = useRef<AbortController | null>(null)
-
-  async function handleSearch(searchQuery: string) {
-    // Cancel any in-flight request so stale results can't overwrite newer ones.
-    activeRequest.current?.abort()
-    const controller = new AbortController()
-    activeRequest.current = controller
-
-    setQuery(searchQuery)
-    setLoading(true)
-    setError(null)
-
-    try {
-      const data = await searchProducts(searchQuery, controller.signal)
-      setResult(data)
-    } catch (err) {
-      if ((err as Error).name === 'AbortError') return
-      setError((err as Error).message)
-      setResult(null)
-    } finally {
-      if (activeRequest.current === controller) {
-        setLoading(false)
-      }
-    }
-  }
-
-  const hasSearched = result !== null
-  const hasResults = !!result && result.offers.length > 0
-
-  const statusMessage = loading
-    ? 'Searching stores…'
-    : hasSearched
-      ? hasResults
-        ? `${result!.offerCount} offers found for ${result!.query}`
-        : `No offers found for ${result!.query}`
-      : ''
-
   return (
-    <div className="page">
-      <Header />
-
-      <main className="content">
-        {!hasSearched ? (
-          <section className="hero">
-            <BrandLockup />
-            <h1 className="hero-title">Compare prices. Buy with confidence.</h1>
-            <p className="hero-subtitle">
-              Search once — Zaynor checks every store, finds the lowest price, and tells you
-              where to buy.
-            </p>
-
-            <SearchBar value={query} onChange={setQuery} onSearch={handleSearch} disabled={loading} />
-            <NeutralityBadge />
-            <PopularSearches onSelect={handleSearch} />
-
-            <p className="hero-trust">
-              Comparing offers across{' '}
-              {TRACKED_STORES.map((store, i) => (
-                <span key={store}>
-                  <span className="hero-trust-store">{store}</span>
-                  {i < TRACKED_STORES.length - 1 && <span> · </span>}
-                </span>
-              ))}
-            </p>
-          </section>
-        ) : (
-          <section className="hero hero-compact">
-            <SearchBar value={query} onChange={setQuery} onSearch={handleSearch} disabled={loading} />
-          </section>
-        )}
-
-        {/* Screen-reader-only live status; visible feedback is rendered below. */}
-        <p className="sr-only" role="status" aria-live="polite">
-          {statusMessage}
-        </p>
-
-        {error && (
-          <p className="hint hint-error" role="alert">
-            Search failed: {error}
-          </p>
-        )}
-
-        {loading && (
-          <section className="results" aria-label="Searching" aria-busy="true">
-            <p className="hint">Searching stores…</p>
-            <OfferListSkeleton />
-          </section>
-        )}
-
-        {!loading && !error && hasSearched && !hasResults && (
-          <p className="hint">No offers found for "{result!.query}".</p>
-        )}
-
-        {!loading && hasResults && (
-          <section className="results results-in" aria-label="Search results">
-            {result!.recommendation && (
-              <RecommendationBanner recommendation={result!.recommendation} />
-            )}
-            <h2 className="results-heading">
-              {result!.offerCount} offers for "{result!.query}"
-            </h2>
-            <OfferList offers={result!.offers} />
-          </section>
-        )}
-
-        {!loading && !hasSearched && <FeatureHighlights />}
-      </main>
-
-      <Footer />
-    </div>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="categories" element={<CategoriesPage />} />
+        <Route path="how-it-works" element={<HowItWorksPage />} />
+        <Route path="about" element={<AboutPage />} />
+        <Route path="privacy" element={<PrivacyPage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
+        <Route
+          path="account"
+          element={
+            <ProtectedRoute>
+              <AccountPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
   )
 }
 
