@@ -14,5 +14,11 @@ public sealed record SearchResult
     /// <summary>The recommendation, or null when no offers were found.</summary>
     public Recommendation? Recommendation { get; init; }
 
+    /// <summary>
+    /// True when the offers came only from a fallback (demo) source — the UI
+    /// labels these honestly instead of presenting them as market prices.
+    /// </summary>
+    public bool IsDemoData { get; init; }
+
     public int OfferCount => Offers.Count;
 }

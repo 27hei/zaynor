@@ -193,6 +193,12 @@ export function HomePage() {
 
       {!loading && hasResults && (
         <section className="results results-in" aria-label="Search results">
+          {result!.isDemoData && (
+            <p className="demo-banner" role="note">
+              {t('results.demoData')}
+            </p>
+          )}
+
           <ProductSummary query={result!.query} offers={result!.offers} />
 
           {result!.recommendation && (

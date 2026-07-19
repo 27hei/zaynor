@@ -694,6 +694,18 @@ html[lang='ar'] {
   margin: 0 0 0.9rem;
 }
 
+/* Demo-data honesty banner */
+.demo-banner {
+  margin: 0 0 1rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #7a5a00;
+  background: #fdf6e3;
+  border: 1px solid #f0e2b6;
+  border-radius: var(--radius-sm);
+}
+
 /* Product summary header (illustration or real feed image + market glance) */
 .product-summary {
   display: flex;

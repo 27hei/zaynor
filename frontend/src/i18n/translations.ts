@@ -44,6 +44,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'results.notify': 'Notify me if the price drops',
     'results.notifySet': 'Alert set ✓',
     'results.actionError': 'That did not work — please try again.',
+    'results.demoData':
+      'Sample data — this product is not covered by our price catalog yet, so these are demonstration prices, not market prices.',
 
     'summary.meta': '{count} offers · best price {price}',
 
@@ -243,6 +245,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'results.notify': 'نبّهني إذا انخفض السعر',
     'results.notifySet': 'تم ضبط التنبيه ✓',
     'results.actionError': 'لم تنجح العملية — حاول مرة أخرى.',
+    'results.demoData':
+      'بيانات تجريبية — هذا المنتج غير مغطى في كتالوج الأسعار بعد، فهذه أسعار توضيحية وليست أسعار السوق.',
 
     'summary.meta': '{count} عروض · أفضل سعر {price}',
 

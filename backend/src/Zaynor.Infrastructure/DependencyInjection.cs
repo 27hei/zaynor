@@ -41,6 +41,9 @@ public static class DependencyInjection
         services.AddSingleton<ITokenService, JwtTokenService>();
         services.AddScoped<IUserItemsService, UserItemsService>();
 
+        // Real curated catalog first (spec 9.4 manual entry); mock is the
+        // flagged fallback for uncovered queries.
+        services.AddSingleton<IProductDataSource, CuratedProductDataSource>();
         services.AddScoped<IProductDataSource, MockProductDataSource>();
 
         // The public engine = core AggregationService (registered by

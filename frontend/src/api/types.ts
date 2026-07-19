@@ -29,6 +29,7 @@ export interface SearchResult {
   query: string
   offers: AggregatedOffer[]
   recommendation: Recommendation | null
+  isDemoData: boolean
   offerCount: number
 }
 

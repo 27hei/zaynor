@@ -31,6 +31,9 @@ public sealed class MockProductDataSource : IProductDataSource
 
     public string SourceName => "MockDataSource";
 
+    /// <summary>Demo data: used only when no real source covers the query.</summary>
+    public bool IsFallback => true;
+
     public Task<IReadOnlyList<StoreOffer>> SearchAsync(string query, CancellationToken cancellationToken = default)
     {
         var trimmed = query.Trim();

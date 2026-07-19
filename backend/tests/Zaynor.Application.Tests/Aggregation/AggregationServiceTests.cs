@@ -86,6 +86,33 @@ public class AggregationServiceTests
         Assert.Null(result.Recommendation);
     }
 
+    [Fact]
+    public async Task SearchAsync_RealSourceExcludesFallbackOffers()
+    {
+        var service = CreateService(
+            FakeDataSource.Returning(FakeDataSource.Offer("Noon", 2000m)),
+            FakeDataSource.FallbackReturning(FakeDataSource.Offer("Mock Store", 100m)));
+
+        var result = await service.SearchAsync("ps5");
+
+        Assert.Single(result.Offers);
+        Assert.Equal("Noon", result.Offers[0].StoreName);
+        Assert.False(result.IsDemoData);
+    }
+
+    [Fact]
+    public async Task SearchAsync_FallbackAlone_IsFlaggedAsDemoData()
+    {
+        var service = CreateService(
+            FakeDataSource.Returning(),
+            FakeDataSource.FallbackReturning(FakeDataSource.Offer("Mock Store", 100m)));
+
+        var result = await service.SearchAsync("uncovered product");
+
+        Assert.Single(result.Offers);
+        Assert.True(result.IsDemoData);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("   ")]

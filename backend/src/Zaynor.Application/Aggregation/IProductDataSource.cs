@@ -15,6 +15,12 @@ public interface IProductDataSource
     string SourceName { get; }
 
     /// <summary>
+    /// Fallback sources (demo/mock data) only contribute when no real source
+    /// covered the query; their results are flagged as demo data to the user.
+    /// </summary>
+    bool IsFallback => false;
+
+    /// <summary>
     /// Returns the offers this source has for the given query. Implementations
     /// should fail soft (return an empty list rather than throw) so one bad
     /// source does not break the whole search (spec NFR4).

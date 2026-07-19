@@ -9,15 +9,20 @@ internal sealed class FakeDataSource : IProductDataSource
     private readonly IReadOnlyList<StoreOffer> _offers;
     private readonly Exception? _throws;
 
-    private FakeDataSource(IReadOnlyList<StoreOffer> offers, Exception? throws)
+    private FakeDataSource(IReadOnlyList<StoreOffer> offers, Exception? throws, bool isFallback = false)
     {
         _offers = offers;
         _throws = throws;
+        IsFallback = isFallback;
     }
 
     public string SourceName => "Fake";
 
+    public bool IsFallback { get; }
+
     public static FakeDataSource Returning(params StoreOffer[] offers) => new(offers, null);
+
+    public static FakeDataSource FallbackReturning(params StoreOffer[] offers) => new(offers, null, isFallback: true);
 
     public static FakeDataSource Throwing(Exception exception) => new(Array.Empty<StoreOffer>(), exception);
 
