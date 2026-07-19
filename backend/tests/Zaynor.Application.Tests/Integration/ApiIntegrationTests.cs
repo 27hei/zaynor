@@ -131,6 +131,20 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
     }
 
     [Fact]
+    public async Task Outbound_AmazonLink_CarriesTheAssociatesTag()
+    {
+        var client = _factory.CreateClient(
+            new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var url = "https://www.amazon.sa/-/en/s?k=ps5";
+        var response = await client.GetAsync(
+            $"/api/out?u={Uri.EscapeDataString(url)}&store=Amazon.sa&product=PS5");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Contains("tag=zaynor-21", response.Headers.Location!.ToString());
+    }
+
+    [Fact]
     public async Task Outbound_UnknownDomain_IsRejected()
     {
         var client = _factory.CreateClient(

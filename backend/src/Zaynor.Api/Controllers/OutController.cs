@@ -23,11 +23,13 @@ public class OutController : ControllerBase
 
     private readonly ZaynorDbContext _db;
     private readonly ILogger<OutController> _logger;
+    private readonly string? _amazonTag;
 
-    public OutController(ZaynorDbContext db, ILogger<OutController> logger)
+    public OutController(ZaynorDbContext db, ILogger<OutController> logger, IConfiguration configuration)
     {
         _db = db;
         _logger = logger;
+        _amazonTag = configuration["Affiliate:AmazonTag"];
     }
 
     [HttpGet]
@@ -45,6 +47,16 @@ public class OutController : ControllerBase
             return BadRequest(new { error = "Unknown store link." });
         }
 
+        // Affiliate monetization (spec Section 10): Amazon links carry the
+        // Associates tag so qualifying purchases earn commission.
+        var target = u;
+        if (!string.IsNullOrWhiteSpace(_amazonTag)
+            && (uri.Host == "amazon.sa" || uri.Host.EndsWith(".amazon.sa", StringComparison.OrdinalIgnoreCase))
+            && !u.Contains("tag=", StringComparison.OrdinalIgnoreCase))
+        {
+            target = u + (u.Contains('?') ? "&" : "?") + "tag=" + Uri.EscapeDataString(_amazonTag);
+        }
+
         // Logging must never block the user's path to the store (NFR4).
         try
         {
@@ -52,7 +64,7 @@ public class OutController : ControllerBase
             {
                 StoreName = (store ?? uri.Host).Trim(),
                 ProductName = (product ?? string.Empty).Trim(),
-                Url = u,
+                Url = target,
                 CreatedAt = DateTimeOffset.UtcNow,
             });
             await _db.SaveChangesAsync(cancellationToken);
@@ -62,7 +74,7 @@ public class OutController : ControllerBase
             _logger.LogWarning(ex, "Click logging failed; redirecting anyway");
         }
 
-        return Redirect(u);
+        return Redirect(target);
     }
 
     /// <summary>Total outbound clicks — evidence for affiliate applications.</summary>
