@@ -1,0 +1,13 @@
+name: Keep Alive
+
+# Pings the free-tier site so it rarely spins down (founder-requested).
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -s -o /dev/null -m 60 https://zaynor.onrender.com/api/health || true
