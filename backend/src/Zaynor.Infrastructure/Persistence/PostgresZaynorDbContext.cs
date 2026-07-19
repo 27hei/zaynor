@@ -30,3 +30,17 @@ public class PostgresZaynorDbContextFactory : IDesignTimeDbContextFactory<Postgr
         return new PostgresZaynorDbContext(options);
     }
 }
+
+/// <summary>Design-time factory for the SQLite context, so `dotnet ef --context ZaynorDbContext`
+/// binds the base context exactly instead of falling through to the Postgres subclass.</summary>
+public class ZaynorDbContextFactory : IDesignTimeDbContextFactory<ZaynorDbContext>
+{
+    public ZaynorDbContext CreateDbContext(string[] args)
+    {
+        var options = new DbContextOptionsBuilder<ZaynorDbContext>()
+            .UseSqlite("Data Source=zaynor-design.db")
+            .Options;
+
+        return new ZaynorDbContext(options);
+    }
+}

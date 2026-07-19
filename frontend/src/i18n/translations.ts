@@ -78,7 +78,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'feature.analysis.title': 'Analysis',
     'feature.analysis.text': 'Clear, sorted results — no more tab-switching to compare prices.',
     'feature.alerts.title': 'Alerts',
-    'feature.alerts.text': 'Price-drop notifications are coming — track a product, get notified.',
+    'feature.alerts.text': 'Track a product and Zaynor watches its price in the background for you.',
 
     'footer.note': 'Zaynor does not sell products — it helps you find the best price before you buy.',
     'footer.product': 'Product',
@@ -283,7 +283,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'feature.analysis.title': 'تحليل',
     'feature.analysis.text': 'نتائج واضحة ومرتّبة — دون التنقّل بين النوافذ.',
     'feature.alerts.title': 'تنبيهات',
-    'feature.alerts.text': 'تنبيهات انخفاض السعر قادمة — تابع منتجًا واستلم الإشعار.',
+    'feature.alerts.text': 'تابع منتجًا ويراقب زينور سعره في الخلفية نيابة عنك.',
 
     'footer.note': 'زينور لا يبيع المنتجات — بل يساعدك على إيجاد أفضل سعر قبل الشراء.',
     'footer.product': 'المنتج',

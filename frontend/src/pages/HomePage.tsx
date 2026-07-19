@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { createAlert, saveProduct, searchProducts } from '../api/client'
+import { createAlert, outboundUrl, saveProduct, searchProducts } from '../api/client'
 import type { SearchResult } from '../api/types'
 import { BrandMark } from '../components/BrandMark'
 import { SearchBar } from '../components/SearchBar'
@@ -213,7 +213,10 @@ export function HomePage() {
           {result!.recommendation && (
             <RecommendationBanner
               recommendation={result!.recommendation}
-              bestUrl={result!.offers.find((o) => o.isLowestPrice)?.productUrl}
+              bestUrl={(() => {
+                const best = result!.offers.find((o) => o.isLowestPrice)
+                return best ? outboundUrl(best.productUrl, best.storeName, result!.query) : undefined
+              })()}
             />
           )}
 

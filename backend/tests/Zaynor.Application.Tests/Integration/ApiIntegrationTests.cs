@@ -114,6 +114,35 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
     }
 
     [Fact]
+    public async Task Outbound_KnownStore_LogsAndRedirects()
+    {
+        var client = _factory.CreateClient(
+            new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var url = "https://www.noon.com/saudi-en/test";
+        var response = await client.GetAsync(
+            $"/api/out?u={Uri.EscapeDataString(url)}&store=Noon&product=Test");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal(url, response.Headers.Location!.ToString());
+
+        var stats = await client.GetFromJsonAsync<Dictionary<string, int>>("/api/out/stats");
+        Assert.True(stats!["totalClicks"] >= 1);
+    }
+
+    [Fact]
+    public async Task Outbound_UnknownDomain_IsRejected()
+    {
+        var client = _factory.CreateClient(
+            new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync(
+            $"/api/out?u={Uri.EscapeDataString("https://evil.example.com/phish")}");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task SavedProducts_RequireAuthentication()
     {
         var response = await _factory.CreateClient().GetAsync("/api/saved");

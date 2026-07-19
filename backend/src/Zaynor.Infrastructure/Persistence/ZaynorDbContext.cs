@@ -30,6 +30,7 @@ public class ZaynorDbContext : DbContext
     public DbSet<Alert> Alerts => Set<Alert>();
     public DbSet<SavedProduct> SavedProducts => Set<SavedProduct>();
     public DbSet<PriceHistory> PriceHistory => Set<PriceHistory>();
+    public DbSet<ClickEvent> ClickEvents => Set<ClickEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -3,6 +3,7 @@ import type { AggregatedOffer } from '../api/types'
 import { formatPrice } from '../format'
 import { useTranslation } from '../i18n/useTranslation'
 import { STORE_BRAND } from '../storeBrand'
+import { outboundUrl } from '../api/client'
 
 const VISIBLE_BY_DEFAULT = 3
 
@@ -68,7 +69,7 @@ export function OfferList({ offers }: OfferListProps) {
                 <span className="offer-price">{formatPrice(offer.price, offer.currency)}</span>
                 <a
                   className="offer-link"
-                  href={offer.productUrl}
+                  href={outboundUrl(offer.productUrl, offer.storeName, offer.productTitle)}
                   target="_blank"
                   rel="noopener noreferrer sponsored"
                 >
