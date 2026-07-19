@@ -11,6 +11,7 @@ export function Footer() {
         <div className="footer-brand-col">
           <Wordmark className="footer-brand" />
           <p className="footer-note">{t('footer.note')}</p>
+          <p className="footer-note">{t('footer.amazonDisclosure')}</p>
         </div>
 
         <nav className="footer-col" aria-label={t('footer.product')}>

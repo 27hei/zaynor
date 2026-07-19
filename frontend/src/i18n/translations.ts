@@ -81,6 +81,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'feature.alerts.text': 'Track a product and Zaynor watches its price in the background for you.',
 
     'footer.note': 'Zaynor does not sell products — it helps you find the best price before you buy.',
+    'footer.amazonDisclosure': 'As an Amazon Associate, Zaynor earns from qualifying purchases.',
     'footer.product': 'Product',
     'footer.company': 'Company',
     'footer.legal': 'Legal',
@@ -286,6 +287,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'feature.alerts.text': 'تابع منتجًا ويراقب زينور سعره في الخلفية نيابة عنك.',
 
     'footer.note': 'زينور لا يبيع المنتجات — بل يساعدك على إيجاد أفضل سعر قبل الشراء.',
+    'footer.amazonDisclosure': 'بصفتنا شريكًا في برنامج Amazon Associates، يربح زينور من عمليات الشراء المؤهلة.',
     'footer.product': 'المنتج',
     'footer.company': 'الشركة',
     'footer.legal': 'قانوني',
