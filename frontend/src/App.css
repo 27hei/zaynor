@@ -159,12 +159,70 @@ html[lang='ar'] {
   flex-wrap: wrap;
 }
 
+/* Mobile menu toggle (hamburger) */
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
 @media (min-width: 900px) {
   .header-nav {
     order: 0;
     width: auto;
     gap: 0.4rem;
   }
+}
+
+@media (max-width: 899px) {
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  /* Collapsed by default on phones; the toggle opens a stacked menu */
+  .header-nav,
+  .header-actions {
+    display: none;
+  }
+
+  .menu-open .header-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    order: 3;
+    gap: 0.15rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .menu-open .header-nav .nav-link {
+    padding: 0.7rem 0.75rem;
+  }
+
+  .menu-open .header-actions {
+    display: flex;
+    width: 100%;
+    order: 4;
+    padding: 0.6rem 0 0.35rem;
+    gap: 0.5rem;
+  }
+
+  .menu-open .header-actions .btn {
+    flex: 1;
+  }
+}
+
+/* Cold-start wait notice */
+.hint-wake {
+  font-size: 0.85rem;
+  color: var(--brand-strong);
 }
 
 /* ============ Buttons ============ */

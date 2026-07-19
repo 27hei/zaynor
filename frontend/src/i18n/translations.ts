@@ -18,6 +18,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'nav.register': 'Sign up',
     'nav.account': 'My Account',
     'nav.logout': 'Log out',
+    'nav.menu': 'Menu',
 
     'hero.eyebrow': "Saudi Arabia's smart price comparison",
     'hero.title': 'Compare prices. Buy with confidence.',
@@ -46,6 +47,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'results.actionError': 'That did not work — please try again.',
     'results.demoData':
       'Sample data — this product is not covered by our price catalog yet, so these are demonstration prices, not market prices.',
+    'results.wakeHint':
+      'The first request can take up to a minute while the server wakes up — thanks for your patience.',
 
     'summary.meta': '{count} offers · best price {price}',
 
@@ -219,6 +222,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'nav.register': 'إنشاء حساب',
     'nav.account': 'حسابي',
     'nav.logout': 'تسجيل الخروج',
+    'nav.menu': 'القائمة',
 
     'hero.eyebrow': 'مقارنة الأسعار الذكية في السعودية',
     'hero.title': 'قارن الأسعار. اشترِ بثقة.',
@@ -247,6 +251,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'results.actionError': 'لم تنجح العملية — حاول مرة أخرى.',
     'results.demoData':
       'بيانات تجريبية — هذا المنتج غير مغطى في كتالوج الأسعار بعد، فهذه أسعار توضيحية وليست أسعار السوق.',
+    'results.wakeHint':
+      'قد يستغرق أول طلب حتى دقيقة ريثما يستيقظ الخادم — شكرًا لصبرك.',
 
     'summary.meta': '{count} عروض · أفضل سعر {price}',
 

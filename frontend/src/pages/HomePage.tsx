@@ -31,6 +31,7 @@ export function HomePage() {
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [alertSet, setAlertSet] = useState(false)
+  const [loadingLong, setLoadingLong] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
   const activeRequest = useRef<AbortController | null>(null)
   const consumedInitialQuery = useRef(false)
@@ -50,6 +51,11 @@ export function HomePage() {
     setAlertSet(false)
     setActionError(null)
 
+    // Free-tier hosting cold-starts can take ~a minute; after a few seconds
+    // of waiting, tell the user honestly instead of looking broken.
+    setLoadingLong(false)
+    const longTimer = window.setTimeout(() => setLoadingLong(true), 4000)
+
     try {
       const data = await searchProducts(searchQuery, controller.signal)
       setResult(data)
@@ -59,8 +65,10 @@ export function HomePage() {
       setError((err as Error).message)
       setResult(null)
     } finally {
+      window.clearTimeout(longTimer)
       if (activeRequest.current === controller) {
         setLoading(false)
+        setLoadingLong(false)
       }
     }
   }
@@ -183,6 +191,7 @@ export function HomePage() {
       {loading && (
         <section className="results" aria-label={t('results.searching')} aria-busy="true">
           <p className="hint">{t('results.searching')}</p>
+          {loadingLong && <p className="hint hint-wake">{t('results.wakeHint')}</p>}
           <OfferListSkeleton />
         </section>
       )}
