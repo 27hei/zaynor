@@ -50,6 +50,21 @@ export async function getPriceHistory(query: string): Promise<PriceHistoryRespon
   return (await response.json()) as PriceHistoryResponse
 }
 
+export interface CatalogSummary {
+  name: string
+  category: string
+  lowestPrice: number
+  currency: string
+  offerCount: number
+}
+
+/** Covered products with real lowest prices (FR10 category browsing). */
+export async function getCatalog(): Promise<CatalogSummary[]> {
+  const response = await fetch(`${API_BASE_URL}/api/catalog`)
+  if (!response.ok) return []
+  return (await response.json()) as CatalogSummary[]
+}
+
 /** Extracts a human-readable error message from an error response body. */
 async function readError(response: Response, fallback: string): Promise<string> {
   try {

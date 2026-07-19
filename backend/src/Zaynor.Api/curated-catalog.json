@@ -4,41 +4,126 @@
   "products": [
     {
       "name": "Samsung Galaxy S24 Ultra 256GB",
-      "keywords": ["s24 ultra", "galaxy s24 ultra", "جالكسي اس 24 الترا", "سامسونج الترا"],
+      "keywords": [
+        "s24 ultra",
+        "galaxy s24 ultra",
+        "جالكسي اس 24 الترا",
+        "سامسونج الترا"
+      ],
       "offers": [
-        { "store": "Noon", "price": 3589, "currency": "SAR", "url": "https://www.noon.com/saudi-en/samsung-galaxy-s24-series/", "freeShipping": true, "deliveryDays": 2 },
-        { "store": "Amazon.sa", "price": 3709, "currency": "SAR", "url": "https://www.amazon.sa/-/en/s?k=galaxy+s24+ultra+256gb", "freeShipping": true, "deliveryDays": 3 },
-        { "store": "Jarir", "price": 5399, "currency": "SAR", "url": "https://www.jarir.com/sa-en/samsung-galaxy-s24", "freeShipping": true, "deliveryDays": 3 }
-      ]
+        {
+          "store": "Noon",
+          "price": 3589,
+          "currency": "SAR",
+          "url": "https://www.noon.com/saudi-en/samsung-galaxy-s24-series/",
+          "freeShipping": true,
+          "deliveryDays": 2
+        },
+        {
+          "store": "Amazon.sa",
+          "price": 3709,
+          "currency": "SAR",
+          "url": "https://www.amazon.sa/-/en/s?k=galaxy+s24+ultra+256gb",
+          "freeShipping": true,
+          "deliveryDays": 3
+        },
+        {
+          "store": "Jarir",
+          "price": 5399,
+          "currency": "SAR",
+          "url": "https://www.jarir.com/sa-en/samsung-galaxy-s24",
+          "freeShipping": true,
+          "deliveryDays": 3
+        }
+      ],
+      "category": "phones"
     },
     {
       "name": "Samsung Galaxy S24",
-      "keywords": ["galaxy s24", "s24", "جالكسي s24", "سامسونج s24"],
+      "keywords": [
+        "galaxy s24",
+        "s24",
+        "جالكسي s24",
+        "سامسونج s24"
+      ],
       "offers": [
-        { "store": "Jarir", "price": 1999, "currency": "SAR", "url": "https://www.jarir.com/sa-en/samsung-galaxy-s24", "freeShipping": true, "deliveryDays": 3 }
-      ]
+        {
+          "store": "Jarir",
+          "price": 1999,
+          "currency": "SAR",
+          "url": "https://www.jarir.com/sa-en/samsung-galaxy-s24",
+          "freeShipping": true,
+          "deliveryDays": 3
+        }
+      ],
+      "category": "phones"
     },
     {
       "name": "Apple iPhone 15 128GB",
-      "keywords": ["iphone 15", "ايفون 15", "آيفون 15"],
+      "keywords": [
+        "iphone 15",
+        "ايفون 15",
+        "آيفون 15"
+      ],
       "offers": [
-        { "store": "Noon", "price": 2249, "currency": "SAR", "url": "https://www.noon.com/saudi-en/", "freeShipping": true, "deliveryDays": 2 }
-      ]
+        {
+          "store": "Noon",
+          "price": 2249,
+          "currency": "SAR",
+          "url": "https://www.noon.com/saudi-en/",
+          "freeShipping": true,
+          "deliveryDays": 2
+        }
+      ],
+      "category": "phones"
     },
     {
       "name": "Sony PlayStation 5 Slim (Disc Edition)",
-      "keywords": ["ps5", "playstation 5", "بلايستيشن 5", "سوني 5"],
+      "keywords": [
+        "ps5",
+        "playstation 5",
+        "بلايستيشن 5",
+        "سوني 5"
+      ],
       "offers": [
-        { "store": "Noon", "price": 2000, "currency": "SAR", "url": "https://www.noon.com/saudi-en/sony-playstation-5/", "freeShipping": true, "deliveryDays": 2 }
-      ]
+        {
+          "store": "Noon",
+          "price": 2000,
+          "currency": "SAR",
+          "url": "https://www.noon.com/saudi-en/sony-playstation-5/",
+          "freeShipping": true,
+          "deliveryDays": 2
+        }
+      ],
+      "category": "gaming"
     },
     {
       "name": "Apple AirPods Pro 2",
-      "keywords": ["airpods pro", "airpods", "ايربودز برو", "سماعات ابل"],
+      "keywords": [
+        "airpods pro",
+        "airpods",
+        "ايربودز برو",
+        "سماعات ابل"
+      ],
       "offers": [
-        { "store": "Noon", "price": 859, "currency": "SAR", "url": "https://www.noon.com/saudi-en/airpods-pro-2-wireless-earbuds-bluetooth-headphones-active-noise-cancellation-hearing-aid-feature-transparency-personalized-spatial-audio-high-fidelity-sound-h2-chip-usb-c-charging-white/N53437240A/p/", "freeShipping": true, "deliveryDays": 2 },
-        { "store": "Jarir", "price": 899, "currency": "SAR", "url": "https://www.jarir.com/sa-en/catalogsearch/result?search=airpods%20pro%202", "freeShipping": true, "deliveryDays": 3 }
-      ]
+        {
+          "store": "Noon",
+          "price": 859,
+          "currency": "SAR",
+          "url": "https://www.noon.com/saudi-en/airpods-pro-2-wireless-earbuds-bluetooth-headphones-active-noise-cancellation-hearing-aid-feature-transparency-personalized-spatial-audio-high-fidelity-sound-h2-chip-usb-c-charging-white/N53437240A/p/",
+          "freeShipping": true,
+          "deliveryDays": 2
+        },
+        {
+          "store": "Jarir",
+          "price": 899,
+          "currency": "SAR",
+          "url": "https://www.jarir.com/sa-en/catalogsearch/result?search=airpods%20pro%202",
+          "freeShipping": true,
+          "deliveryDays": 3
+        }
+      ],
+      "category": "electronics"
     }
   ]
 }

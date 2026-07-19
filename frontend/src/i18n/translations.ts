@@ -119,6 +119,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'account.logout': 'Log out',
 
     'categories.title': 'Browse by category',
+    'catalog.from': 'from {price}',
     'categories.subtitle': 'Category browsing is expanding — start with a search for now.',
     'category.electronics': 'Electronics',
     'category.gaming': 'Gaming',
@@ -323,6 +324,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'account.logout': 'تسجيل الخروج',
 
     'categories.title': 'تصفّح حسب الفئة',
+    'catalog.from': 'يبدأ من {price}',
     'categories.subtitle': 'تصفّح الفئات في توسّع مستمر — ابدأ بالبحث الآن.',
     'category.electronics': 'إلكترونيات',
     'category.gaming': 'ألعاب',

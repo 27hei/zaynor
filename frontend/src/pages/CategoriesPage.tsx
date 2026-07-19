@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getCatalog, type CatalogSummary } from '../api/client'
+import { formatPrice } from '../format'
 import { useTranslation } from '../i18n/useTranslation'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { CATEGORY_SEEDS, type CategoryKey } from '../categories'
@@ -20,21 +23,57 @@ const CATEGORY_ICONS: Record<CategoryKey, typeof DiscoveryIcon> = {
   appliances: AlertsIcon,
 }
 
-// Category browsing is an early/expansion feature (spec FR10). For now each
-// category seeds a search so it's genuinely useful rather than a dead link.
+/**
+ * Real category browsing (FR10): covered products from the curated catalog,
+ * grouped by category with genuine lowest prices. Categories without coverage
+ * yet fall back to seeded searches so nothing is a dead end.
+ */
 export function CategoriesPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [catalog, setCatalog] = useState<CatalogSummary[]>([])
 
   usePageTitle(t('nav.categories'))
+
+  useEffect(() => {
+    getCatalog().then(setCatalog).catch(() => setCatalog([]))
+  }, [])
+
+  const covered = new Set(catalog.map((p) => p.category))
 
   return (
     <section className="page-article">
       <h1 className="page-title">{t('categories.title')}</h1>
       <p className="page-subtitle">{t('categories.subtitle')}</p>
 
+      {/* Real covered products, grouped by category */}
+      {[...covered].map((category) => (
+        <div key={category} className="catalog-group">
+          <h2 className="catalog-group-title">{t(`category.${category}`)}</h2>
+          <ul className="catalog-list">
+            {catalog
+              .filter((p) => p.category === category)
+              .map((p) => (
+                <li key={p.name}>
+                  <button
+                    type="button"
+                    className="catalog-item"
+                    onClick={() => navigate(`/?q=${encodeURIComponent(p.name)}`)}
+                  >
+                    <span className="catalog-item-name">{p.name}</span>
+                    <span className="catalog-item-price">
+                      {t('catalog.from', { price: formatPrice(p.lowestPrice, p.currency) })}
+                    </span>
+                  </button>
+                </li>
+              ))}
+          </ul>
+        </div>
+      ))}
+
+      {/* Uncovered categories still seed a search */}
       <div className="category-grid">
-        {CATEGORY_SEEDS.map(({ key, seed }) => {
+        {CATEGORY_SEEDS.filter(({ key }) => !covered.has(key)).map(({ key, seed }) => {
           const Icon = CATEGORY_ICONS[key]
           return (
             <button

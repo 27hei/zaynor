@@ -55,7 +55,8 @@ public static class DependencyInjection
 
         // Real curated catalog first (spec 9.4 manual entry); mock is the
         // flagged fallback for uncovered queries.
-        services.AddSingleton<IProductDataSource, CuratedProductDataSource>();
+        services.AddSingleton<CuratedProductDataSource>();
+        services.AddSingleton<IProductDataSource>(sp => sp.GetRequiredService<CuratedProductDataSource>());
         services.AddScoped<IProductDataSource, MockProductDataSource>();
 
         // The public engine = core AggregationService (registered by
