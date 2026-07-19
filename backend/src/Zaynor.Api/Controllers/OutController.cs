@@ -24,12 +24,21 @@ public class OutController : ControllerBase
     private readonly ZaynorDbContext _db;
     private readonly ILogger<OutController> _logger;
     private readonly string? _amazonTag;
+    private readonly string? _deeplinkTemplate;
+    private readonly string[] _deeplinkHosts;
 
     public OutController(ZaynorDbContext db, ILogger<OutController> logger, IConfiguration configuration)
     {
         _db = db;
         _logger = logger;
         _amazonTag = configuration["Affiliate:AmazonTag"];
+
+        // Network deeplink wrapping (Admitad/ArabClicks style): a template with
+        // {url} placeholder, applied to the configured store hosts. Left empty
+        // until the network approves — activation is then a config change only.
+        _deeplinkTemplate = configuration["Affiliate:DeeplinkTemplate"];
+        _deeplinkHosts = (configuration["Affiliate:DeeplinkHosts"] ?? "noon.com,jarir.com,extra.com,aliexpress.com")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 
     [HttpGet]
@@ -55,6 +64,13 @@ public class OutController : ControllerBase
             && !u.Contains("tag=", StringComparison.OrdinalIgnoreCase))
         {
             target = u + (u.Contains('?') ? "&" : "?") + "tag=" + Uri.EscapeDataString(_amazonTag);
+        }
+        else if (!string.IsNullOrWhiteSpace(_deeplinkTemplate)
+            && _deeplinkTemplate.Contains("{url}")
+            && _deeplinkHosts.Any(h => uri.Host == h || uri.Host.EndsWith("." + h, StringComparison.OrdinalIgnoreCase)))
+        {
+            // Network deeplink: the store URL rides inside the tracking link.
+            target = _deeplinkTemplate.Replace("{url}", Uri.EscapeDataString(u));
         }
 
         // Logging must never block the user's path to the store (NFR4).

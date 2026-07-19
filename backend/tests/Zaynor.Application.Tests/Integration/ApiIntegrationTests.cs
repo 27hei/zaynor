@@ -145,6 +145,30 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
     }
 
     [Fact]
+    public async Task Outbound_DeeplinkTemplate_WrapsNetworkStoreLinks()
+    {
+        // Derived factory: deeplink template configured (as it will be once a
+        // network approves) — noon links must ride inside the tracking link.
+        using var factory = _factory.WithWebHostBuilder(builder =>
+            builder.ConfigureAppConfiguration((_, config) =>
+                config.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Affiliate:DeeplinkTemplate"] = "https://ad.admitad.com/g/test123/?ulp={url}",
+                })));
+        var client = factory.CreateClient(
+            new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var url = "https://www.noon.com/saudi-en/p/123";
+        var response = await client.GetAsync(
+            $"/api/out?u={Uri.EscapeDataString(url)}&store=Noon&product=Test");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        var location = response.Headers.Location!.ToString();
+        Assert.StartsWith("https://ad.admitad.com/g/test123/?ulp=", location);
+        Assert.Contains(Uri.EscapeDataString(url), location);
+    }
+
+    [Fact]
     public async Task Outbound_UnknownDomain_IsRejected()
     {
         var client = _factory.CreateClient(
