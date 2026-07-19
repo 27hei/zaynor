@@ -6,7 +6,7 @@
 FROM node:20-alpine AS webbuild
 WORKDIR /web
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+RUN npm install --no-audit --no-fund
 COPY frontend/ .
 # Empty API origin => the SPA calls /api relatively (same origin, no CORS)
 ENV VITE_API_URL=
