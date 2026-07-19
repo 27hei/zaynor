@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.11" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
@@ -22,9 +23,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The curated catalog so integration tests exercise the real data source -->
+    <Content Include="..\..\src\Zaynor.Api\curated-catalog.json" Link="curated-catalog.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Zaynor.Application\Zaynor.Application.csproj" />
     <ProjectReference Include="..\..\src\Zaynor.Domain\Zaynor.Domain.csproj" />
     <ProjectReference Include="..\..\src\Zaynor.Infrastructure\Zaynor.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Zaynor.Api\Zaynor.Api.csproj" />
   </ItemGroup>
 
 </Project>
