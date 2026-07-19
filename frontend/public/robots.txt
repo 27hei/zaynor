@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://zaynor.onrender.com/sitemap.xml
