@@ -16,6 +16,12 @@ public class ZaynorDbContext : DbContext
     {
     }
 
+    /// <summary>Allows provider-specific subclasses (e.g. Postgres) to pass their own options.</summary>
+    protected ZaynorDbContext(DbContextOptions options)
+        : base(options)
+    {
+    }
+
     public DbSet<User> Users => Set<User>();
     public DbSet<Store> Stores => Set<Store>();
     public DbSet<Category> Categories => Set<Category>();

@@ -22,10 +22,22 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        // Provider by connection string: PostgreSQL for production scale
+        // (spec Section 14), SQLite for zero-setup local dev.
         var connectionString = configuration.GetConnectionString("Default")
             ?? "Data Source=zaynor.db";
+        var isPostgres = connectionString.Contains("Host=", StringComparison.OrdinalIgnoreCase)
+            || connectionString.StartsWith("postgres", StringComparison.OrdinalIgnoreCase);
 
-        services.AddDbContext<ZaynorDbContext>(options => options.UseSqlite(connectionString));
+        if (isPostgres)
+        {
+            services.AddDbContext<ZaynorDbContext, PostgresZaynorDbContext>(
+                options => options.UseNpgsql(connectionString));
+        }
+        else
+        {
+            services.AddDbContext<ZaynorDbContext>(options => options.UseSqlite(connectionString));
+        }
 
         var jwtSection = configuration.GetSection(JwtSettings.SectionName);
         var jwtSettings = new JwtSettings
