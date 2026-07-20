@@ -145,6 +145,22 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
     }
 
     [Fact]
+    public async Task Outbound_AmazonLinkWithDibTag_StillGetsTheAssociatesTag()
+    {
+        // Live Amazon search URLs carry dib_tag=se, which contains "tag=" as a
+        // substring but is NOT the Associates tag. Our tag must still be added.
+        var client = _factory.CreateClient(
+            new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var url = "https://www.amazon.sa/product/dp/B0BKLC5MTT/ref=sr_1_3?dib_tag=se&keywords=gaming+keyboard";
+        var response = await client.GetAsync(
+            $"/api/out?u={Uri.EscapeDataString(url)}&store=Amazon.sa&product=Keyboard");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Contains("tag=zaynor-21", response.Headers.Location!.ToString());
+    }
+
+    [Fact]
     public async Task Outbound_DeeplinkTemplate_WrapsNetworkStoreLinks()
     {
         // Derived factory: deeplink template configured (as it will be once a

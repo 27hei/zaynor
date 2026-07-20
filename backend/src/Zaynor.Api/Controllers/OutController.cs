@@ -61,7 +61,7 @@ public class OutController : ControllerBase
         var target = u;
         if (!string.IsNullOrWhiteSpace(_amazonTag)
             && (uri.Host == "amazon.sa" || uri.Host.EndsWith(".amazon.sa", StringComparison.OrdinalIgnoreCase))
-            && !u.Contains("tag=", StringComparison.OrdinalIgnoreCase))
+            && !HasTagParameter(uri))
         {
             target = u + (u.Contains('?') ? "&" : "?") + "tag=" + Uri.EscapeDataString(_amazonTag);
         }
@@ -91,6 +91,21 @@ public class OutController : ControllerBase
         }
 
         return Redirect(target);
+    }
+
+    /// <summary>
+    /// True only when the URL already carries a real <c>tag</c> query parameter.
+    /// Checked precisely (not a substring scan) because live Amazon search URLs
+    /// contain <c>dib_tag=se</c>, which contains "tag=" but is NOT the Associates
+    /// tag — a substring check there would wrongly skip adding our tag and lose
+    /// the commission.
+    /// </summary>
+    private static bool HasTagParameter(Uri uri)
+    {
+        // Normalize so every parameter is preceded by '&', then "&tag=" matches
+        // only a real tag param (never "&dib_tag=").
+        var normalized = "&" + uri.Query.TrimStart('?');
+        return normalized.Contains("&tag=", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>Total outbound clicks — evidence for affiliate applications.</summary>
