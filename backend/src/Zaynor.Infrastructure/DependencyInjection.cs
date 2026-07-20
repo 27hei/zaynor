@@ -57,6 +57,14 @@ public static class DependencyInjection
         // flagged fallback for uncovered queries.
         services.AddSingleton<CuratedProductDataSource>();
         services.AddSingleton<IProductDataSource>(sp => sp.GetRequiredService<CuratedProductDataSource>());
+
+        // Live external feeds (real prices/images/links at catalogue scale).
+        // Each is dormant until its API key is configured, so registering them
+        // unconditionally changes nothing until a key exists (config-only
+        // activation). HttpClient is needed for their outbound calls.
+        services.AddHttpClient();
+        services.AddScoped<IProductDataSource, RainforestAmazonDataSource>();
+
         services.AddScoped<IProductDataSource, MockProductDataSource>();
 
         // The public engine = core AggregationService (registered by
