@@ -21,6 +21,14 @@ public interface IProductDataSource
     bool IsFallback => false;
 
     /// <summary>
+    /// Quota-limited live feeds (paid trial credits, rate-limited APIs) are
+    /// only queried when no cheap source (the curated catalog) already has a
+    /// real match — this conserves quota and avoids diluting a trustworthy,
+    /// verified comparison with unrelated live search results.
+    /// </summary>
+    bool IsExpensiveLive => false;
+
+    /// <summary>
     /// Returns the offers this source has for the given query. Implementations
     /// should fail soft (return an empty list rather than throw) so one bad
     /// source does not break the whole search (spec NFR4).

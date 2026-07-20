@@ -56,21 +56,38 @@ public sealed class AggregationService : IAggregationService
     }
 
     /// <summary>
-    /// Queries all sources concurrently, separating real offers from fallback
-    /// (demo) ones. A source that throws is logged and skipped so one failing
-    /// source never breaks the whole search (spec NFR4).
+    /// Queries cheap sources (the curated catalog) first; quota-limited live
+    /// feeds only fire when nothing cheap matched, which both conserves their
+    /// request budgets and keeps a verified curated match from being diluted
+    /// by unrelated live search results. A source that throws is logged and
+    /// skipped so one failing source never breaks the whole search (spec NFR4).
     /// </summary>
     private async Task<(List<StoreOffer> Real, List<StoreOffer> Fallback)> GatherOffersAsync(
         string query, CancellationToken cancellationToken)
     {
-        var tasks = _sources
+        var cheapSources = _sources.Where(s => !s.IsExpensiveLive).ToList();
+        var expensiveSources = _sources.Where(s => s.IsExpensiveLive).ToList();
+
+        var cheapResults = await QueryAllAsync(cheapSources, query, cancellationToken);
+        var cheapReal = cheapResults.Where(r => !r.IsFallback).SelectMany(r => r.Offers).ToList();
+
+        var expensiveResults = cheapReal.Count > 0
+            ? []
+            : await QueryAllAsync(expensiveSources, query, cancellationToken);
+
+        var allResults = cheapResults.Concat(expensiveResults).ToList();
+        var real = allResults.Where(r => !r.IsFallback).SelectMany(r => r.Offers).ToList();
+        var fallback = allResults.Where(r => r.IsFallback).SelectMany(r => r.Offers).ToList();
+        return (real, fallback);
+    }
+
+    private async Task<List<(bool IsFallback, IReadOnlyList<StoreOffer> Offers)>> QueryAllAsync(
+        IReadOnlyList<IProductDataSource> sources, string query, CancellationToken cancellationToken)
+    {
+        var tasks = sources
             .Select(async source => (source.IsFallback, Offers: await QuerySourceAsync(source, query, cancellationToken)))
             .ToList();
-        var results = await Task.WhenAll(tasks);
-
-        var real = results.Where(r => !r.IsFallback).SelectMany(r => r.Offers).ToList();
-        var fallback = results.Where(r => r.IsFallback).SelectMany(r => r.Offers).ToList();
-        return (real, fallback);
+        return (await Task.WhenAll(tasks)).ToList();
     }
 
     private async Task<IReadOnlyList<StoreOffer>> QuerySourceAsync(

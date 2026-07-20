@@ -125,4 +125,47 @@ public class AggregationServiceTests
         Assert.Empty(result.Offers);
         Assert.Equal(string.Empty, result.Query);
     }
+
+    [Fact]
+    public async Task SearchAsync_CheapSourceHasAMatch_ExpensiveLiveSourceIsNeverCalled()
+    {
+        var cheap = FakeDataSource.Returning(FakeDataSource.Offer("Jarir", 2000m));
+        var expensive = FakeDataSource.ExpensiveReturning(FakeDataSource.Offer("Amazon.sa", 1900m));
+        var service = CreateService(cheap, expensive);
+
+        var result = await service.SearchAsync("iphone 15");
+
+        Assert.Equal(0, expensive.CallCount);
+        Assert.Single(result.Offers);
+        Assert.Equal("Jarir", result.Offers[0].StoreName);
+    }
+
+    [Fact]
+    public async Task SearchAsync_NoCheapMatch_ExpensiveLiveSourceIsCalled()
+    {
+        var cheap = FakeDataSource.Returning(); // curated catalog miss
+        var expensive = FakeDataSource.ExpensiveReturning(FakeDataSource.Offer("Amazon.sa", 1900m));
+        var service = CreateService(cheap, expensive);
+
+        var result = await service.SearchAsync("some obscure gadget");
+
+        Assert.Equal(1, expensive.CallCount);
+        Assert.Single(result.Offers);
+        Assert.Equal("Amazon.sa", result.Offers[0].StoreName);
+    }
+
+    [Fact]
+    public async Task SearchAsync_NoCheapMatch_FallbackDemoStillWorksAlongsideExpensiveSource()
+    {
+        var cheap = FakeDataSource.Returning();
+        var expensive = FakeDataSource.ExpensiveReturning(); // live feed also found nothing
+        var demo = FakeDataSource.FallbackReturning(FakeDataSource.Offer("Mock Store", 100m));
+        var service = CreateService(cheap, expensive, demo);
+
+        var result = await service.SearchAsync("totally uncovered thing");
+
+        Assert.Equal(1, expensive.CallCount);
+        Assert.Single(result.Offers);
+        Assert.True(result.IsDemoData);
+    }
 }

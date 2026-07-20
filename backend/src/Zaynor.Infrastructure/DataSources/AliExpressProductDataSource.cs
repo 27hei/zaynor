@@ -30,7 +30,13 @@ public sealed class AliExpressProductDataSource : IProductDataSource
 {
     private const string Gateway = "https://api-sg.aliexpress.com/sync";
     private const string Method = "aliexpress.affiliate.product.query";
-    private const int MaxResults = 6;
+
+    // Request a real page of candidates from the API, but only surface the
+    // single best match — several distinct AliExpress listings for one
+    // query aren't the same product compared across stores, they're just
+    // search results, and showing them as if they were would be misleading.
+    private const int RequestPageSize = 6;
+    private const int MaxResults = 1;
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<AliExpressProductDataSource> _logger;
@@ -56,6 +62,9 @@ public sealed class AliExpressProductDataSource : IProductDataSource
     public bool IsEnabled =>
         !string.IsNullOrWhiteSpace(_appKey) && !string.IsNullOrWhiteSpace(_appSecret);
 
+    /// <summary>Rate-limited API — only called when the curated catalog has no match.</summary>
+    public bool IsExpensiveLive => true;
+
     public async Task<IReadOnlyList<StoreOffer>> SearchAsync(string query, CancellationToken cancellationToken = default)
     {
         if (!IsEnabled)
@@ -77,7 +86,7 @@ public sealed class AliExpressProductDataSource : IProductDataSource
                 ["target_language"] = "EN",
                 ["ship_to_country"] = "SA",
                 ["page_no"] = "1",
-                ["page_size"] = MaxResults.ToString(CultureInfo.InvariantCulture),
+                ["page_size"] = RequestPageSize.ToString(CultureInfo.InvariantCulture),
             };
             if (!string.IsNullOrWhiteSpace(_trackingId))
             {
