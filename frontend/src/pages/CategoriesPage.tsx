@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCatalog, type CatalogSummary } from '../api/client'
 import { formatPrice } from '../format'
+import { productArtFor } from '../productImage'
 import { useTranslation } from '../i18n/useTranslation'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { CATEGORY_SEEDS, type CategoryKey } from '../categories'
@@ -60,9 +61,18 @@ export function CategoriesPage() {
                     className="catalog-item"
                     onClick={() => navigate(`/?q=${encodeURIComponent(p.name)}`)}
                   >
-                    <span className="catalog-item-name">{p.name}</span>
-                    <span className="catalog-item-price">
-                      {t('catalog.from', { price: formatPrice(p.lowestPrice, p.currency) })}
+                    <img
+                      className="catalog-item-art"
+                      src={p.image ?? productArtFor(p.name)}
+                      alt=""
+                      aria-hidden="true"
+                      loading="lazy"
+                    />
+                    <span className="catalog-item-info">
+                      <span className="catalog-item-name">{p.name}</span>
+                      <span className="catalog-item-price">
+                        {t('catalog.from', { price: formatPrice(p.lowestPrice, p.currency) })}
+                      </span>
                     </span>
                   </button>
                 </li>

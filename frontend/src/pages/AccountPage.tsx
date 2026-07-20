@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { getAlerts, getSavedProducts, removeAlert, removeSavedProduct } from '../api/client'
 import type { AlertDto, SavedProductDto } from '../api/types'
 import { useAuth } from '../auth/useAuth'
 import { useTranslation } from '../i18n/useTranslation'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { SavingsIcon, AlertsIcon } from '../components/icons'
 
 /** Extracts "4308.96 SAR" from "triggered:4308.96 SAR;baseline:…", or null when not triggered. */
 function triggeredPrice(condition: string): string | null {
@@ -103,9 +104,17 @@ export function AccountPage() {
 
       <div className="account-grid">
         <div className="account-card">
-          <h2 className="account-card-title">{t('account.savedTitle')}</h2>
+          <h2 className="account-card-title">
+            <span className="account-card-icon"><SavingsIcon /></span>
+            {t('account.savedTitle')}
+          </h2>
           {savedProducts.length === 0 ? (
-            <p className="account-card-text">{t('account.emptySaved')}</p>
+            <div className="account-card-empty">
+              <p className="account-card-text">{t('account.emptySaved')}</p>
+              <Link to="/" className="btn btn-ghost btn-sm">
+                {t('account.searchNow')}
+              </Link>
+            </div>
           ) : (
             <ul className="item-list">
               {savedProducts.map((item) => (
@@ -128,9 +137,17 @@ export function AccountPage() {
         </div>
 
         <div className="account-card">
-          <h2 className="account-card-title">{t('account.alertsTitle')}</h2>
+          <h2 className="account-card-title">
+            <span className="account-card-icon"><AlertsIcon /></span>
+            {t('account.alertsTitle')}
+          </h2>
           {alerts.length === 0 ? (
-            <p className="account-card-text">{t('account.emptyAlerts')}</p>
+            <div className="account-card-empty">
+              <p className="account-card-text">{t('account.emptyAlerts')}</p>
+              <Link to="/" className="btn btn-ghost btn-sm">
+                {t('account.searchNow')}
+              </Link>
+            </div>
           ) : (
             <>
               <ul className="item-list">

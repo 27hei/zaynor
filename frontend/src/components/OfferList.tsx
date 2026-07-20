@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { AggregatedOffer } from '../api/types'
 import { formatPrice } from '../format'
 import { useTranslation } from '../i18n/useTranslation'
@@ -6,6 +6,7 @@ import { StoreLogo } from './StoreLogo'
 import { outboundUrl } from '../api/client'
 
 const VISIBLE_BY_DEFAULT = 3
+type SortMode = 'price' | 'delivery'
 
 interface OfferListProps {
   offers: AggregatedOffer[]
@@ -14,10 +15,27 @@ interface OfferListProps {
 export function OfferList({ offers }: OfferListProps) {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
+  const [sortMode, setSortMode] = useState<SortMode>('price')
+  const [hideOutOfStock, setHideOutOfStock] = useState(false)
 
-  const hasMore = offers.length > VISIBLE_BY_DEFAULT
-  const visibleOffers = expanded ? offers : offers.slice(0, VISIBLE_BY_DEFAULT)
-  const hiddenCount = offers.length - VISIBLE_BY_DEFAULT
+  const hasOutOfStock = offers.some((o) => !o.inStock)
+
+  // Offers arrive price-sorted from the API (isLowestPrice is fixed to the
+  // true cheapest regardless of display order, so re-sorting here for
+  // display never mislabels the "best price" tag).
+  const sortedOffers = useMemo(() => {
+    const base = hideOutOfStock ? offers.filter((o) => o.inStock) : offers
+    if (sortMode !== 'delivery') return base
+    return [...base].sort((a, b) => {
+      if (a.deliveryDays == null) return 1
+      if (b.deliveryDays == null) return -1
+      return a.deliveryDays - b.deliveryDays
+    })
+  }, [offers, sortMode, hideOutOfStock])
+
+  const hasMore = sortedOffers.length > VISIBLE_BY_DEFAULT
+  const visibleOffers = expanded ? sortedOffers : sortedOffers.slice(0, VISIBLE_BY_DEFAULT)
+  const hiddenCount = sortedOffers.length - VISIBLE_BY_DEFAULT
 
   function shippingLabel(offer: AggregatedOffer): string | null {
     const parts: string[] = []
@@ -36,6 +54,28 @@ export function OfferList({ offers }: OfferListProps) {
 
   return (
     <>
+      {offers.length > 1 && (
+        <div className="offer-list-controls">
+          <label className="offer-sort">
+            <span>{t('results.sortLabel')}</span>
+            <select value={sortMode} onChange={(e) => setSortMode(e.target.value as SortMode)}>
+              <option value="price">{t('results.sortPrice')}</option>
+              <option value="delivery">{t('results.sortDelivery')}</option>
+            </select>
+          </label>
+          {hasOutOfStock && (
+            <label className="offer-filter-toggle">
+              <input
+                type="checkbox"
+                checked={hideOutOfStock}
+                onChange={(e) => setHideOutOfStock(e.target.checked)}
+              />
+              {t('results.hideOutOfStock')}
+            </label>
+          )}
+        </div>
+      )}
+
       <ul className="offer-list">
         {visibleOffers.map((offer, index) => {
           const shipping = shippingLabel(offer)
