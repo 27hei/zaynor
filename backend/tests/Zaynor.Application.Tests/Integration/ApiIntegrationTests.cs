@@ -64,7 +64,7 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
 
         Assert.NotNull(result);
         Assert.False(result!.IsDemoData);
-        Assert.Contains(result.Offers, o => o.StoreName == "Noon" && o.Price == 3589m);
+        Assert.Contains(result.Offers, o => o.StoreName == "Amazon.sa" && o.Price == 3899m);
         Assert.True(result.Offers.First(o => o.IsLowestPrice).Price <= result.Offers.Max(o => o.Price));
     }
 

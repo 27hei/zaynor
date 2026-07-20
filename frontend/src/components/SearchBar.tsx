@@ -25,11 +25,22 @@ export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProp
   const debounceTimer = useRef<number | undefined>(undefined)
   const fetchController = useRef<AbortController | null>(null)
   const suppressFetch = useRef(false)
+  const isFirstRender = useRef(true)
 
   // Debounced suggestion fetch as the user types.
   useEffect(() => {
     window.clearTimeout(debounceTimer.current)
     fetchController.current?.abort()
+
+    // HomePage swaps in a fresh SearchBar instance (hero → hero-compact) once
+    // a search runs, already carrying the committed query as `value`. Without
+    // this guard that mount alone would re-fire the fetch and pop the
+    // suggestions dropdown, unfocused, over the results (spec NFR: no
+    // surprising UI).
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
 
     if (suppressFetch.current) {
       suppressFetch.current = false

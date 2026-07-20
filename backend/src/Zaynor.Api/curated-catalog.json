@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-07-19",
-  "note": "Manually curated REAL market prices (spec Section 9.4 manual entry / 20.7 temporary data). Founder-maintained until affiliate feeds arrive: verify and update prices here, then restart. Sources researched 2026-07-19 via public price listings.",
+  "lastUpdated": "2026-07-20",
+  "note": "Manually curated REAL market prices (spec Section 9.4 manual entry / 20.7 temporary data). Founder-maintained until affiliate feeds arrive: verify and update prices here, then restart. Sources researched 2026-07-20 via live store product pages (Noon/Amazon.sa/Jarir/Extra), each URL and image confirmed to load and match the exact product before inclusion.",
   "products": [
     {
       "name": "Samsung Galaxy S24 Ultra 256GB",
@@ -12,26 +12,20 @@
       ],
       "offers": [
         {
-          "store": "Noon",
-          "price": 3589,
+          "store": "Amazon.sa",
+          "price": 3899,
           "currency": "SAR",
-          "url": "https://www.noon.com/saudi-en/samsung-galaxy-s24-series/",
+          "url": "https://www.amazon.sa/-/en/dp/B0CQYZZ76N",
+          "image": "https://m.media-amazon.com/images/I/71ItR8v6dqL._AC_SL1500_.jpg",
           "freeShipping": true,
           "deliveryDays": 2
-        },
-        {
-          "store": "Amazon.sa",
-          "price": 3709,
-          "currency": "SAR",
-          "url": "https://www.amazon.sa/-/en/s?k=galaxy+s24+ultra+256gb",
-          "freeShipping": true,
-          "deliveryDays": 3
         },
         {
           "store": "Jarir",
           "price": 5399,
           "currency": "SAR",
-          "url": "https://www.jarir.com/sa-en/samsung-galaxy-s24",
+          "url": "https://www.jarir.com/sa-en/samsung-galaxy-s24-ultra-smartphones-629684.html",
+          "image": "https://ak-asset.jarir.com/akeneo-prod/asset/c/f/7/5/cf75118d76fb92880f2e1f6a51754bb42461bd97_629684.jpg",
           "freeShipping": true,
           "deliveryDays": 3
         }
@@ -48,10 +42,20 @@
       ],
       "offers": [
         {
-          "store": "Jarir",
-          "price": 1999,
+          "store": "Amazon.sa",
+          "price": 3115,
           "currency": "SAR",
-          "url": "https://www.jarir.com/sa-en/samsung-galaxy-s24",
+          "url": "https://www.amazon.sa/-/en/dp/B0CQYZNBCX",
+          "image": "https://m.media-amazon.com/images/I/61VBxLFlzeL._AC_SL1500_.jpg",
+          "freeShipping": true,
+          "deliveryDays": 1
+        },
+        {
+          "store": "Jarir",
+          "price": 3499,
+          "currency": "SAR",
+          "url": "https://www.jarir.com/sa-en/samsung-galaxy-s24-smartphones-629664.html",
+          "image": "https://ak-asset.jarir.com/akeneo-prod/asset/2/1/a/9/21a928fd54a7ac88d99987454acf92da6c7eb503_629664.jpg",
           "freeShipping": true,
           "deliveryDays": 3
         }
@@ -67,12 +71,22 @@
       ],
       "offers": [
         {
-          "store": "Noon",
-          "price": 2249,
+          "store": "Amazon.sa",
+          "price": 2561,
           "currency": "SAR",
-          "url": "https://www.noon.com/saudi-en/",
+          "url": "https://www.amazon.sa/-/en/Apple-iPhone-15-128-GB/dp/B0CHXGL9PN",
+          "image": "https://m.media-amazon.com/images/I/61bCKBrMVNL._AC_SL1500_.jpg",
           "freeShipping": true,
-          "deliveryDays": 2
+          "deliveryDays": 5
+        },
+        {
+          "store": "Noon",
+          "price": 2585,
+          "currency": "SAR",
+          "url": "https://www.noon.com/saudi-en/iphone-15-128gb-black-5g-with-facetime-middle-east-version/N53432546A/p/",
+          "image": "https://f.nooncdn.com/p/pzsku/Z53E81F264126B7FC4844Z/45/_/1779095089/716d97c6-600a-4793-ba11-56a05205879b.jpg",
+          "freeShipping": true,
+          "deliveryDays": 5
         }
       ],
       "category": "phones"
@@ -88,11 +102,30 @@
       "offers": [
         {
           "store": "Noon",
-          "price": 2000,
+          "price": 2678,
           "currency": "SAR",
-          "url": "https://www.noon.com/saudi-en/sony-playstation-5/",
+          "url": "https://www.noon.com/saudi-en/playstation-5-slim-console-international-version-disc-version-with-controller-new-model-2023/N70022609V/p/",
+          "image": "https://f.nooncdn.com/p/pzsku/ZC16790565664993C16C6Z/45/_/1780467076/64f3c076-a87b-451e-8e59-6ac258f179cf.jpg",
+          "freeShipping": true,
+          "deliveryDays": 5
+        },
+        {
+          "store": "Amazon.sa",
+          "price": 2689,
+          "currency": "SAR",
+          "url": "https://www.amazon.sa/-/en/PlayStation-Blu-ray-Console-Manufacturer-Warranty/dp/B0CN5RCWDD",
+          "image": "https://m.media-amazon.com/images/I/51tSjJJl82L._AC_SL1500_.jpg",
           "freeShipping": true,
           "deliveryDays": 2
+        },
+        {
+          "store": "Jarir",
+          "price": 2749,
+          "currency": "SAR",
+          "url": "https://www.jarir.com/sa-en/sony-playstation-5-gaming-consoles-and-handheld-627678.html",
+          "image": "https://ak-asset.jarir.com/akeneo-prod/asset/8/2/f/6/82f667de26563eb0ae2b2f56d64d322d70b33588_627678.jpg",
+          "freeShipping": true,
+          "deliveryDays": 3
         }
       ],
       "category": "gaming"
@@ -108,22 +141,139 @@
       "offers": [
         {
           "store": "Noon",
-          "price": 859,
+          "price": 794,
           "currency": "SAR",
           "url": "https://www.noon.com/saudi-en/airpods-pro-2-wireless-earbuds-bluetooth-headphones-active-noise-cancellation-hearing-aid-feature-transparency-personalized-spatial-audio-high-fidelity-sound-h2-chip-usb-c-charging-white/N53437240A/p/",
+          "image": "https://f.nooncdn.com/p/pzsku/Z8A614A40DF7E2C01E826Z/45/_/1779094329/e5b04f57-c6a4-46e1-92ae-f828705ffc41.jpg",
           "freeShipping": true,
-          "deliveryDays": 2
+          "deliveryDays": 8
         },
         {
           "store": "Jarir",
           "price": 899,
           "currency": "SAR",
-          "url": "https://www.jarir.com/sa-en/catalogsearch/result?search=airpods%20pro%202",
+          "url": "https://www.jarir.com/sa-en/apple-airpods-pro-2nd-gen-headsets-623511.html",
+          "image": "https://ak-asset.jarir.com/akeneo-prod/asset/b/7/0/7/b707895db386bc65155ddd593b9705cfa4af4882_623511.jpg",
           "freeShipping": true,
           "deliveryDays": 3
         }
       ],
       "category": "electronics"
+    },
+    {
+      "name": "Samsung 55\" Crystal UHD DU7000 4K Smart TV (2024)",
+      "keywords": [
+        "samsung tv",
+        "crystal uhd",
+        "55 inch smart tv",
+        "du7000",
+        "تلفزيون سامسونج",
+        "شاشة سامسونج 55 بوصة",
+        "تلفزيون ذكي"
+      ],
+      "offers": [
+        {
+          "store": "Amazon.sa",
+          "price": 2099,
+          "currency": "SAR",
+          "url": "https://www.amazon.sa/-/en/Samsung-Upscaling-PurColor-Q-Symphony-UA55DU7000UXSA/dp/B0D1V8H433",
+          "image": "https://m.media-amazon.com/images/I/81hbmwvrDiL._AC_SL1500_.jpg",
+          "freeShipping": true,
+          "deliveryDays": 2
+        },
+        {
+          "store": "Jarir",
+          "price": 2999,
+          "currency": "SAR",
+          "url": "https://www.jarir.com/sa-en/samsung-du7000-smart-tv-643226.html",
+          "image": "https://ak-asset.jarir.com/akeneo-prod/asset/0/c/1/c/0c1cbc99fbb077636bccef3f5f331bc951ebc053_643226.jpg",
+          "freeShipping": true,
+          "deliveryDays": 3
+        },
+        {
+          "store": "Noon",
+          "price": 3999,
+          "currency": "SAR",
+          "url": "https://www.noon.com/saudi-en/55-inch-crystal-uhd-4k-smart-tv-du7000-series-tizen-os-built-in-receiver-50hz-model-2024-ua55du7000uxsa-black/N70070524V/p/",
+          "image": "https://f.nooncdn.com/p/pzsku/ZB35AFE23DCDE2033DEB4Z/45/_/1772180544/db2ac44d-f31f-4245-9c45-d0f99e8f703c.jpg",
+          "freeShipping": true,
+          "deliveryDays": 7
+        }
+      ],
+      "category": "tv"
+    },
+    {
+      "name": "Apple MacBook Air 13\" M5 (2026, 16GB/512GB)",
+      "keywords": [
+        "macbook air",
+        "ماك بوك اير",
+        "apple laptop",
+        "لابتوب أبل",
+        "m5 macbook air",
+        "لابتوب ماك"
+      ],
+      "offers": [
+        {
+          "store": "Noon",
+          "price": 5206,
+          "currency": "SAR",
+          "url": "https://www.noon.com/saudi-en/new-2026-macbook-air-mdh74-13-inch-display-m5-air-10-core-cpu-8-core-gpu-16gb-ram-512gb-ssd-macos-english-keyboard-international-version-silver/N70298766V/p/",
+          "image": "https://f.nooncdn.com/p/pzsku/ZF405A1F74664C59D8793Z/45/_/1779094756/e3a0857b-2aa9-4101-819f-ef3fd004642c.jpg",
+          "freeShipping": true,
+          "deliveryDays": 5
+        },
+        {
+          "store": "Amazon.sa",
+          "price": 5999,
+          "currency": "SAR",
+          "url": "https://www.amazon.sa/-/en/Apple-2026-MacBook-13-inch-Laptop/dp/B0GR1BNH72",
+          "image": "https://m.media-amazon.com/images/I/71sqf+TyrNL._AC_SL1500_.jpg",
+          "freeShipping": true,
+          "deliveryDays": 1
+        },
+        {
+          "store": "Jarir",
+          "price": 5999,
+          "currency": "SAR",
+          "url": "https://www.jarir.com/sa-en/apple-macbook-air-laptops-678919.html",
+          "image": "https://ak-asset.jarir.com/akeneo-prod/asset/b/b/2/4/bb24aa6c9916c37cf43b04dd4e6c54287314091a_678919.jpg",
+          "freeShipping": true,
+          "deliveryDays": 3
+        }
+      ],
+      "category": "computers"
+    },
+    {
+      "name": "Xiaomi Robot Vacuum X20+ (BHR8125EN)",
+      "keywords": [
+        "robot vacuum",
+        "مكنسة روبوت",
+        "xiaomi vacuum",
+        "مكنسة ذكية",
+        "x20+",
+        "مكنسة شاومي"
+      ],
+      "offers": [
+        {
+          "store": "Noon",
+          "price": 1799,
+          "currency": "SAR",
+          "url": "https://www.noon.com/saudi-en/x20-smart-robot-vacuum-floor-cleaner-6000pa-suction-laser-navigation-dual-mop-self-cleaning-station-app-voice-control-75-w-bhr8125en-white/N70100182V/p/",
+          "image": "https://f.nooncdn.com/p/pzsku/Z3ED3779151425A833AA0Z/45/_/1780466858/8679e987-0fe6-41e7-a656-ec96a89e21ad.jpg",
+          "freeShipping": true,
+          "deliveryDays": 5
+        },
+        {
+          "store": "Extra",
+          "price": 1999,
+          "currency": "SAR",
+          "url": "https://www.extra.com/en-sa/small-appliances/home-environment-care/vacuum-cleaner/xiaomi-x20-4l-capacity-water-tank-all-in-one-station-robot-vacuum-white/p/100372636",
+          "image": "https://media.extra.com/s/aurora/100372636_800/Xiaomi-X20%2B-4L-capacity-water-tank-All-in-one-station-Robot-Vacuum-White?locale=en-GB,en-*,*",
+          "freeShipping": true,
+          "deliveryDays": 3
+        }
+      ],
+      "category": "appliances"
     }
   ]
 }

@@ -133,6 +133,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'about.title': 'About Zaynor',
     'about.p1':
       'Zaynor is an intelligent, impartial shopping assistant. Instead of searching across dozens of stores and comparing prices by hand, you enter a product once — and Zaynor gathers the offers, finds the real lowest price, and recommends the best deal.',
+    'about.promiseTitle': 'Our Promise',
     'about.p2':
       'Zaynor does not sell products. It sells confidence in the buying decision. Our promise: never buy until you are sure you got the best price and the best value.',
     'about.p3':
@@ -340,6 +341,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'about.title': 'عن زينور',
     'about.p1':
       'زينور مساعد تسوّق ذكي ومحايد. بدلًا من البحث في عشرات المتاجر ومقارنة الأسعار يدويًا، تُدخل المنتج مرة واحدة — فيجمع زينور العروض، ويجد أقل سعر حقيقي، ويوصي بأفضل صفقة.',
+    'about.promiseTitle': 'وعدنا',
     'about.p2':
       'زينور لا يبيع المنتجات، بل يبيع الثقة في قرار الشراء. وعدنا: لا تشترِ حتى تتأكد أنك حصلت على أفضل سعر وأفضل قيمة.',
     'about.p3':

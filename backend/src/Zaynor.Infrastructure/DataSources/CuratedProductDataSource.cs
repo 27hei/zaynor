@@ -16,7 +16,7 @@ namespace Zaynor.Infrastructure.DataSources;
 public sealed class CuratedProductDataSource : IProductDataSource
 {
     private sealed record CatalogOffer(
-        string Store, decimal Price, string Currency, string Url, bool FreeShipping, int? DeliveryDays);
+        string Store, decimal Price, string Currency, string Url, bool FreeShipping, int? DeliveryDays, string? Image);
 
     private sealed record CatalogProduct(string Name, List<string>? Keywords, List<CatalogOffer> Offers, string? Category);
 
@@ -100,6 +100,7 @@ public sealed class CuratedProductDataSource : IProductDataSource
             Currency = o.Currency,
             ProductUrl = o.Url,
             InStock = true,
+            ImageUrl = o.Image,
             FreeShipping = o.FreeShipping,
             DeliveryDays = o.DeliveryDays,
         }).ToList();

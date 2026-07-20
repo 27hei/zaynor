@@ -47,6 +47,9 @@ export function OfferList({ offers }: OfferListProps) {
               className={offer.isLowestPrice ? 'offer offer-lowest' : 'offer'}
             >
               <div className="offer-main">
+                {offer.imageUrl && (
+                  <img className="offer-thumb" src={offer.imageUrl} alt="" aria-hidden="true" loading="lazy" />
+                )}
                 <span
                   className="offer-avatar"
                   aria-hidden="true"

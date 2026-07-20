@@ -881,6 +881,17 @@ html[lang='ar'] {
   flex-wrap: wrap;
 }
 
+.offer-thumb {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  object-fit: contain;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: 11px;
+  padding: 3px;
+}
+
 .offer-avatar {
   display: flex;
   align-items: center;
@@ -1265,6 +1276,30 @@ html[lang='ar'] {
   margin: 0 0 2rem;
   font-size: 1.05rem;
   color: var(--text-muted);
+}
+
+.about-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.about-hero .page-title {
+  margin-bottom: 0.35rem;
+}
+
+.about-hero .page-subtitle {
+  margin-bottom: 0;
+}
+
+.about-name-note {
+  margin-top: 1.5rem;
+  padding-inline-start: 1rem;
+  border-inline-start: 3px solid var(--brand);
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.7;
 }
 
 .page-article p {
