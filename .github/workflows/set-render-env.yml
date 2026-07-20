@@ -1,0 +1,50 @@
+name: Configure Render env
+
+# Pushes data-source API credentials (stored as GitHub secrets) onto the Render
+# service as environment variables, then triggers a redeploy so the live app
+# picks them up. Manually triggered. Each variable is set only when its secret
+# is present, so this is safe to run repeatedly as more feeds are approved.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env vars on Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          RAINFOREST_API_KEY: ${{ secrets.RAINFOREST_API_KEY }}
+          ALIEXPRESS_APP_KEY: ${{ secrets.ALIEXPRESS_APP_KEY }}
+          ALIEXPRESS_APP_SECRET: ${{ secrets.ALIEXPRESS_APP_SECRET }}
+          ALIEXPRESS_TRACKING_ID: ${{ secrets.ALIEXPRESS_TRACKING_ID }}
+        run: |
+          set -e
+          if [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_SERVICE_ID" ]; then
+            echo "Render credentials missing; nothing to do."; exit 1
+          fi
+
+          # Upsert a single env var (never the bulk endpoint — that would wipe
+          # the existing DB connection string and JWT key).
+          set_var () {
+            local key="$1"; local value="$2"
+            [ -z "$value" ] && return 0
+            code=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
+              "https://api.render.com/v1/services/$RENDER_SERVICE_ID/env-vars/$key" \
+              -H "Authorization: Bearer $RENDER_API_KEY" \
+              -H "Content-Type: application/json" \
+              --data "{\"value\": \"$value\"}")
+            echo "set $key -> HTTP $code"
+          }
+
+          set_var "DataSources__Rainforest__ApiKey"     "$RAINFOREST_API_KEY"
+          set_var "DataSources__AliExpress__AppKey"      "$ALIEXPRESS_APP_KEY"
+          set_var "DataSources__AliExpress__AppSecret"   "$ALIEXPRESS_APP_SECRET"
+          set_var "DataSources__AliExpress__TrackingId"  "$ALIEXPRESS_TRACKING_ID"
+
+          echo "Triggering redeploy so the new configuration takes effect..."
+          curl -s -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+            -H "Authorization: Bearer $RENDER_API_KEY" -H "Content-Type: application/json" -d '{}' \
+            -o /dev/null -w "deploy trigger -> HTTP %{http_code}\n"
