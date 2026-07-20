@@ -64,6 +64,7 @@ public static class DependencyInjection
         // activation). HttpClient is needed for their outbound calls.
         services.AddHttpClient();
         services.AddScoped<IProductDataSource, RainforestAmazonDataSource>();
+        services.AddScoped<IProductDataSource, AliExpressProductDataSource>();
 
         services.AddScoped<IProductDataSource, MockProductDataSource>();
 
