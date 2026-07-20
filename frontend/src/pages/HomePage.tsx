@@ -37,7 +37,7 @@ export function HomePage() {
   const consumedInitialQuery = useRef(false)
   const { recent, add: addRecent, clear: clearRecent } = useRecentSearches()
 
-  usePageTitle()
+  usePageTitle(result ? t('seo.searchTitle', { query: result.query }) : undefined)
 
   async function handleSearch(searchQuery: string) {
     activeRequest.current?.abort()
