@@ -21,7 +21,7 @@ public sealed class CuratedProductDataSource : IProductDataSource
     private sealed record CatalogProduct(string Name, List<string>? Keywords, List<CatalogOffer> Offers, string? Category);
 
     /// <summary>A covered product for category browsing (FR10).</summary>
-    public sealed record CatalogSummary(string Name, string Category, decimal LowestPrice, string Currency, int OfferCount);
+    public sealed record CatalogSummary(string Name, string Category, decimal LowestPrice, string Currency, int OfferCount, string? Image);
 
     private sealed record Catalog(string? LastUpdated, string? Note, List<CatalogProduct> Products);
 
@@ -69,7 +69,8 @@ public sealed class CuratedProductDataSource : IProductDataSource
                 p.Product.Category ?? "electronics",
                 p.Product.Offers.Min(o => o.Price),
                 p.Product.Offers[0].Currency,
-                p.Product.Offers.Count))
+                p.Product.Offers.Count,
+                p.Product.Offers.Select(o => o.Image).FirstOrDefault(i => !string.IsNullOrWhiteSpace(i))))
             .ToList();
 
     public Task<IReadOnlyList<StoreOffer>> SearchAsync(string query, CancellationToken cancellationToken = default)

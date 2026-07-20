@@ -11,6 +11,8 @@ import { OfferList } from '../components/OfferList'
 import { OfferListSkeleton } from '../components/OfferListSkeleton'
 import { FeatureHighlights } from '../components/FeatureHighlights'
 import { HomeCategories } from '../components/HomeCategories'
+import { LivePricesTeaser } from '../components/LivePricesTeaser'
+import { StoreLogo } from '../components/StoreLogo'
 import { ProductSummary } from '../components/ProductSummary'
 import { PriceHistorySection } from '../components/PriceHistorySection'
 import { useTranslation } from '../i18n/useTranslation'
@@ -162,15 +164,16 @@ export function HomePage() {
             </div>
           )}
 
-          <p className="hero-trust">
-            {t('hero.trustLine')}{' '}
-            {TRACKED_STORES.map((store, i) => (
-              <span key={store}>
-                <span className="hero-trust-store">{store}</span>
-                {i < TRACKED_STORES.length - 1 && <span> · </span>}
-              </span>
-            ))}
-          </p>
+          <div className="hero-trust">
+            <span className="hero-trust-label">{t('hero.trustLine')}</span>
+            <div className="hero-trust-logos">
+              {TRACKED_STORES.map((store) => (
+                <span key={store} className="hero-trust-logo" title={store}>
+                  <StoreLogo storeName={store} />
+                </span>
+              ))}
+            </div>
+          </div>
         </section>
       ) : (
         <section className="hero hero-compact">
@@ -252,6 +255,7 @@ export function HomePage() {
 
       {!loading && !hasSearched && (
         <>
+          <LivePricesTeaser onSelect={handleSearch} />
           <FeatureHighlights />
           <HomeCategories onSelect={handleSearch} />
         </>

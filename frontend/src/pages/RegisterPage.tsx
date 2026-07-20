@@ -61,7 +61,11 @@ export function RegisterPage() {
             autoComplete="new-password"
             minLength={8}
             required
+            aria-describedby="password-hint"
           />
+          <span id="password-hint" className="field-hint">
+            {t('auth.passwordHint')}
+          </span>
         </label>
 
         <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { AggregatedOffer } from '../api/types'
 import { formatPrice } from '../format'
 import { useTranslation } from '../i18n/useTranslation'
-import { STORE_BRAND } from '../storeBrand'
+import { StoreLogo } from './StoreLogo'
 import { outboundUrl } from '../api/client'
 
 const VISIBLE_BY_DEFAULT = 3
@@ -38,7 +38,6 @@ export function OfferList({ offers }: OfferListProps) {
     <>
       <ul className="offer-list">
         {visibleOffers.map((offer, index) => {
-          const brand = STORE_BRAND[offer.storeName]
           const shipping = shippingLabel(offer)
 
           return (
@@ -50,13 +49,7 @@ export function OfferList({ offers }: OfferListProps) {
                 {offer.imageUrl && (
                   <img className="offer-thumb" src={offer.imageUrl} alt="" aria-hidden="true" loading="lazy" />
                 )}
-                <span
-                  className="offer-avatar"
-                  aria-hidden="true"
-                  style={brand ? { background: brand.bg, color: brand.fg, borderColor: brand.bg } : undefined}
-                >
-                  {offer.storeName.charAt(0).toUpperCase()}
-                </span>
+                <StoreLogo storeName={offer.storeName} />
                 <div className="offer-info">
                   <span className="offer-store-row">
                     <span className="offer-store">{offer.storeName}</span>

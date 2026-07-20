@@ -61,6 +61,7 @@ export interface CatalogSummary {
   lowestPrice: number
   currency: string
   offerCount: number
+  image: string | null
 }
 
 /** Covered products with real lowest prices (FR10 category browsing). */
