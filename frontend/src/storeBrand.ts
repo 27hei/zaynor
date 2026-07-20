@@ -1,3 +1,7 @@
+// The stores Zaynor actively compares (spec Section 6, 20.3) — the single
+// source of truth for the hero trust row and the footer trust row.
+export const TRACKED_STORE_NAMES = ['Amazon.sa', 'Noon', 'Jarir', 'Extra', 'AliExpress']
+
 // Recognizable store identity colors (competitive analysis Section 6.C) —
 // shared by the offer rows and the price-history chart legend. Logo doubles
 // as a fallback source; the row falls back to the initial-letter avatar

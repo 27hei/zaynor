@@ -13,14 +13,13 @@ import { FeatureHighlights } from '../components/FeatureHighlights'
 import { HomeCategories } from '../components/HomeCategories'
 import { LivePricesTeaser } from '../components/LivePricesTeaser'
 import { StoreLogo } from '../components/StoreLogo'
+import { TRACKED_STORE_NAMES } from '../storeBrand'
 import { ProductSummary } from '../components/ProductSummary'
 import { PriceHistorySection } from '../components/PriceHistorySection'
 import { useTranslation } from '../i18n/useTranslation'
 import { useAuth } from '../auth/useAuth'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useRecentSearches } from '../hooks/useRecentSearches'
-
-const TRACKED_STORES = ['Amazon.sa', 'Noon', 'Jarir', 'Extra', 'AliExpress']
 
 export function HomePage() {
   const { t } = useTranslation()
@@ -167,7 +166,7 @@ export function HomePage() {
           <div className="hero-trust">
             <span className="hero-trust-label">{t('hero.trustLine')}</span>
             <div className="hero-trust-logos">
-              {TRACKED_STORES.map((store) => (
+              {TRACKED_STORE_NAMES.map((store) => (
                 <span key={store} className="hero-trust-logo" title={store}>
                   <StoreLogo storeName={store} />
                 </span>

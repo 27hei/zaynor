@@ -1,19 +1,46 @@
-import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { BrandMark } from './BrandMark'
 import { LanguageToggle } from './LanguageToggle'
+import { HeaderSearch } from './HeaderSearch'
+import { CartIcon } from './icons'
+import { getSavedProducts } from '../api/client'
 import { useTranslation } from '../i18n/useTranslation'
 import { useAuth } from '../auth/useAuth'
 
 export function Header() {
   const { t } = useTranslation()
   const { user, logout } = useAuth()
+  const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [savedCount, setSavedCount] = useState(0)
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? 'nav-link nav-link-active' : 'nav-link'
 
   const close = () => setMenuOpen(false)
+
+  // Powers the cart-style saved-products shortcut; re-checked on navigation
+  // so the badge stays right after saving/removing a product elsewhere.
+  useEffect(() => {
+    if (!user) {
+      setSavedCount(0)
+      return
+    }
+    let cancelled = false
+    getSavedProducts()
+      .then((list) => {
+        if (!cancelled) setSavedCount(list.length)
+      })
+      .catch(() => {
+        if (!cancelled) setSavedCount(0)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user, location.pathname])
+
+  const initial = user?.email.charAt(0).toUpperCase()
 
   return (
     <header className={menuOpen ? 'header menu-open' : 'header'}>
@@ -52,11 +79,20 @@ export function Header() {
         </nav>
 
         <div className="header-actions">
+          {location.pathname !== '/' && <HeaderSearch />}
+
+          {user && (
+            <Link to="/account" className="header-cart" aria-label={t('account.savedTitle')} onClick={close}>
+              <CartIcon />
+              {savedCount > 0 && <span className="header-cart-badge">{savedCount}</span>}
+            </Link>
+          )}
+
           <LanguageToggle />
           {user ? (
             <>
-              <Link to="/account" className="btn btn-ghost" onClick={close}>
-                {t('nav.account')}
+              <Link to="/account" className="header-avatar" onClick={close} aria-label={t('nav.account')}>
+                {initial}
               </Link>
               <button
                 type="button"

@@ -89,6 +89,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'footer.amazonDisclosure': 'As an Amazon Associate, Zaynor earns from qualifying purchases.',
     'footer.product': 'Product',
     'footer.company': 'Company',
+    'footer.contact': 'Contact us',
     'footer.legal': 'Legal',
     'footer.rights': '© {year} Zaynor. All rights reserved.',
 
@@ -304,6 +305,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'footer.amazonDisclosure': 'بصفتنا شريكًا في برنامج Amazon Associates، يربح زينور من عمليات الشراء المؤهلة.',
     'footer.product': 'المنتج',
     'footer.company': 'الشركة',
+    'footer.contact': 'تواصل معنا',
     'footer.legal': 'قانوني',
     'footer.rights': '© {year} زينور. جميع الحقوق محفوظة.',
 
