@@ -167,6 +167,15 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
     /// iPhone 15 "for 20 SAR" is not a real phone. With enough offers to
     /// judge a genuine cluster, drop anything priced under 20% of the
     /// median; below that count there isn't enough signal to safely guess.
+    ///
+    /// Symmetric on the high side too — a real reported case: searching a
+    /// personal-care product ("غسول...") once returned an item priced
+    /// wildly above the rest of the genuine cluster (thousands of SAR
+    /// versus tens on Amazon for the actual product), almost certainly a
+    /// mismatched or wrong-currency-parsed listing that slipped past the
+    /// relevance/keyword checks. 8x the median is generous enough to keep
+    /// legitimate premium variants (e.g. a higher-storage phone model)
+    /// while still catching genuine order-of-magnitude anomalies.
     /// </summary>
     private static List<StoreOffer> RemovePriceOutliers(List<StoreOffer> offers)
     {
@@ -178,9 +187,10 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
         var sorted = offers.Select(o => o.Price).OrderBy(p => p).ToList();
         var mid = sorted.Count / 2;
         var median = sorted.Count % 2 == 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2m;
-        var threshold = median * 0.2m;
+        var lowerBound = median * 0.2m;
+        var upperBound = median * 8m;
 
-        return offers.Where(o => o.Price >= threshold).ToList();
+        return offers.Where(o => o.Price >= lowerBound && o.Price <= upperBound).ToList();
     }
 
     private static bool IsNoon(string? source) =>

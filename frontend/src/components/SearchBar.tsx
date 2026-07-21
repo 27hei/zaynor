@@ -266,12 +266,21 @@ export function SearchBar({
           {/* No `capture` attribute — that forces mobile browsers straight
               into the camera app, skipping the native chooser that offers
               both "Camera" and "Photo Library"/"Gallery". Leaving it off
-              lets the OS show its normal picker with both options. */}
+              lets the OS show its normal picker with both options.
+
+              display:none (not .sr-only's clip-to-1px technique) — a real
+              observed bug: native file inputs report their full ~176px
+              native UI width via scrollWidth regardless of the 1px CSS
+              width .sr-only forces, which quietly widened the whole page
+              on mobile and made it pannable/zoomable. There's no
+              accessibility loss here: this input is never meant to be
+              focused directly — the camera button (with its own
+              aria-label) is what triggers it programmatically. */}
           <input
             ref={imageInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp"
-            className="sr-only"
+            style={{ display: 'none' }}
             onChange={handleImageSelected}
           />
 

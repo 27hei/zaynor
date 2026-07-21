@@ -4,10 +4,20 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* The hero's decorative background glow deliberately bleeds ~40% past
+     its own edges for a soft wash effect (.hero::before) — with nothing
+     clipping that at the page root, it was making the ENTIRE page
+     horizontally scrollable/pannable, especially visible on mobile (a real
+     reported bug: the page could be dragged/zoomed sideways). Clipping
+     here is the standard fix for bleeding decorative elements — normal
+     content is never intentionally wider than the viewport, so this only
+     ever removes unwanted scroll, never legitimate content. */
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
+  overflow-x: hidden;
   /* 500 (a real loaded weight, not a synthesized fake-bold) rather than the
      browser default 400 — clearer and easier to read for older/low-vision
      visitors. Anything with its own font-weight (headings, buttons, ...)

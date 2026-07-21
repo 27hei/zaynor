@@ -316,6 +316,37 @@ public class GoogleShoppingDataSourceTests
     }
 
     [Fact]
+    public async Task DiscardsListingsPricedWildlyAboveTheGenuineCluster()
+    {
+        // Real reported case: searching a personal-care product once
+        // returned a listing priced in the thousands of SAR against a
+        // genuine cluster of tens of SAR (the real product costs ~80 SAR on
+        // Amazon) — the symmetric counterpart to the "too cheap" outlier
+        // filter above. 8x the median comfortably keeps a legitimate
+        // premium variant while catching an order-of-magnitude mismatch.
+        const string json = """
+        {
+          "shopping": [
+            { "title": "Nip and Fab Cleanser 200ml", "source": "Nahdi Online", "price": "SAR 38.00", "link": "https://www.google.com/search?ibp=oshop&prds=a" },
+            { "title": "Nip and Fab Cleanser 150ml", "source": "Henzadem", "price": "SAR 45.00", "link": "https://www.google.com/search?ibp=oshop&prds=b" },
+            { "title": "Nip and Fab Cleanser", "source": "Amazon", "price": "SAR 80.00", "link": "https://www.google.com/search?ibp=oshop&prds=c" },
+            { "title": "Nip and Fab Cleanser Bundle", "source": "SuspiciousStore", "price": "SAR 4000.00", "link": "https://www.google.com/search?ibp=oshop&prds=d" }
+          ]
+        }
+        """;
+        var source = new GoogleShoppingDataSource(
+            new StubFactory(new StubHandler(json)),
+            Config(("DataSources:Serper:ApiKey", "test-key")),
+            NullLogger<GoogleShoppingDataSource>.Instance);
+
+        var offers = await source.SearchAsync("nip and fab cleanser");
+
+        Assert.Equal(3, offers.Count);
+        Assert.DoesNotContain(offers, o => o.StoreName == "SuspiciousStore");
+        Assert.Contains(offers, o => o.StoreName == "Amazon");
+    }
+
+    [Fact]
     public async Task DiscardsMerchBundlesThatArentThePlayedDeviceItself()
     {
         // A real observed leak: searching "Xbox Series X" surfaced a

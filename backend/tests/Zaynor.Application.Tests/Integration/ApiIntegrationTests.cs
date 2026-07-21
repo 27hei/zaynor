@@ -69,14 +69,19 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
     }
 
     [Fact]
-    public async Task Search_UncoveredProduct_IsFlaggedAsDemo()
+    public async Task Search_UncoveredProductWithNoLiveSourceConfigured_ReturnsEmptyNotDemo()
     {
+        // Demo/mock data was removed outright (spec: no fabricated prices,
+        // ever) — a product outside the curated catalog with no live source
+        // configured (no Serper key in this test host) must come back
+        // genuinely empty, never silently filled in with placeholder offers.
         var client = _factory.CreateClient();
 
         var result = await client.GetFromJsonAsync<SearchResult>("/api/search?q=xbox");
 
         Assert.NotNull(result);
-        Assert.True(result!.IsDemoData);
+        Assert.False(result!.IsDemoData);
+        Assert.Empty(result.Offers);
     }
 
     [Fact]

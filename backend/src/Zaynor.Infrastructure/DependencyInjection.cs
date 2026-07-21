@@ -94,8 +94,6 @@ public static class DependencyInjection
         services.AddScoped<IProductDataSource, AliExpressProductDataSource>();
         services.AddScoped<IProductDataSource, GoogleShoppingDataSource>();
 
-        services.AddScoped<IProductDataSource, MockProductDataSource>();
-
         // "Search by photo" — reuses the same Serper account/key as
         // GoogleShoppingDataSource for its reverse-image (Lens) endpoint.
         services.AddSingleton<ITempImageStore, MemoryTempImageStore>();
