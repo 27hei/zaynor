@@ -24,6 +24,7 @@ public class OutController : ControllerBase
     private readonly ZaynorDbContext _db;
     private readonly ILogger<OutController> _logger;
     private readonly string? _amazonTag;
+    private readonly string? _noonUtmSuffix;
     private readonly string? _deeplinkTemplate;
     private readonly string[] _deeplinkHosts;
 
@@ -33,11 +34,17 @@ public class OutController : ControllerBase
         _logger = logger;
         _amazonTag = configuration["Affiliate:AmazonTag"];
 
+        // Noon tags per-URL via query params appended directly to the same
+        // noon.com link (utm_campaign/utm_medium/utm_source from the noon
+        // partners dashboard) — not a redirector-wrapped deeplink, so it's a
+        // simple suffix like the Amazon tag rather than a {url} template.
+        _noonUtmSuffix = configuration["Affiliate:NoonUtmSuffix"];
+
         // Network deeplink wrapping (Admitad/ArabClicks style): a template with
         // {url} placeholder, applied to the configured store hosts. Left empty
         // until the network approves — activation is then a config change only.
         _deeplinkTemplate = configuration["Affiliate:DeeplinkTemplate"];
-        _deeplinkHosts = (configuration["Affiliate:DeeplinkHosts"] ?? "noon.com,jarir.com,extra.com,aliexpress.com")
+        _deeplinkHosts = (configuration["Affiliate:DeeplinkHosts"] ?? "jarir.com,extra.com,aliexpress.com")
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 
@@ -64,6 +71,12 @@ public class OutController : ControllerBase
             && !HasTagParameter(uri))
         {
             target = u + (u.Contains('?') ? "&" : "?") + "tag=" + Uri.EscapeDataString(_amazonTag);
+        }
+        else if (!string.IsNullOrWhiteSpace(_noonUtmSuffix)
+            && (uri.Host == "noon.com" || uri.Host == "www.noon.com")
+            && !uri.Query.Contains("utm_campaign", StringComparison.OrdinalIgnoreCase))
+        {
+            target = u + (u.Contains('?') ? "&" : "?") + _noonUtmSuffix;
         }
         else if (!string.IsNullOrWhiteSpace(_deeplinkTemplate)
             && _deeplinkTemplate.Contains("{url}")

@@ -164,7 +164,10 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
     public async Task Outbound_DeeplinkTemplate_WrapsNetworkStoreLinks()
     {
         // Derived factory: deeplink template configured (as it will be once a
-        // network approves) — noon links must ride inside the tracking link.
+        // network approves) — Jarir links must ride inside the tracking link.
+        // (Noon isn't in the default deeplink hosts — it gets its own direct
+        // UTM tagging below, since noon.partners tags same-domain links
+        // rather than wrapping them behind a redirector.)
         using var factory = _factory.WithWebHostBuilder(builder =>
             builder.ConfigureAppConfiguration((_, config) =>
                 config.AddInMemoryCollection(new Dictionary<string, string?>
@@ -174,14 +177,40 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
         var client = factory.CreateClient(
             new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
 
-        var url = "https://www.noon.com/saudi-en/p/123";
+        var url = "https://www.jarir.com/sa-en/some-product.html";
         var response = await client.GetAsync(
-            $"/api/out?u={Uri.EscapeDataString(url)}&store=Noon&product=Test");
+            $"/api/out?u={Uri.EscapeDataString(url)}&store=Jarir&product=Test");
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         var location = response.Headers.Location!.ToString();
         Assert.StartsWith("https://ad.admitad.com/g/test123/?ulp=", location);
         Assert.Contains(Uri.EscapeDataString(url), location);
+    }
+
+    [Fact]
+    public async Task Outbound_NoonLink_CarriesTheUtmTrackingSuffix()
+    {
+        // Noon (noon.partners) tags per-URL via query params appended
+        // directly to the noon.com link itself — not a redirector wrap.
+        using var factory = _factory.WithWebHostBuilder(builder =>
+            builder.ConfigureAppConfiguration((_, config) =>
+                config.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Affiliate:NoonUtmSuffix"] =
+                        "utm_campaign=CMPtest&utm_medium=AFFtest&adjust_deeplink_js=1&utm_source=Ctest",
+                })));
+        var client = factory.CreateClient(
+            new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var url = "https://www.noon.com/saudi-en/some-product/p/";
+        var response = await client.GetAsync(
+            $"/api/out?u={Uri.EscapeDataString(url)}&store=Noon&product=Test");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        var location = response.Headers.Location!.ToString();
+        Assert.StartsWith(url + "?", location);
+        Assert.Contains("utm_campaign=CMPtest", location);
+        Assert.Contains("utm_medium=AFFtest", location);
     }
 
     [Fact]
