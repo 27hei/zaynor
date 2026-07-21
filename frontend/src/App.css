@@ -1180,36 +1180,18 @@ html[lang='ar'] {
 }
 
 /* ============ Noon search fallback (no live Noon feed) ============ */
-.noon-fallback {
+/* Reuses .offer's exact layout/spacing so it reads as "one more store to
+   check" rather than a separate/lesser element; margin-top replaces the
+   .offer-list gap since this sits just outside that list. */
+.offer-noon-fallback {
+  margin-top: 0.6rem;
+}
+
+.offer-thumb-search {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  margin-top: 0.85rem;
-  padding: 0.85rem 1.1rem;
-  text-decoration: none;
-  background: var(--surface);
-  border: 1px dashed var(--hairline-strong);
-  border-radius: var(--radius);
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.noon-fallback:hover {
-  border-color: var(--brand);
-  background: var(--brand-tint);
-}
-
-.noon-fallback-text {
-  flex: 1;
-  font-size: 0.88rem;
-  color: var(--text-muted);
-}
-
-.noon-fallback-cta {
-  flex-shrink: 0;
-  font-size: 0.88rem;
-  font-weight: 700;
+  justify-content: center;
   color: var(--brand-strong);
-  white-space: nowrap;
 }
 
 /* ============ Price history (progressive disclosure) ============ */
