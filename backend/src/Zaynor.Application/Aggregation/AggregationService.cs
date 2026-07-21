@@ -56,11 +56,16 @@ public sealed class AggregationService : IAggregationService
     }
 
     /// <summary>
-    /// Queries cheap sources (the curated catalog) first; quota-limited live
-    /// feeds only fire when nothing cheap matched, which both conserves their
-    /// request budgets and keeps a verified curated match from being diluted
-    /// by unrelated live search results. A source that throws is logged and
-    /// skipped so one failing source never breaks the whole search (spec NFR4).
+    /// Queries every source concurrently — cheap (curated catalog) and
+    /// expensive/live feeds alike — and merges their real offers together.
+    /// Earlier this skipped live feeds entirely whenever the curated catalog
+    /// had any match, to conserve their paid-API quota; that silently capped
+    /// the handful of curated products (iPhone 15, Galaxy S24, PS5, ...) at
+    /// just the 2-3 manually-entered stores instead of the dozens live
+    /// search finds for everything else — the opposite of what's wanted
+    /// (spec: founder's call — maximum store coverage matters more than
+    /// quota conservation). A source that throws is logged and skipped so
+    /// one failing source never breaks the whole search (spec NFR4).
     /// </summary>
     private async Task<(List<StoreOffer> Real, List<StoreOffer> Fallback)> GatherOffersAsync(
         string query, CancellationToken cancellationToken)
@@ -68,14 +73,11 @@ public sealed class AggregationService : IAggregationService
         var cheapSources = _sources.Where(s => !s.IsExpensiveLive).ToList();
         var expensiveSources = _sources.Where(s => s.IsExpensiveLive).ToList();
 
-        var cheapResults = await QueryAllAsync(cheapSources, query, cancellationToken);
-        var cheapReal = cheapResults.Where(r => !r.IsFallback).SelectMany(r => r.Offers).ToList();
+        var cheapResultsTask = QueryAllAsync(cheapSources, query, cancellationToken);
+        var expensiveResultsTask = QueryAllAsync(expensiveSources, query, cancellationToken);
+        await Task.WhenAll(cheapResultsTask, expensiveResultsTask);
 
-        var expensiveResults = cheapReal.Count > 0
-            ? []
-            : await QueryAllAsync(expensiveSources, query, cancellationToken);
-
-        var allResults = cheapResults.Concat(expensiveResults).ToList();
+        var allResults = cheapResultsTask.Result.Concat(expensiveResultsTask.Result).ToList();
         var real = allResults.Where(r => !r.IsFallback).SelectMany(r => r.Offers).ToList();
         var fallback = allResults.Where(r => r.IsFallback).SelectMany(r => r.Offers).ToList();
         return (real, fallback);

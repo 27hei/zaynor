@@ -62,7 +62,7 @@ public sealed class AliExpressProductDataSource : IProductDataSource
     public bool IsEnabled =>
         !string.IsNullOrWhiteSpace(_appKey) && !string.IsNullOrWhiteSpace(_appSecret);
 
-    /// <summary>Rate-limited API — only called when the curated catalog has no match.</summary>
+    /// <summary>Rate-limited API — queried on every search, alongside the curated catalog and other live feeds.</summary>
     public bool IsExpensiveLive => true;
 
     public async Task<IReadOnlyList<StoreOffer>> SearchAsync(string query, CancellationToken cancellationToken = default)

@@ -51,7 +51,7 @@ public sealed class RainforestAmazonDataSource : IProductDataSource
     /// <summary>Active only once an API key is configured; otherwise fully dormant.</summary>
     public bool IsEnabled => !string.IsNullOrWhiteSpace(_apiKey);
 
-    /// <summary>Trial/paid API quota — only called when the curated catalog has no match.</summary>
+    /// <summary>Trial/paid API quota — queried on every search, alongside the curated catalog and other live feeds.</summary>
     public bool IsExpensiveLive => true;
 
     public async Task<IReadOnlyList<StoreOffer>> SearchAsync(string query, CancellationToken cancellationToken = default)

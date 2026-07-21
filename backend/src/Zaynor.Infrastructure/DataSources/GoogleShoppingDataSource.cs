@@ -27,8 +27,9 @@ namespace Zaynor.Infrastructure.DataSources;
 ///
 /// Config-only activation: dormant until DataSources:Serper:ApiKey is set
 /// (env: DataSources__Serper__ApiKey). Billed per request by Serper (very
-/// cheap: ~$1/1,000 after a 2,500-request free allowance), so — like the
-/// other live feeds — only called when the curated catalog has no match.
+/// cheap: ~$1/1,000 after a 2,500-request free allowance). Queried on every
+/// search alongside the curated catalog — max store coverage matters more
+/// here than conserving quota (spec: founder's call).
 /// </summary>
 public sealed class GoogleShoppingDataSource : IProductDataSource
 {
@@ -57,7 +58,7 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
     /// <summary>Active only once a Serper API key is configured; otherwise fully dormant.</summary>
     public bool IsEnabled => !string.IsNullOrWhiteSpace(_apiKey);
 
-    /// <summary>Paid-per-request API — only called when the curated catalog has no match.</summary>
+    /// <summary>Paid-per-request API — queried on every search, alongside the curated catalog and other live feeds.</summary>
     public bool IsExpensiveLive => true;
 
     public async Task<IReadOnlyList<StoreOffer>> SearchAsync(string query, CancellationToken cancellationToken = default)

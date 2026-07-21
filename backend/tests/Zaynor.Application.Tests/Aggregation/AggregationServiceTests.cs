@@ -127,17 +127,22 @@ public class AggregationServiceTests
     }
 
     [Fact]
-    public async Task SearchAsync_CheapSourceHasAMatch_ExpensiveLiveSourceIsNeverCalled()
+    public async Task SearchAsync_CheapSourceHasAMatch_ExpensiveLiveSourceIsStillCalledAndMerged()
     {
+        // Curated-catalog products (iPhone 15, Galaxy S24, PS5, ...) must not
+        // be capped at just their 2-3 manually-entered stores — live feeds
+        // run alongside the catalog on every search, not only as a fallback,
+        // so these products get the same store coverage as everything else.
         var cheap = FakeDataSource.Returning(FakeDataSource.Offer("Jarir", 2000m));
         var expensive = FakeDataSource.ExpensiveReturning(FakeDataSource.Offer("Amazon.sa", 1900m));
         var service = CreateService(cheap, expensive);
 
         var result = await service.SearchAsync("iphone 15");
 
-        Assert.Equal(0, expensive.CallCount);
-        Assert.Single(result.Offers);
-        Assert.Equal("Jarir", result.Offers[0].StoreName);
+        Assert.Equal(1, expensive.CallCount);
+        Assert.Equal(2, result.Offers.Count);
+        Assert.Equal("Amazon.sa", result.Offers[0].StoreName); // cheaper, ranked first
+        Assert.Contains(result.Offers, o => o.StoreName == "Jarir");
     }
 
     [Fact]
