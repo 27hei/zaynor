@@ -132,13 +132,37 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
                 }
             }
 
-            return bestPerMerchant.Values.Take(MaxResults).ToList();
+            return RemovePriceOutliers(bestPerMerchant.Values.ToList()).Take(MaxResults).ToList();
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger.LogWarning(ex, "GoogleShopping source failed for query {Query}; skipping it", query);
             return Array.Empty<StoreOffer>();
         }
+    }
+
+    /// <summary>
+    /// A real observed gap in the keyword filters above: some listings
+    /// (a mislabeled/deceptive accessory, or a case brand whose product name
+    /// doesn't mention "case") carry no accessory keyword at all, yet price
+    /// at a small fraction of every genuine listing for the same query — an
+    /// iPhone 15 "for 20 SAR" is not a real phone. With enough offers to
+    /// judge a genuine cluster, drop anything priced under 20% of the
+    /// median; below that count there isn't enough signal to safely guess.
+    /// </summary>
+    private static List<StoreOffer> RemovePriceOutliers(List<StoreOffer> offers)
+    {
+        if (offers.Count < 3)
+        {
+            return offers;
+        }
+
+        var sorted = offers.Select(o => o.Price).OrderBy(p => p).ToList();
+        var mid = sorted.Count / 2;
+        var median = sorted.Count % 2 == 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2m;
+        var threshold = median * 0.2m;
+
+        return offers.Where(o => o.Price >= threshold).ToList();
     }
 
     private static bool IsNoon(string? source) =>

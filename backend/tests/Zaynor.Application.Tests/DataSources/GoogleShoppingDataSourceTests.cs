@@ -230,6 +230,37 @@ public class GoogleShoppingDataSourceTests
     }
 
     [Fact]
+    public async Task DiscardsListingsPricedAsOutliersAgainstTheGenuineCluster()
+    {
+        // A real observed gap: searching "iPhone 15" returned a "phone" at 20
+        // SAR and a RhinoShield case listed only as "iPhone 15 Mod NX Black"
+        // — neither title contains an accessory keyword, so only the price
+        // (a small fraction of every genuine listing) gives it away.
+        const string json = """
+        {
+          "shopping": [
+            { "title": "Iphone 15 pro", "source": "gpsaudi.com", "price": "SAR 20.00", "link": "https://www.google.com/search?ibp=oshop&prds=a" },
+            { "title": "iPhone 15 Mod NX Black", "source": "rhinoshield.io", "price": "SAR 125.77", "link": "https://www.google.com/search?ibp=oshop&prds=b" },
+            { "title": "Apple iPhone 15 A16 Bionic", "source": "FoneZone.me", "price": "SAR 1965.06", "link": "https://www.google.com/search?ibp=oshop&prds=c" },
+            { "title": "Apple iPhone 15 128GB", "source": "Amazon.sa", "price": "SAR 2561.00", "link": "https://www.google.com/search?ibp=oshop&prds=d" },
+            { "title": "Apple iPhone 15", "source": "Jarir Bookstore", "price": "SAR 2799.00", "link": "https://www.google.com/search?ibp=oshop&prds=e" }
+          ]
+        }
+        """;
+        var source = new GoogleShoppingDataSource(
+            new StubFactory(new StubHandler(json)),
+            Config(("DataSources:Serper:ApiKey", "test-key")),
+            NullLogger<GoogleShoppingDataSource>.Instance);
+
+        var offers = await source.SearchAsync("iphone 15");
+
+        Assert.Equal(3, offers.Count);
+        Assert.DoesNotContain(offers, o => o.StoreName == "gpsaudi.com");
+        Assert.DoesNotContain(offers, o => o.StoreName == "rhinoshield.io");
+        Assert.Contains(offers, o => o.StoreName == "FoneZone.me");
+    }
+
+    [Fact]
     public async Task DiscardsAccessoriesThatShareWordsWithTheProductBeingSearched()
     {
         // A real observed failure: searching a phone returned its case at a
