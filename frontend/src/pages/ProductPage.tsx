@@ -193,6 +193,12 @@ export function ProductPage() {
         {statusMessage}
       </p>
 
+      {!loading && result?.correctedQuery && (
+        <p className="corrected-query-note">
+          {t('results.correctedQuery', { corrected: result.correctedQuery })}
+        </p>
+      )}
+
       {loading && (
         <section className="results" aria-label={t('results.searching')} aria-busy="true">
           <p className="hint">{t('results.searching')}</p>

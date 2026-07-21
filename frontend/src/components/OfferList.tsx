@@ -108,6 +108,14 @@ export function OfferList({ offers }: OfferListProps) {
                     {offer.rating != null && (
                       <StoreRating rating={offer.rating} ratingCount={offer.ratingCount} />
                     )}
+                    {offer.hasAffiliateLink && (
+                      <span className="offer-affiliate-badge" title={t('offer.affiliateHint')}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M12 21s-7.5-4.6-10-9.2C.5 8.4 2.3 5 5.8 5c1.9 0 3.5 1 4.5 2.6C11.3 6 12.9 5 14.8 5c3.5 0 5.3 3.4 3.8 6.8C19.5 16.4 12 21 12 21z" />
+                        </svg>
+                        {t('offer.affiliateBadge')}
+                      </span>
+                    )}
                   </span>
                   {shipping && <span className="offer-shipping">{shipping}</span>}
                 </div>

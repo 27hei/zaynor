@@ -48,7 +48,7 @@ public class CachedAggregationServiceTests
         bool returnsOffers = true)
     {
         var source = new CountingDataSource(returnsOffers);
-        var inner = new AggregationService([source], NullLogger<AggregationService>.Instance);
+        var inner = new AggregationService([source], new AffiliateSettings(), NullLogger<AggregationService>.Instance);
         var recorder = new CountingRecorder();
         var cache = new MemoryCache(new MemoryCacheOptions());
         var service = new CachedAggregationService(

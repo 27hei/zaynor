@@ -8,6 +8,14 @@ public sealed record SearchResult
 {
     public required string Query { get; init; }
 
+    /// <summary>
+    /// Set only when a known colloquial Arabic brand spelling was corrected
+    /// before searching (e.g. "سامسنج" → "Samsung") — surfaced so the UI can
+    /// tell the visitor what was actually searched for, the same way Google
+    /// itself shows "Showing results for X" after a silent correction.
+    /// </summary>
+    public string? CorrectedQuery { get; init; }
+
     /// <summary>Offers sorted by price ascending (spec FR4).</summary>
     public required IReadOnlyList<AggregatedOffer> Offers { get; init; }
 

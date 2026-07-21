@@ -15,6 +15,8 @@ export interface AggregatedOffer {
   ratingCount: number | null
   normalizedKey: string
   isLowestPrice: boolean
+  /** True when this specific store's link currently carries an active affiliate tag. */
+  hasAffiliateLink: boolean
 }
 
 export interface Recommendation {
@@ -29,6 +31,8 @@ export interface Recommendation {
 
 export interface SearchResult {
   query: string
+  /** Set only when a colloquial Arabic brand spelling was corrected before searching (e.g. "سامسنج" → "Samsung"). */
+  correctedQuery: string | null
   offers: AggregatedOffer[]
   recommendation: Recommendation | null
   isDemoData: boolean

@@ -66,6 +66,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'results.noonFallbackCta': 'Search on Noon',
     'results.viaGoogle': 'via Google Shopping',
     'results.tryInstead': 'Try searching for:',
+    'results.correctedQuery': 'Showing results for {corrected}',
 
     'summary.meta': '{count} offers · best price {price}',
     'summary.viewPhoto': 'View this photo',
@@ -85,6 +86,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'offer.deliveryNextDay': 'Next-day delivery',
     'offer.delivery': 'Delivery in {days} days',
     'offer.ratingLabel': 'Rated {rating} out of 5',
+    'offer.affiliateBadge': 'Supports Zaynor',
+    'offer.affiliateHint': 'Buying through this link helps support Zaynor at no extra cost to you.',
 
     'product.backToSearch': 'New search',
     'product.pageNote': 'Prices, images, and ratings shown are exactly what each store reports — nothing here is estimated.',
@@ -306,6 +309,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'results.noonFallbackCta': 'ابحث في نون',
     'results.viaGoogle': 'عبر Google Shopping',
     'results.tryInstead': 'جرّب البحث عن:',
+    'results.correctedQuery': 'تعرض النتائج الآن لـ {corrected}',
 
     'summary.meta': '{count} عروض · أفضل سعر {price}',
     'summary.viewPhoto': 'عرض هذه الصورة',
@@ -325,6 +329,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'offer.deliveryNextDay': 'توصيل في اليوم التالي',
     'offer.delivery': 'التوصيل خلال {days} أيام',
     'offer.ratingLabel': 'تقييم {rating} من 5',
+    'offer.affiliateBadge': 'يدعم زينور',
+    'offer.affiliateHint': 'الشراء عبر هذا الرابط يدعم زينور دون أي تكلفة إضافية عليك.',
 
     'product.backToSearch': 'بحث جديد',
     'product.pageNote': 'الأسعار والصور والتقييمات المعروضة هي بالضبط كما يعلن عنها كل متجر — لا شيء هنا مقدَّر أو مفترض.',

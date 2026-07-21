@@ -12,13 +12,16 @@ namespace Zaynor.Application.Aggregation;
 public sealed class AggregationService : IAggregationService
 {
     private readonly IReadOnlyList<IProductDataSource> _sources;
+    private readonly AffiliateSettings _affiliateSettings;
     private readonly ILogger<AggregationService> _logger;
 
     public AggregationService(
         IEnumerable<IProductDataSource> sources,
+        AffiliateSettings affiliateSettings,
         ILogger<AggregationService> logger)
     {
         _sources = sources.ToList();
+        _affiliateSettings = affiliateSettings;
         _logger = logger;
     }
 
@@ -30,6 +33,13 @@ public sealed class AggregationService : IAggregationService
             return new SearchResult { Query = string.Empty, Offers = Array.Empty<AggregatedOffer>() };
         }
 
+        // Surfaced to the UI (a "Showing results for X" style note) whenever
+        // a colloquial Arabic brand spelling ("سامسنج" → "Samsung") was
+        // corrected before searching, so the correction stays visible
+        // instead of only happening silently inside the live data source.
+        var normalized = ArabicBrandNormalizer.Normalize(trimmed);
+        var correctedQuery = normalized != trimmed ? normalized : null;
+
         var (realOffers, fallbackOffers) = await GatherOffersAsync(trimmed, cancellationToken);
 
         // Real sources win outright; fallback (demo) offers appear only when
@@ -40,10 +50,10 @@ public sealed class AggregationService : IAggregationService
         if (offers.Count == 0)
         {
             _logger.LogInformation("No offers found for query {Query}", trimmed);
-            return new SearchResult { Query = trimmed, Offers = Array.Empty<AggregatedOffer>() };
+            return new SearchResult { Query = trimmed, Offers = Array.Empty<AggregatedOffer>(), CorrectedQuery = correctedQuery };
         }
 
-        var ranked = RankOffers(offers);
+        var ranked = RankOffers(offers, _affiliateSettings);
         var recommendation = BuildRecommendation(ranked);
 
         return new SearchResult
@@ -52,6 +62,7 @@ public sealed class AggregationService : IAggregationService
             Offers = ranked,
             Recommendation = recommendation,
             IsDemoData = isDemo,
+            CorrectedQuery = correctedQuery,
         };
     }
 
@@ -119,7 +130,7 @@ public sealed class AggregationService : IAggregationService
     }
 
     /// <summary>Sorts offers cheapest-first (spec FR4) and flags the lowest (spec FR5).</summary>
-    private static List<AggregatedOffer> RankOffers(IEnumerable<StoreOffer> offers)
+    private static List<AggregatedOffer> RankOffers(IEnumerable<StoreOffer> offers, AffiliateSettings affiliateSettings)
     {
         var sorted = offers
             .OrderBy(o => o.Price)
@@ -145,6 +156,7 @@ public sealed class AggregationService : IAggregationService
                 RatingCount = offer.RatingCount,
                 NormalizedKey = ProductNormalizer.Normalize(offer.ProductTitle),
                 IsLowestPrice = i == 0,
+                HasAffiliateLink = AffiliateEligibility.IsMonetized(offer.ProductUrl, affiliateSettings),
             });
         }
 

@@ -37,4 +37,12 @@ public sealed record AggregatedOffer
 
     /// <summary>True for the single cheapest offer in the result set.</summary>
     public bool IsLowestPrice { get; init; }
+
+    /// <summary>
+    /// True when clicking through to this specific store right now actually
+    /// carries an affiliate tag (computed the same way <c>OutController</c>
+    /// decides whether to tag the outbound link) — never a hint about which
+    /// offer is the best deal, only which one currently supports Zaynor.
+    /// </summary>
+    public bool HasAffiliateLink { get; init; }
 }

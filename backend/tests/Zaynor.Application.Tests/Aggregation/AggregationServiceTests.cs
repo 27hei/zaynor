@@ -1,12 +1,64 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Zaynor.Application.Aggregation;
+using Zaynor.Application.Aggregation.Models;
 
 namespace Zaynor.Application.Tests.Aggregation;
 
 public class AggregationServiceTests
 {
     private static AggregationService CreateService(params IProductDataSource[] sources) =>
-        new(sources, NullLogger<AggregationService>.Instance);
+        new(sources, new AffiliateSettings(), NullLogger<AggregationService>.Instance);
+
+    private static AggregationService CreateService(AffiliateSettings affiliateSettings, params IProductDataSource[] sources) =>
+        new(sources, affiliateSettings, NullLogger<AggregationService>.Instance);
+
+    [Fact]
+    public async Task SearchAsync_SurfacesTheCorrectedQuery_WhenAColloquialArabicBrandSpellingWasFixed()
+    {
+        var service = CreateService(FakeDataSource.Returning(FakeDataSource.Offer("Jarir", 2000m)));
+
+        var result = await service.SearchAsync("سامسنج A70");
+
+        Assert.Equal("Samsung A70", result.CorrectedQuery);
+    }
+
+    [Fact]
+    public async Task SearchAsync_CorrectedQueryIsNull_WhenNothingNeededCorrecting()
+    {
+        var service = CreateService(FakeDataSource.Returning(FakeDataSource.Offer("Jarir", 2000m)));
+
+        var result = await service.SearchAsync("Samsung A70");
+
+        Assert.Null(result.CorrectedQuery);
+    }
+
+    [Fact]
+    public async Task SearchAsync_FlagsOffers_OnlyForStoresWithAnActiveAffiliateConfig()
+    {
+        var noonOffer = new StoreOffer
+        {
+            StoreName = "Noon",
+            ProductTitle = "Test Product",
+            Price = 100m,
+            Currency = "SAR",
+            ProductUrl = "https://www.noon.com/saudi-en/search/?q=test",
+        };
+        var jarirOffer = new StoreOffer
+        {
+            StoreName = "Jarir",
+            ProductTitle = "Test Product",
+            Price = 200m,
+            Currency = "SAR",
+            ProductUrl = "https://www.jarir.com/product",
+        };
+        var settings = new AffiliateSettings { NoonSuffixConfigured = true }; // Jarir/deeplink NOT configured
+        var service = CreateService(settings, FakeDataSource.Returning(noonOffer, jarirOffer));
+
+        var result = await service.SearchAsync("test");
+
+        Assert.True(result.Offers.Single(o => o.StoreName == "Noon").HasAffiliateLink);
+        Assert.False(result.Offers.Single(o => o.StoreName == "Jarir").HasAffiliateLink);
+    }
 
     [Fact]
     public async Task SearchAsync_SortsOffersByPriceAscending()

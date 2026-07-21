@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom'
 import { BrandMark } from '../components/BrandMark'
 import { SearchBar } from '../components/SearchBar'
 import { NeutralityBadge } from '../components/NeutralityBadge'
-import { FeatureHighlights } from '../components/FeatureHighlights'
 import { HomeCategories } from '../components/HomeCategories'
 import { LivePricesTeaser } from '../components/LivePricesTeaser'
 import { StoreLogo } from '../components/StoreLogo'
@@ -62,7 +61,6 @@ export function HomePage() {
       </section>
 
       <LivePricesTeaser onSelect={goToProduct} />
-      <FeatureHighlights />
       <HomeCategories onSelect={goToProduct} />
     </>
   )

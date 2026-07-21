@@ -8,7 +8,11 @@ html {
 
 body {
   margin: 0;
-  font: 16px/1.5 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  /* 500 (a real loaded weight, not a synthesized fake-bold) rather than the
+     browser default 400 — clearer and easier to read for older/low-vision
+     visitors. Anything with its own font-weight (headings, buttons, ...)
+     keeps that value; this only affects otherwise-unstyled text. */
+  font: 500 16px/1.5 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

@@ -51,6 +51,21 @@ public static class DependencyInjection
         };
         services.AddSingleton(Options.Create(jwtSettings));
 
+        // Which affiliate mechanisms are actually configured right now —
+        // the same config keys OutController reads to decide whether to tag
+        // an outbound link, bound once here so the aggregation engine can
+        // flag which offers currently support Zaynor without ever seeing
+        // the actual tag/template secrets themselves.
+        var affiliateSection = configuration.GetSection("Affiliate");
+        services.AddSingleton(new AffiliateSettings
+        {
+            AmazonTagConfigured = !string.IsNullOrWhiteSpace(affiliateSection["AmazonTag"]),
+            NoonSuffixConfigured = !string.IsNullOrWhiteSpace(affiliateSection["NoonUtmSuffix"]),
+            DeeplinkConfigured = affiliateSection["DeeplinkTemplate"] is { Length: > 0 } template && template.Contains("{url}"),
+            DeeplinkHosts = (affiliateSection["DeeplinkHosts"] ?? "jarir.com,extra.com,aliexpress.com")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
+        });
+
         services.AddScoped<IAuthService, AuthService>();
         services.AddSingleton<ITokenService, JwtTokenService>();
         services.AddScoped<IUserItemsService, UserItemsService>();

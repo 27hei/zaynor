@@ -263,11 +263,14 @@ export function SearchBar({
               </svg>
             )}
           </button>
+          {/* No `capture` attribute — that forces mobile browsers straight
+              into the camera app, skipping the native chooser that offers
+              both "Camera" and "Photo Library"/"Gallery". Leaving it off
+              lets the OS show its normal picker with both options. */}
           <input
             ref={imageInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp"
-            capture="environment"
             className="sr-only"
             onChange={handleImageSelected}
           />

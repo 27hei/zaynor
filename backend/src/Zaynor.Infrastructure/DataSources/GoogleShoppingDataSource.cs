@@ -79,7 +79,7 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
             // checks, so they're judged consistently) fixes this without
             // ever inventing data — it only helps Google understand what was
             // actually typed.
-            var effectiveQuery = NormalizeArabicBrandNames(query);
+            var effectiveQuery = ArabicBrandNormalizer.Normalize(query);
 
             var client = _httpClientFactory.CreateClient(nameof(GoogleShoppingDataSource));
             using var request = new HttpRequestMessage(HttpMethod.Post, Endpoint)
@@ -185,58 +185,6 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
 
     private static bool IsNoon(string? source) =>
         !string.IsNullOrWhiteSpace(source) && source.Contains("noon", StringComparison.OrdinalIgnoreCase);
-
-    // Common colloquial/informal Arabic spellings of major brand names, as
-    // typed in everyday Gulf/Saudi Arabic — not necessarily "correct"
-    // transliteration (e.g. "سامسنج" is missing a "و" versus the standard
-    // "سامسونج"), but exactly how people actually search. Mapped to the
-    // brand's own English name, since that's what merchant listings and
-    // Google Shopping's own catalog consistently use regardless of the
-    // storefront's display language.
-    private static readonly Dictionary<string, string> ArabicBrandNames = new(StringComparer.Ordinal)
-    {
-        ["سامسنج"] = "Samsung",
-        ["سامسونج"] = "Samsung",
-        ["سامسوونج"] = "Samsung",
-        ["ابل"] = "Apple",
-        ["آبل"] = "Apple",
-        ["أبل"] = "Apple",
-        ["ايفون"] = "iPhone",
-        ["آيفون"] = "iPhone",
-        ["أيفون"] = "iPhone",
-        ["سوني"] = "Sony",
-        ["هواوي"] = "Huawei",
-        ["شاومي"] = "Xiaomi",
-        ["زيومي"] = "Xiaomi",
-        ["ريلمي"] = "Realme",
-        ["اوبو"] = "Oppo",
-        ["أوبو"] = "Oppo",
-        ["فيفو"] = "Vivo",
-        ["نوكيا"] = "Nokia",
-        ["توشيبا"] = "Toshiba",
-        ["ديل"] = "Dell",
-        ["لينوفو"] = "Lenovo",
-        ["ايسوس"] = "Asus",
-        ["آسوس"] = "Asus",
-        ["مايكروسوفت"] = "Microsoft",
-        ["جوجل"] = "Google",
-        ["بلايستيشن"] = "PlayStation",
-        ["بلاي ستيشن"] = "PlayStation",
-        ["اكس بوكس"] = "Xbox",
-        ["إكس بوكس"] = "Xbox",
-        ["نينتندو"] = "Nintendo",
-    };
-
-    /// <summary>Replaces any known Arabic brand spelling (single- or multi-word) with its English name.</summary>
-    private static string NormalizeArabicBrandNames(string query)
-    {
-        foreach (var (arabic, english) in ArabicBrandNames)
-        {
-            query = query.Replace(arabic, english, StringComparison.Ordinal);
-        }
-
-        return query;
-    }
 
     private static readonly string[] StopWords = ["a", "an", "the", "for", "of", "with", "and", "in", "on", "to", "by"];
     private static readonly char[] TokenSeparators = [' ', '-', '_', ',', '.', '/', '(', ')'];

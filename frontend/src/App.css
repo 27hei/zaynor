@@ -14,8 +14,11 @@
   --surface: #ffffff;
   --surface-2: #f2f5f3;
   --ink: #0b1f18;
-  --text: #33433d;
-  --text-muted: #6a7a73;
+  /* Darkened from #33433d/#6a7a73 — clearer, higher-contrast body and
+     muted text (spec: founder's call — legibility for older/low-vision
+     visitors matters more than a lighter, airier gray). */
+  --text: #212e28;
+  --text-muted: #526158;
   --hairline: #e6ebe8;
   --hairline-strong: #d7ded9;
 
@@ -61,22 +64,24 @@ html[lang='ar'] {
     --accent: #e2764e;
     --accent-soft: rgba(216, 90, 48, 0.18);
 
-    --canvas: #0c1512;
-    --surface: #141e1a;
-    --surface-2: #1a2521;
+    /* A softer dark gray-green, not near-black — easier on the eyes for
+       extended reading than the previous #0c1512 (spec: founder's call). */
+    --canvas: #161f1c;
+    --surface: #1e2926;
+    --surface-2: #263631;
     --ink: #edf5f0;
     --text: #cbdcd4;
-    --text-muted: #86a196;
-    --hairline: #223129;
-    --hairline-strong: #2d4038;
+    --text-muted: #93aba1;
+    --hairline: #2c3b36;
+    --hairline-strong: #3a4c45;
 
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 12px 30px -12px rgba(0, 0, 0, 0.5);
     --shadow-lg: 0 28px 60px -24px rgba(0, 0, 0, 0.6);
 
-    --header-bg: rgba(12, 21, 18, 0.82);
-    --skeleton-shimmer: #223129;
+    --header-bg: rgba(22, 31, 28, 0.82);
+    --skeleton-shimmer: #2c3b36;
     --warning-bg: #2a2410;
     --warning-border: #4a3f18;
     --warning-fg: #e8c95f;
@@ -107,22 +112,22 @@ html[lang='ar'] {
   --accent: #e2764e;
   --accent-soft: rgba(216, 90, 48, 0.18);
 
-  --canvas: #0c1512;
-  --surface: #141e1a;
-  --surface-2: #1a2521;
+  --canvas: #161f1c;
+  --surface: #1e2926;
+  --surface-2: #263631;
   --ink: #edf5f0;
   --text: #cbdcd4;
-  --text-muted: #86a196;
-  --hairline: #223129;
-  --hairline-strong: #2d4038;
+  --text-muted: #93aba1;
+  --hairline: #2c3b36;
+  --hairline-strong: #3a4c45;
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 12px 30px -12px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 28px 60px -24px rgba(0, 0, 0, 0.6);
 
-  --header-bg: rgba(12, 21, 18, 0.82);
-  --skeleton-shimmer: #223129;
+  --header-bg: rgba(22, 31, 28, 0.82);
+  --skeleton-shimmer: #2c3b36;
   --warning-bg: #2a2410;
   --warning-border: #4a3f18;
   --warning-fg: #e8c95f;
@@ -273,12 +278,19 @@ html[lang='ar'] {
   flex-wrap: wrap;
 }
 
-.header-search-toggle {
+/* Every icon-only header control (search, theme, cart) shares this exact
+   footprint and hover behavior — previously .theme-toggle had no CSS of its
+   own at all and rendered as a bare, unstyled native button next to these
+   carefully-matched ones, the clearest case of the header's buttons not
+   reading as one consistent family. */
+.header-search-toggle,
+.theme-toggle,
+.header-cart {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   color: var(--text);
   background: transparent;
   border: 1px solid var(--hairline-strong);
@@ -287,7 +299,9 @@ html[lang='ar'] {
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 
-.header-search-toggle:hover {
+.header-search-toggle:hover,
+.theme-toggle:hover,
+.header-cart:hover {
   color: var(--brand-strong);
   border-color: var(--brand);
 }
@@ -316,21 +330,9 @@ html[lang='ar'] {
 }
 
 .header-cart {
+  /* Shared sizing/color/border/hover comes from the combined selector
+     above; only the badge's positioning context is specific to the cart. */
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  color: var(--text);
-  border: 1px solid transparent;
-  border-radius: 10px;
-  transition: color 0.15s ease, border-color 0.15s ease;
-}
-
-.header-cart:hover {
-  color: var(--brand-strong);
-  border-color: var(--hairline-strong);
 }
 
 .header-cart-badge {
@@ -851,17 +853,21 @@ html[lang='ar'] {
   font-weight: 600;
   font-family: inherit;
   color: #fff;
-  background: var(--brand-strong);
+  /* Same gradient/lift as .btn-primary — both are the site's "primary
+     action" button and should read as the same family, not two different
+     styles of green button. */
+  background: linear-gradient(180deg, var(--brand) 0%, var(--brand-strong) 100%);
   border: none;
   border-radius: 14px;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
-  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .search-button:hover:not(:disabled) {
-  background: var(--brand-deep);
+  background: linear-gradient(180deg, var(--brand-strong) 0%, var(--brand-deep) 100%);
   box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .search-button:active:not(:disabled) {
@@ -1177,6 +1183,14 @@ html[lang='ar'] {
   letter-spacing: 0.06em;
   color: var(--text-muted);
   margin: 0 0 0.9rem;
+}
+
+/* "Showing results for X" note — transparency for the automatic
+   colloquial-Arabic-brand-spelling correction, not a silent swap. */
+.corrected-query-note {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 /* Demo-data honesty banner */
@@ -1517,6 +1531,23 @@ html[lang='ar'] {
 .store-rating-count {
   font-weight: 500;
   color: var(--text-muted);
+}
+
+/* A store where clicking through actually earns Zaynor commission right
+   now — never a hint about which offer is the best deal (that's still
+   price alone), just an honest, warm accent distinct from both the green
+   "lowest price" tag and the gold rating stars. */
+.offer-affiliate-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  cursor: help;
 }
 
 .offer-side {
