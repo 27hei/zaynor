@@ -103,14 +103,23 @@ export function OfferList({ offers }: OfferListProps) {
               </div>
               <div className="offer-side">
                 <span className="offer-price">{formatPrice(offer.price, offer.currency)}</span>
-                <a
-                  className="offer-link"
-                  href={outboundUrl(offer.productUrl, offer.storeName, offer.productTitle)}
-                  target="_blank"
-                  rel="noopener noreferrer sponsored"
-                >
-                  {t('results.goToStore')}
-                </a>
+                <span className="offer-link-wrap">
+                  <a
+                    className="offer-link"
+                    href={outboundUrl(offer.productUrl, offer.storeName, offer.productTitle)}
+                    target="_blank"
+                    rel="noopener noreferrer sponsored"
+                  >
+                    {t('results.goToStore')}
+                  </a>
+                  {/* Most non-Noon merchants only have a Google compare-prices
+                      link (no verified direct site URL) — say so plainly
+                      rather than implying a direct store link (spec: trust
+                      is the product). */}
+                  {offer.productUrl.includes('google.com') && (
+                    <span className="offer-link-note">{t('results.viaGoogle')}</span>
+                  )}
+                </span>
               </div>
             </li>
           )

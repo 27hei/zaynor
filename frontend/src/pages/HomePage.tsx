@@ -5,7 +5,6 @@ import type { SearchResult } from '../api/types'
 import { BrandMark } from '../components/BrandMark'
 import { SearchBar } from '../components/SearchBar'
 import { NeutralityBadge } from '../components/NeutralityBadge'
-import { PopularSearches } from '../components/PopularSearches'
 import { RecommendationBanner } from '../components/RecommendationBanner'
 import { OfferList } from '../components/OfferList'
 import { OfferListSkeleton } from '../components/OfferListSkeleton'
@@ -73,6 +72,18 @@ export function HomePage() {
         setLoadingLong(false)
       }
     }
+  }
+
+  // "Start over": back to the empty hero state, as if freshly landed.
+  function handleReset() {
+    activeRequest.current?.abort()
+    setQuery('')
+    setResult(null)
+    setError(null)
+    setSaved(false)
+    setAlertSet(false)
+    setActionError(null)
+    navigate('/', { replace: true })
   }
 
   // Save the searched product to the signed-in user's list (spec FR9).
@@ -144,28 +155,15 @@ export function HomePage() {
           <h1 className="hero-title">{t('hero.title')}</h1>
           <p className="hero-subtitle">{t('hero.subtitle')}</p>
 
-          <SearchBar value={query} onChange={setQuery} onSearch={handleSearch} disabled={loading} />
+          <SearchBar
+            value={query}
+            onChange={setQuery}
+            onSearch={handleSearch}
+            disabled={loading}
+            recentSearches={recent}
+            onClearRecent={clearRecent}
+          />
           <NeutralityBadge />
-          <PopularSearches onSelect={handleSearch} />
-
-          {recent.length > 0 && (
-            <div className="popular-searches" aria-label={t('hero.recentLabel')}>
-              <span className="popular-searches-label">{t('hero.recentLabel')}</span>
-              {recent.map((recentQuery) => (
-                <button
-                  key={recentQuery}
-                  type="button"
-                  className="popular-chip"
-                  onClick={() => handleSearch(recentQuery)}
-                >
-                  {recentQuery}
-                </button>
-              ))}
-              <button type="button" className="recent-clear" onClick={clearRecent}>
-                {t('hero.clearRecent')}
-              </button>
-            </div>
-          )}
 
           <div className="hero-trust">
             <span className="hero-trust-label">{t('hero.trustLine')}</span>
@@ -180,7 +178,19 @@ export function HomePage() {
         </section>
       ) : (
         <section className="hero hero-compact">
-          <SearchBar value={query} onChange={setQuery} onSearch={handleSearch} disabled={loading} />
+          <div className="hero-compact-search">
+            <SearchBar
+              value={query}
+              onChange={setQuery}
+              onSearch={handleSearch}
+              disabled={loading}
+              recentSearches={recent}
+              onClearRecent={clearRecent}
+            />
+            <button type="button" className="search-reset" onClick={handleReset}>
+              {t('hero.reset')}
+            </button>
+          </div>
         </section>
       )}
 

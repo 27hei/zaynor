@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { BrandMark } from './BrandMark'
 import { LanguageToggle } from './LanguageToggle'
+import { ThemeToggle } from './ThemeToggle'
 import { HeaderSearch } from './HeaderSearch'
 import { CartIcon } from './icons'
 import { getSavedProducts } from '../api/client'
@@ -45,10 +46,12 @@ export function Header() {
   return (
     <header className={menuOpen ? 'header menu-open' : 'header'}>
       <div className="header-inner">
-        <Link to="/" className="header-brand" aria-label="Zaynor home" onClick={close}>
+        {/* A plain <a>, not <Link> — a full page reload back to a clean
+            home state is the point here, not client-side navigation. */}
+        <a href="/" className="header-brand" aria-label="Zaynor home">
           <BrandMark size={34} />
           <img src="/zaynor-wordmark.png" alt="Zaynor" className="header-logo-word" />
-        </Link>
+        </a>
 
         {/* Mobile menu toggle (hidden on desktop via CSS) */}
         <button
@@ -88,6 +91,7 @@ export function Header() {
             </Link>
           )}
 
+          <ThemeToggle />
           <LanguageToggle />
           {user ? (
             <>

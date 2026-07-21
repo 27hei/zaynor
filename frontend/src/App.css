@@ -31,10 +31,92 @@
 
   --font-display: 'Sora', 'Inter', system-ui, sans-serif;
   --maxw: 1120px;
+
+  /* A few spots use raw colors instead of the tokens above (a translucent
+     header, a shimmer highlight, warning/error text) — tokenized here too so
+     dark mode can override them without hunting through the file. */
+  --header-bg: rgba(248, 250, 249, 0.82);
+  --skeleton-shimmer: #e9efec;
+  --warning-bg: #fdf6e3;
+  --warning-border: #f0e2b6;
+  --warning-fg: #7a5a00;
+  --danger-fg: #8a2c10;
+  --danger-border: #f1c6b6;
+
+  color-scheme: light;
 }
 
 html[lang='ar'] {
   --font-display: 'Cairo', 'Sora', system-ui, sans-serif;
+}
+
+/* Dark theme — same structure, inverted surfaces. Applied via the
+   ThemeProvider-stamped data-theme attribute (explicit user choice takes
+   priority) and, absent that, the OS preference. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --brand-strong: #22b585;
+    --brand-tint: rgba(29, 158, 117, 0.16);
+    --brand-tint-2: rgba(29, 158, 117, 0.3);
+    --accent: #e2764e;
+    --accent-soft: rgba(216, 90, 48, 0.18);
+
+    --canvas: #0c1512;
+    --surface: #141e1a;
+    --surface-2: #1a2521;
+    --ink: #edf5f0;
+    --text: #cbdcd4;
+    --text-muted: #86a196;
+    --hairline: #223129;
+    --hairline-strong: #2d4038;
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 12px 30px -12px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 28px 60px -24px rgba(0, 0, 0, 0.6);
+
+    --header-bg: rgba(12, 21, 18, 0.82);
+    --skeleton-shimmer: #223129;
+    --warning-bg: #2a2410;
+    --warning-border: #4a3f18;
+    --warning-fg: #e8c95f;
+    --danger-fg: #ff9d7a;
+    --danger-border: #5a3226;
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --brand-strong: #22b585;
+  --brand-tint: rgba(29, 158, 117, 0.16);
+  --brand-tint-2: rgba(29, 158, 117, 0.3);
+  --accent: #e2764e;
+  --accent-soft: rgba(216, 90, 48, 0.18);
+
+  --canvas: #0c1512;
+  --surface: #141e1a;
+  --surface-2: #1a2521;
+  --ink: #edf5f0;
+  --text: #cbdcd4;
+  --text-muted: #86a196;
+  --hairline: #223129;
+  --hairline-strong: #2d4038;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 12px 30px -12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 28px 60px -24px rgba(0, 0, 0, 0.6);
+
+  --header-bg: rgba(12, 21, 18, 0.82);
+  --skeleton-shimmer: #223129;
+  --warning-bg: #2a2410;
+  --warning-border: #4a3f18;
+  --warning-fg: #e8c95f;
+  --danger-fg: #ff9d7a;
+  --danger-border: #5a3226;
+
+  color-scheme: dark;
 }
 
 .page {
@@ -67,7 +149,7 @@ html[lang='ar'] {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(248, 250, 249, 0.82);
+  background: var(--header-bg);
   backdrop-filter: saturate(180%) blur(12px);
   border-bottom: 1px solid var(--hairline);
 }
@@ -435,6 +517,54 @@ html[lang='ar'] {
   padding: 2rem 0 0.5rem;
 }
 
+.hero-compact-search {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.hero-compact-search .search-bar {
+  flex: 1;
+  max-width: none;
+  margin: 0;
+}
+
+.search-reset {
+  flex-shrink: 0;
+  padding: 0.7rem 1.1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.search-reset:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+@media (max-width: 520px) {
+  .hero-compact-search {
+    flex-wrap: wrap;
+  }
+
+  .hero-compact-search .search-bar {
+    flex-basis: 100%;
+  }
+
+  .search-reset {
+    margin: 0 auto;
+  }
+}
+
 .hero-mark {
   display: flex;
   justify-content: center;
@@ -641,6 +771,27 @@ html[lang='ar'] {
 .search-suggestion-active {
   background: var(--brand-tint);
   color: var(--brand-strong);
+}
+
+/* Recent-searches heading row inside the dropdown (shown below MIN_CHARS) */
+.search-suggestions-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.9rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.search-suggestions-heading .recent-clear {
+  padding: 0;
+  font-size: 0.75rem;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 /* Clear button for recent searches */
@@ -873,9 +1024,9 @@ html[lang='ar'] {
   padding: 0.7rem 1rem;
   font-size: 0.85rem;
   font-weight: 500;
-  color: #7a5a00;
-  background: #fdf6e3;
-  border: 1px solid #f0e2b6;
+  color: var(--warning-fg);
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
   border-radius: var(--radius-sm);
 }
 
@@ -1147,6 +1298,18 @@ html[lang='ar'] {
   background: var(--brand-tint);
 }
 
+.offer-link-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.offer-link-note {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
 .offer-lowest .offer-link {
   color: #fff;
   background: var(--accent);
@@ -1286,7 +1449,7 @@ html[lang='ar'] {
 .skeleton-line {
   height: 0.9rem;
   border-radius: 6px;
-  background: linear-gradient(90deg, var(--surface-2) 25%, #e9efec 37%, var(--surface-2) 63%);
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--skeleton-shimmer) 37%, var(--surface-2) 63%);
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
 }
@@ -1547,6 +1710,10 @@ html[lang='ar'] {
   margin-bottom: 0;
 }
 
+.about-stats {
+  margin: 2rem 0;
+}
+
 .about-name-note {
   margin-top: 1.5rem;
   padding-inline-start: 1rem;
@@ -1597,17 +1764,34 @@ html[lang='ar'] {
   box-shadow: var(--shadow-xs);
 }
 
-.step-number {
+.step-icon {
+  position: relative;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  font-family: var(--font-display);
-  font-weight: 700;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   color: var(--brand-strong);
   background: var(--brand-tint);
+}
+
+.step-number {
+  position: absolute;
+  bottom: -6px;
+  inset-inline-end: -6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--brand-strong);
+  border: 2px solid var(--surface);
   border-radius: 50%;
 }
 
@@ -1639,7 +1823,10 @@ html[lang='ar'] {
   font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--brand-deep);
+  /* brand-strong, not brand-deep — brand-deep is a fixed near-black green
+     used elsewhere only as a background; as text on the tinted card it
+     went nearly invisible in dark mode, where the tint itself darkens. */
+  color: var(--brand-strong);
 }
 
 .transparency-text {
@@ -1694,6 +1881,14 @@ html[lang='ar'] {
   font-weight: 600;
   font-size: 1.02rem;
   color: var(--ink);
+}
+
+/* Distinguishes "no curated products yet, this seeds a live search"
+   category cards from the ones above showing real catalog items. */
+.category-search-hint {
+  margin-top: -0.4rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
 }
 
 /* ============ Auth ============ */
@@ -1768,9 +1963,9 @@ html[lang='ar'] {
   padding: 0.75rem 0.95rem;
   font-size: 0.88rem;
   font-weight: 500;
-  color: #8a2c10;
+  color: var(--danger-fg);
   background: var(--accent-soft);
-  border: 1px solid #f1c6b6;
+  border: 1px solid var(--danger-border);
   border-radius: 11px;
 }
 

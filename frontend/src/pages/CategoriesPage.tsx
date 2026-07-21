@@ -96,6 +96,7 @@ export function CategoriesPage() {
                 <Icon />
               </span>
               <span className="category-name">{t(`category.${key}`)}</span>
+              <span className="category-search-hint">{t('categories.searchHint')}</span>
             </button>
           )
         })}

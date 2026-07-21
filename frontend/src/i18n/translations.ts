@@ -27,10 +27,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     'hero.searchPlaceholder': 'Search for a product, e.g. Sony PlayStation 5',
     'hero.searchButton': 'Search',
     'hero.neutrality': '100% impartial — every store ranked by price alone, never by commission',
-    'hero.popularLabel': 'Try:',
-    'hero.recentLabel': 'Recent:',
+    'hero.recentLabel': 'Recent searches',
     'hero.clearRecent': 'Clear',
     'hero.trustLine': 'Comparing offers across',
+    'hero.reset': 'Reset',
 
     'results.searching': 'Searching stores…',
     'results.noResults': 'No offers found for "{query}".',
@@ -56,6 +56,7 @@ export const translations: Record<Lang, Record<string, string>> = {
       'The first request can take up to a minute while the server wakes up — thanks for your patience.',
     'results.noonFallbackText': "Noon isn't in these results yet — search for it directly on Noon.",
     'results.noonFallbackCta': 'Search on Noon',
+    'results.viaGoogle': 'via Google Shopping',
 
     'summary.meta': '{count} offers · best price {price}',
 
@@ -133,6 +134,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'catalog.from': 'from {price}',
     'teaser.title': 'Real prices, right now',
     'categories.subtitle': 'Category browsing is expanding — start with a search for now.',
+    'categories.searchHint': 'Search this category live',
     'category.electronics': 'Electronics',
     'category.gaming': 'Gaming',
     'category.phones': 'Phones',
@@ -148,6 +150,12 @@ export const translations: Record<Lang, Record<string, string>> = {
       'Zaynor does not sell products. It sells confidence in the buying decision. Our promise: never buy until you are sure you got the best price and the best value.',
     'about.p3':
       'The name blends the Arabic roots zayn (the finest) and noor (light, clarity): the best choice, made clear.',
+    'about.stat1Title': 'Many stores, one search',
+    'about.stat1Text': 'Amazon, Noon, Jarir, Extra, AliExpress, and dozens more via Google Shopping.',
+    'about.stat2Title': '100% impartial',
+    'about.stat2Text': 'Ranked by price alone — commission never affects the order.',
+    'about.stat3Title': 'Real prices, live',
+    'about.stat3Text': 'Pulled from the stores themselves the moment you search — not a stale cache.',
 
     'how.title': 'How It Works',
     'how.step1.title': 'Search',
@@ -245,10 +253,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     'hero.searchPlaceholder': 'ابحث عن منتج، مثل سوني بلايستيشن ٥',
     'hero.searchButton': 'بحث',
     'hero.neutrality': 'محايد ١٠٠٪ — كل متجر يُرتَّب حسب السعر فقط، لا حسب العمولة',
-    'hero.popularLabel': 'جرّب:',
-    'hero.recentLabel': 'بحثت مؤخرًا:',
+    'hero.recentLabel': 'بحثت مؤخرًا',
     'hero.clearRecent': 'مسح',
     'hero.trustLine': 'نقارن العروض عبر',
+    'hero.reset': 'إعادة تعيين',
 
     'results.searching': 'جارٍ البحث في المتاجر…',
     'results.noResults': 'لا توجد عروض لـ "{query}".',
@@ -274,6 +282,7 @@ export const translations: Record<Lang, Record<string, string>> = {
       'قد يستغرق أول طلب حتى دقيقة ريثما يستيقظ الخادم — شكرًا لصبرك.',
     'results.noonFallbackText': 'نون غير موجود ضمن هذي النتائج — ابحث عنه مباشرة في نون.',
     'results.noonFallbackCta': 'ابحث في نون',
+    'results.viaGoogle': 'عبر Google Shopping',
 
     'summary.meta': '{count} عروض · أفضل سعر {price}',
 
@@ -351,6 +360,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'catalog.from': 'يبدأ من {price}',
     'teaser.title': 'أسعار حقيقية، الآن',
     'categories.subtitle': 'تصفّح الفئات في توسّع مستمر — ابدأ بالبحث الآن.',
+    'categories.searchHint': 'ابحث في هذه الفئة مباشرة',
     'category.electronics': 'إلكترونيات',
     'category.gaming': 'ألعاب',
     'category.phones': 'هواتف',
@@ -366,6 +376,12 @@ export const translations: Record<Lang, Record<string, string>> = {
       'زينور لا يبيع المنتجات، بل يبيع الثقة في قرار الشراء. وعدنا: لا تشترِ حتى تتأكد أنك حصلت على أفضل سعر وأفضل قيمة.',
     'about.p3':
       'الاسم يمزج الجذرين العربيين «زين» (الأفضل) و«نور» (الوضوح): الخيار الأفضل، بوضوح.',
+    'about.stat1Title': 'متاجر كثيرة، بحث واحد',
+    'about.stat1Text': 'أمازون، نون، جرير، إكسترا، علي إكسبريس، وعشرات المتاجر عبر Google Shopping.',
+    'about.stat2Title': 'محايد ١٠٠٪',
+    'about.stat2Text': 'الترتيب حسب السعر فقط — العمولة لا تؤثر على الترتيب أبدًا.',
+    'about.stat3Title': 'أسعار حقيقية ومباشرة',
+    'about.stat3Text': 'مسحوبة من المتاجر نفسها لحظة بحثك — مو أرقام قديمة مخزّنة.',
 
     'how.title': 'كيف يعمل',
     'how.step1.title': 'ابحث',

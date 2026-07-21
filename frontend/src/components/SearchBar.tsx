@@ -10,14 +10,25 @@ interface SearchBarProps {
   onChange: (value: string) => void
   onSearch: (query: string) => void
   disabled?: boolean
+  recentSearches?: string[]
+  onClearRecent?: () => void
 }
 
 /**
  * The search box with live autocomplete (competitive analysis table stakes
- * #1). Suggestions are fetched debounced from the API, navigable by keyboard
- * (arrows/Enter/Escape), and exposed via combobox ARIA roles.
+ * #1). Below MIN_CHARS the dropdown shows recent searches instead (opened on
+ * focus, like a favorites list); at MIN_CHARS+ it switches to live API
+ * suggestions. Both are navigable by keyboard (arrows/Enter/Escape) and
+ * exposed via combobox ARIA roles.
  */
-export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProps) {
+export function SearchBar({
+  value,
+  onChange,
+  onSearch,
+  disabled,
+  recentSearches = [],
+  onClearRecent,
+}: SearchBarProps) {
   const { t } = useTranslation()
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [open, setOpen] = useState(false)
@@ -26,6 +37,9 @@ export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProp
   const fetchController = useRef<AbortController | null>(null)
   const suppressFetch = useRef(false)
   const isFirstRender = useRef(true)
+
+  const isShort = value.trim().length < MIN_CHARS
+  const items = isShort ? recentSearches : suggestions
 
   // Debounced suggestion fetch as the user types.
   useEffect(() => {
@@ -50,7 +64,7 @@ export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProp
     const trimmed = value.trim()
     if (trimmed.length < MIN_CHARS) {
       setSuggestions([])
-      setOpen(false)
+      setActiveIndex(-1)
       return
     }
 
@@ -84,6 +98,14 @@ export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProp
     onSearch(suggestion)
   }
 
+  function handleFocus() {
+    // Below MIN_CHARS there's nothing to fetch — offer recent searches
+    // instead, like a favorites list, so the box is never a dead end.
+    if (isShort && recentSearches.length > 0) {
+      setOpen(true)
+    }
+  }
+
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
     const trimmed = value.trim()
@@ -99,23 +121,25 @@ export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProp
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (!open || suggestions.length === 0) {
+    if (!open || items.length === 0) {
       return
     }
 
     if (event.key === 'ArrowDown') {
       event.preventDefault()
-      setActiveIndex((i) => (i + 1) % suggestions.length)
+      setActiveIndex((i) => (i + 1) % items.length)
     } else if (event.key === 'ArrowUp') {
       event.preventDefault()
-      setActiveIndex((i) => (i <= 0 ? suggestions.length - 1 : i - 1))
+      setActiveIndex((i) => (i <= 0 ? items.length - 1 : i - 1))
     } else if (event.key === 'Enter' && activeIndex >= 0) {
       event.preventDefault()
-      select(suggestions[activeIndex])
+      select(items[activeIndex])
     } else if (event.key === 'Escape') {
       close()
     }
   }
+
+  const showDropdown = open && items.length > 0
 
   return (
     <form className="search-bar" onSubmit={handleSubmit} role="search">
@@ -140,22 +164,41 @@ export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProp
           placeholder={t('hero.searchPlaceholder')}
           aria-label={t('hero.searchPlaceholder')}
           role="combobox"
-          aria-expanded={open}
+          aria-expanded={showDropdown}
           aria-controls="search-suggestions"
           aria-autocomplete="list"
           autoComplete="off"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
+          onFocus={handleFocus}
           onBlur={() => window.setTimeout(close, 150)}
           disabled={disabled}
         />
 
-        {open && (
+        {showDropdown && (
           <ul id="search-suggestions" className="search-suggestions" role="listbox">
-            {suggestions.map((suggestion, index) => (
+            {isShort && (
+              <li className="search-suggestions-heading">
+                <span>{t('hero.recentLabel')}</span>
+                {onClearRecent && (
+                  <button
+                    type="button"
+                    className="recent-clear"
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      onClearRecent()
+                      close()
+                    }}
+                  >
+                    {t('hero.clearRecent')}
+                  </button>
+                )}
+              </li>
+            )}
+            {items.map((item, index) => (
               <li
-                key={suggestion}
+                key={item}
                 role="option"
                 aria-selected={index === activeIndex}
                 className={
@@ -166,11 +209,11 @@ export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProp
                 // mousedown fires before the input's blur, so the click wins.
                 onMouseDown={(e) => {
                   e.preventDefault()
-                  select(suggestion)
+                  select(item)
                 }}
                 onMouseEnter={() => setActiveIndex(index)}
               >
-                {suggestion}
+                {item}
               </li>
             ))}
           </ul>
