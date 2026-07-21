@@ -2,6 +2,8 @@
   "name": "ZAYNOR — Smart Shopping Decisions",
   "short_name": "Zaynor",
   "description": "Compare prices across Saudi stores and buy with confidence.",
+  "lang": "ar",
+  "dir": "rtl",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8faf9",

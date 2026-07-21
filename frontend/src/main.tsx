@@ -6,6 +6,9 @@ import App from './App.tsx'
 import { LanguageProvider } from './i18n/LanguageProvider'
 import { AuthProvider } from './auth/AuthProvider'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { initAnalytics } from './analytics'
+
+initAnalytics()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

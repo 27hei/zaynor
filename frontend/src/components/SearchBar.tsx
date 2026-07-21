@@ -88,6 +88,11 @@ export function SearchBar({ value, onChange, onSearch, disabled }: SearchBarProp
     event.preventDefault()
     const trimmed = value.trim()
     if (trimmed) {
+      // Cancel any in-flight/pending suggestion fetch — otherwise it can
+      // resolve after submit and reopen the dropdown on top of the results
+      // that just rendered underneath.
+      window.clearTimeout(debounceTimer.current)
+      fetchController.current?.abort()
       close()
       onSearch(trimmed)
     }
