@@ -4,11 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Zaynor.Application.Aggregation;
 using Zaynor.Application.Auth;
+using Zaynor.Application.ImageSearch;
 using Zaynor.Application.UserItems;
 using Zaynor.Infrastructure.Aggregation;
 using Zaynor.Infrastructure.Alerts;
 using Zaynor.Infrastructure.Auth;
 using Zaynor.Infrastructure.DataSources;
+using Zaynor.Infrastructure.ImageSearch;
 using Zaynor.Infrastructure.Persistence;
 using Zaynor.Infrastructure.UserItems;
 
@@ -78,6 +80,12 @@ public static class DependencyInjection
         services.AddScoped<IProductDataSource, GoogleShoppingDataSource>();
 
         services.AddScoped<IProductDataSource, MockProductDataSource>();
+
+        // "Search by photo" — reuses the same Serper account/key as
+        // GoogleShoppingDataSource for its reverse-image (Lens) endpoint.
+        services.AddSingleton<ITempImageStore, MemoryTempImageStore>();
+        services.AddHttpClient(nameof(SerperLensQueryResolver), c => c.Timeout = liveSourceTimeout);
+        services.AddScoped<IImageQueryResolver, SerperLensQueryResolver>();
 
         // The public engine = core AggregationService (registered by
         // AddApplication) decorated with caching + price-history recording

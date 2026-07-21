@@ -77,6 +77,13 @@ export function OfferList({ offers }: OfferListProps) {
         </div>
       )}
 
+      {sortedOffers.length > 0 && (
+        <div className="offer-table-head" aria-hidden="true">
+          <span>{t('results.colStore')}</span>
+          <span>{t('results.colPrice')}</span>
+        </div>
+      )}
+
       <ul className="offer-list">
         {visibleOffers.map((offer, index) => {
           const shipping = shippingLabel(offer)

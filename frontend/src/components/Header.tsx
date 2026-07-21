@@ -15,11 +15,23 @@ export function Header() {
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [savedCount, setSavedCount] = useState(0)
+  const [scrolled, setScrolled] = useState(false)
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? 'nav-link nav-link-active' : 'nav-link'
 
   const close = () => setMenuOpen(false)
+
+  // Shrinks the header once the page has scrolled a little, giving content
+  // more room without hiding the header entirely.
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 12)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   // Powers the cart-style saved-products shortcut; re-checked on navigation
   // so the badge stays right after saving/removing a product elsewhere.
@@ -43,13 +55,17 @@ export function Header() {
 
   const initial = user?.email.charAt(0).toUpperCase()
 
+  const headerClass = ['header', menuOpen && 'menu-open', scrolled && 'header-scrolled']
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <header className={menuOpen ? 'header menu-open' : 'header'}>
+    <header className={headerClass}>
       <div className="header-inner">
         {/* A plain <a>, not <Link> — a full page reload back to a clean
             home state is the point here, not client-side navigation. */}
         <a href="/" className="header-brand" aria-label="Zaynor home">
-          <BrandMark size={34} />
+          <BrandMark size={scrolled ? 28 : 34} />
           <img src="/zaynor-wordmark.png" alt="Zaynor" className="header-logo-word" />
         </a>
 

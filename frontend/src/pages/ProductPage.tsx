@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { createAlert, outboundUrl, saveProduct, searchProducts } from '../api/client'
+import { createAlert, getSuggestions, outboundUrl, saveProduct, searchProducts } from '../api/client'
 import type { SearchResult } from '../api/types'
+import { CATEGORY_SEEDS } from '../categories'
 import { SearchBar } from '../components/SearchBar'
 import { RecommendationBanner } from '../components/RecommendationBanner'
 import { OfferList } from '../components/OfferList'
@@ -13,6 +14,7 @@ import { useTranslation } from '../i18n/useTranslation'
 import { useAuth } from '../auth/useAuth'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useRecentSearches } from '../hooks/useRecentSearches'
+import { useToast } from '../toast/useToast'
 
 /**
  * A product's own page: one URL per search, so a result is something a
@@ -25,17 +27,17 @@ export function ProductPage() {
   const { t } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const toast = useToast()
   const [searchParams] = useSearchParams()
   const initialQuery = searchParams.get('q') ?? ''
 
   const [query, setQuery] = useState(initialQuery)
   const [result, setResult] = useState<SearchResult | null>(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [alertSet, setAlertSet] = useState(false)
   const [loadingLong, setLoadingLong] = useState(false)
-  const [actionError, setActionError] = useState<string | null>(null)
+  const [altSuggestions, setAltSuggestions] = useState<string[]>([])
   const activeRequest = useRef<AbortController | null>(null)
   const lastRunQuery = useRef<string | null>(null)
   const { recent, add: addRecent, clear: clearRecent } = useRecentSearches()
@@ -50,10 +52,9 @@ export function ProductPage() {
     lastRunQuery.current = searchQuery
     setQuery(searchQuery)
     setLoading(true)
-    setError(null)
     setSaved(false)
     setAlertSet(false)
-    setActionError(null)
+    setAltSuggestions([])
     navigate(`/product?q=${encodeURIComponent(searchQuery)}`, { replace: true })
 
     // Free-tier hosting cold-starts can take ~a minute; after a few seconds
@@ -65,9 +66,12 @@ export function ProductPage() {
       const data = await searchProducts(searchQuery, controller.signal)
       setResult(data)
       addRecent(searchQuery)
+      if (data.offers.length === 0) {
+        loadAlternativeSuggestions(searchQuery)
+      }
     } catch (err) {
       if ((err as Error).name === 'AbortError') return
-      setError((err as Error).message)
+      toast.push(t('results.error', { message: (err as Error).message }), 'error')
       setResult(null)
     } finally {
       window.clearTimeout(longTimer)
@@ -78,18 +82,51 @@ export function ProductPage() {
     }
   }
 
+  // No results: never leave the visitor at a dead end. Try the first
+  // significant word of their query against known product names; if that
+  // also comes up empty, fall back to a fixed set of popular categories.
+  async function loadAlternativeSuggestions(failedQuery: string) {
+    const firstWord = failedQuery.trim().split(/\s+/)[0]
+    try {
+      const found = firstWord ? await getSuggestions(firstWord) : []
+      setAltSuggestions(found.length > 0 ? found : CATEGORY_SEEDS.map((c) => c.seed))
+    } catch {
+      setAltSuggestions(CATEGORY_SEEDS.map((c) => c.seed))
+    }
+  }
+
+  // Share this product's own URL — native share sheet where available
+  // (mainly mobile), otherwise copy the link and confirm via toast.
+  async function handleShare() {
+    const shareUrl = window.location.href
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: result?.query, url: shareUrl })
+      } catch {
+        // User cancelled the share sheet — not an error.
+      }
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      toast.push(t('results.linkCopied'), 'success')
+    } catch {
+      toast.push(t('results.actionError'), 'error')
+    }
+  }
+
   // Save the searched product to the signed-in user's list (spec FR9).
   async function handleSave() {
     if (!user) {
       navigate('/login')
       return
     }
-    setActionError(null)
     try {
       await saveProduct(result!.query)
       setSaved(true)
+      toast.push(t('results.savedDone'), 'success')
     } catch {
-      setActionError(t('results.actionError'))
+      toast.push(t('results.actionError'), 'error')
     }
   }
 
@@ -100,13 +137,13 @@ export function ProductPage() {
       navigate('/login')
       return
     }
-    setActionError(null)
     const best = result!.offers.find((o) => o.isLowestPrice)
     try {
       await createAlert(result!.query, best?.price ?? null, best?.currency ?? null)
       setAlertSet(true)
+      toast.push(t('results.notifySet'), 'success')
     } catch {
-      setActionError(t('results.actionError'))
+      toast.push(t('results.actionError'), 'error')
     }
   }
 
@@ -156,12 +193,6 @@ export function ProductPage() {
         {statusMessage}
       </p>
 
-      {error && (
-        <p className="hint hint-error" role="alert">
-          {t('results.error', { message: error })}
-        </p>
-      )}
-
       {loading && (
         <section className="results" aria-label={t('results.searching')} aria-busy="true">
           <p className="hint">{t('results.searching')}</p>
@@ -170,9 +201,21 @@ export function ProductPage() {
         </section>
       )}
 
-      {!loading && !error && result && !hasResults && (
+      {!loading && result && !hasResults && (
         <>
           <p className="hint">{t('results.noResults', { query: result.query })}</p>
+          {altSuggestions.length > 0 && (
+            <div className="no-results-suggestions">
+              <span className="no-results-suggestions-label">{t('results.tryInstead')}</span>
+              <div className="no-results-suggestions-row">
+                {altSuggestions.map((s) => (
+                  <button key={s} type="button" className="popular-chip" onClick={() => handleSearch(s)}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <NoonFallbackLink query={result.query} />
         </>
       )}
@@ -202,6 +245,9 @@ export function ProductPage() {
               {t('results.heading', { count: result!.offerCount, query: result!.query })}
             </h2>
             <div className="results-actions">
+              <button type="button" className="action-chip" onClick={handleShare}>
+                {t('results.share')}
+              </button>
               <button
                 type="button"
                 className="action-chip"
@@ -215,11 +261,6 @@ export function ProductPage() {
               </button>
             </div>
           </div>
-          {actionError && (
-            <p className="hint hint-error" role="alert">
-              {actionError}
-            </p>
-          )}
 
           <OfferList offers={result!.offers} />
 

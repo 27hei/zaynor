@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
-import { getSuggestions } from '../api/client'
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from 'react'
+import { getSuggestions, searchByImage } from '../api/client'
 import { useTranslation } from '../i18n/useTranslation'
+import { useToast } from '../toast/useToast'
 
 const DEBOUNCE_MS = 200
 const MIN_CHARS = 2
@@ -50,17 +51,37 @@ export function SearchBar({
   onClearRecent,
 }: SearchBarProps) {
   const { t, lang } = useTranslation()
+  const toast = useToast()
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const [listening, setListening] = useState(false)
+  const [analyzingImage, setAnalyzingImage] = useState(false)
   const debounceTimer = useRef<number | undefined>(undefined)
   const fetchController = useRef<AbortController | null>(null)
   const suppressFetch = useRef(false)
   const isFirstRender = useRef(true)
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
+  const imageInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => () => recognitionRef.current?.stop(), [])
+
+  async function handleImageSelected(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = '' // allow re-selecting the same file later
+    if (!file) return
+
+    setAnalyzingImage(true)
+    try {
+      const derivedQuery = await searchByImage(file)
+      onChange(derivedQuery)
+      onSearch(derivedQuery)
+    } catch (err) {
+      toast.push((err as Error).message, 'error')
+    } finally {
+      setAnalyzingImage(false)
+    }
+  }
 
   function toggleVoiceSearch() {
     if (!SpeechRecognitionCtor) return
@@ -222,22 +243,52 @@ export function SearchBar({
           disabled={disabled}
         />
 
-        {SpeechRecognitionCtor && (
+        <div className="search-field-actions">
           <button
             type="button"
-            className={listening ? 'search-mic search-mic-active' : 'search-mic'}
-            aria-label={listening ? t('hero.listening') : t('hero.voiceSearch')}
-            aria-pressed={listening}
-            onClick={toggleVoiceSearch}
-            disabled={disabled}
+            className={analyzingImage ? 'search-icon-btn search-icon-btn-spin' : 'search-icon-btn'}
+            aria-label={analyzingImage ? t('hero.analyzingImage') : t('hero.imageSearch')}
+            onClick={() => imageInputRef.current?.click()}
+            disabled={disabled || analyzingImage}
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <rect x="9" y="2" width="6" height="12" rx="3" />
-              <path d="M5 10a7 7 0 0 0 14 0" />
-              <path d="M12 19v3" />
-            </svg>
+            {analyzingImage ? (
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M12 3a9 9 0 1 0 9 9" />
+              </svg>
+            ) : (
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4 8V6a2 2 0 0 1 2-2h2l1.5-1.5h5L16 4h2a2 2 0 0 1 2 2v2" />
+                <path d="M4 8h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z" />
+                <circle cx="12" cy="13.5" r="3.2" />
+              </svg>
+            )}
           </button>
-        )}
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            capture="environment"
+            className="sr-only"
+            onChange={handleImageSelected}
+          />
+
+          {SpeechRecognitionCtor && (
+            <button
+              type="button"
+              className={listening ? 'search-icon-btn search-icon-btn-active' : 'search-icon-btn'}
+              aria-label={listening ? t('hero.listening') : t('hero.voiceSearch')}
+              aria-pressed={listening}
+              onClick={toggleVoiceSearch}
+              disabled={disabled}
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <rect x="9" y="2" width="6" height="12" rx="3" />
+                <path d="M5 10a7 7 0 0 0 14 0" />
+                <path d="M12 19v3" />
+              </svg>
+            </button>
+          )}
+        </div>
 
         {showDropdown && (
           <ul id="search-suggestions" className="search-suggestions" role="listbox">

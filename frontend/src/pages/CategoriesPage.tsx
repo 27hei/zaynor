@@ -14,6 +14,7 @@ import {
   AlertsIcon,
   TrustIcon,
 } from '../components/icons'
+import { Reveal } from '../components/Reveal'
 
 const CATEGORY_ICONS: Record<CategoryKey, typeof DiscoveryIcon> = {
   electronics: DiscoveryIcon,
@@ -83,21 +84,22 @@ export function CategoriesPage() {
 
       {/* Uncovered categories still seed a search */}
       <div className="category-grid">
-        {CATEGORY_SEEDS.filter(({ key }) => !covered.has(key)).map(({ key, seed }) => {
+        {CATEGORY_SEEDS.filter(({ key }) => !covered.has(key)).map(({ key, seed }, i) => {
           const Icon = CATEGORY_ICONS[key]
           return (
-            <button
-              key={key}
-              type="button"
-              className="category-card"
-              onClick={() => navigate(`/product?q=${encodeURIComponent(seed)}`)}
-            >
-              <span className="category-icon">
-                <Icon />
-              </span>
-              <span className="category-name">{t(`category.${key}`)}</span>
-              <span className="category-search-hint">{t('categories.searchHint')}</span>
-            </button>
+            <Reveal key={key} delayMs={i * 60}>
+              <button
+                type="button"
+                className="category-card"
+                onClick={() => navigate(`/product?q=${encodeURIComponent(seed)}`)}
+              >
+                <span className="category-icon">
+                  <Icon />
+                </span>
+                <span className="category-name">{t(`category.${key}`)}</span>
+                <span className="category-search-hint">{t('categories.searchHint')}</span>
+              </button>
+            </Reveal>
           )
         })}
       </div>

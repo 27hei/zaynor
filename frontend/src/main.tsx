@@ -6,6 +6,7 @@ import App from './App.tsx'
 import { LanguageProvider } from './i18n/LanguageProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
 import { AuthProvider } from './auth/AuthProvider'
+import { ToastProvider } from './toast/ToastProvider'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { initAnalytics } from './analytics'
 
@@ -17,9 +18,11 @@ createRoot(document.getElementById('root')!).render(
       <ThemeProvider>
         <LanguageProvider>
           <AuthProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
+            <ToastProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </ToastProvider>
           </AuthProvider>
         </LanguageProvider>
       </ThemeProvider>

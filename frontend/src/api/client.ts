@@ -26,6 +26,30 @@ export async function searchProducts(
   return (await response.json()) as SearchResult
 }
 
+/**
+ * "Search by photo": uploads the image, gets back the product name our
+ * reverse-image lookup recognized. The caller then runs that name through
+ * the normal searchProducts() — image search shares the exact same
+ * aggregation pipeline as a typed query, not a separate results path.
+ */
+export async function searchByImage(file: File, signal?: AbortSignal): Promise<string> {
+  const form = new FormData()
+  form.append('image', file)
+
+  const response = await fetch(`${API_BASE_URL}/api/search/by-image`, {
+    method: 'POST',
+    body: form,
+    signal,
+  })
+
+  if (!response.ok) {
+    throw new Error(await readError(response, `Image search failed (${response.status})`))
+  }
+
+  const body = (await response.json()) as { query: string }
+  return body.query
+}
+
 /** Autocomplete suggestions from products Zaynor has seen. */
 export async function getSuggestions(query: string, signal?: AbortSignal): Promise<string[]> {
   const url = `${API_BASE_URL}/api/search/suggestions?q=${encodeURIComponent(query)}`

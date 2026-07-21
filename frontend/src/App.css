@@ -173,6 +173,11 @@ html[lang='ar'] {
   background: var(--header-bg);
   backdrop-filter: saturate(180%) blur(12px);
   border-bottom: 1px solid var(--hairline);
+  transition: box-shadow 0.2s ease;
+}
+
+.header-scrolled {
+  box-shadow: var(--shadow-sm);
 }
 
 .header-inner {
@@ -184,6 +189,11 @@ html[lang='ar'] {
   justify-content: space-between;
   gap: 1.25rem;
   flex-wrap: wrap;
+  transition: padding 0.2s ease;
+}
+
+.header-scrolled .header-inner {
+  padding-block: 0.55rem;
 }
 
 .header-brand {
@@ -206,6 +216,7 @@ html[lang='ar'] {
 .brand-mark-img {
   mix-blend-mode: multiply;
   border-radius: 6px;
+  transition: width 0.2s ease, height 0.2s ease;
 }
 
 .header-logo-word {
@@ -730,7 +741,7 @@ html[lang='ar'] {
   width: 100%;
   padding-block: 1.05rem;
   padding-inline-start: 3rem;
-  padding-inline-end: 2.7rem;
+  padding-inline-end: 4.6rem;
   font-size: 1.02rem;
   font-family: inherit;
   color: var(--ink);
@@ -741,12 +752,21 @@ html[lang='ar'] {
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-/* Voice search — only rendered where the browser supports it */
-.search-mic {
+/* Voice search + image search — the trailing icon buttons inside the
+   search field. Mic only renders where the browser supports it; camera
+   always renders (server-side feature). */
+.search-field-actions {
   position: absolute;
-  inset-inline-end: 0.5rem;
+  inset-inline-end: 0.4rem;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.search-icon-btn {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -760,27 +780,27 @@ html[lang='ar'] {
   transition: color 0.15s ease, background 0.15s ease;
 }
 
-.search-mic:hover:not(:disabled) {
+.search-icon-btn:hover:not(:disabled) {
   color: var(--brand-strong);
   background: var(--brand-tint);
 }
 
-.search-mic:disabled {
+.search-icon-btn:disabled {
   opacity: 0.5;
   cursor: default;
 }
 
-.search-mic-active {
+.search-icon-btn-active {
   color: #fff;
   background: var(--accent);
 }
 
-.search-mic-active:hover:not(:disabled) {
+.search-icon-btn-active:hover:not(:disabled) {
   color: #fff;
   background: var(--accent);
 }
 
-.search-mic-active::after {
+.search-icon-btn-active::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -792,6 +812,16 @@ html[lang='ar'] {
   transform: translate(-50%, -50%) scale(1);
   animation: mic-pulse-ring 1.3s ease-out infinite;
   pointer-events: none;
+}
+
+@keyframes icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.search-icon-btn-spin svg {
+  animation: icon-spin 0.9s linear infinite;
 }
 
 @keyframes mic-pulse-ring {
@@ -969,6 +999,24 @@ html[lang='ar'] {
   background: var(--brand-tint);
 }
 
+.no-results-suggestions {
+  margin-top: 1rem;
+}
+
+.no-results-suggestions-label {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.no-results-suggestions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 /* ============ Utility / status ============ */
 .sr-only {
   position: absolute;
@@ -1029,6 +1077,20 @@ html[lang='ar'] {
   background: var(--brand-tint);
   border-radius: 999px;
   white-space: nowrap;
+}
+
+/* The translucent tint reads too low-contrast against a dark surface at
+   this small a font size — a solid fill with white text is unambiguous. */
+:root[data-theme='dark'] .recommendation-badge {
+  color: #fff;
+  background: var(--brand-strong);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .recommendation-badge {
+    color: #fff;
+    background: var(--brand-strong);
+  }
 }
 
 .recommendation-headline {
@@ -1137,6 +1199,14 @@ html[lang='ar'] {
   margin-bottom: 1.25rem;
 }
 
+.product-summary-media {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
 .product-summary-art {
   width: 108px;
   height: 108px;
@@ -1145,6 +1215,37 @@ html[lang='ar'] {
   border: 1px solid var(--hairline);
   object-fit: cover;
   background: var(--brand-tint);
+}
+
+.product-summary-thumbs {
+  display: flex;
+  gap: 0.35rem;
+  max-width: 108px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.product-summary-thumb {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.product-summary-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-summary-thumb-active {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 1px var(--brand);
 }
 
 @media (max-width: 520px) {
@@ -1223,6 +1324,25 @@ html[lang='ar'] {
   background: var(--brand-tint);
   border-color: var(--brand-tint-2);
   cursor: default;
+}
+
+.offer-table-head {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .offer-table-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.4rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
 }
 
 .offer-list-controls {
@@ -1575,26 +1695,54 @@ html[lang='ar'] {
 }
 
 /* ============ Skeleton ============ */
+/* Mirrors the real .offer row's shape (thumb + avatar + text, price +
+   button) instead of generic bars, so loading reads as "results are about
+   to appear here" rather than a disconnected placeholder. */
 .offer-skeleton {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.6rem;
+  pointer-events: none;
 }
 
+.skeleton-block,
 .skeleton-line {
-  height: 0.9rem;
   border-radius: 6px;
   background: linear-gradient(90deg, var(--surface-2) 25%, var(--skeleton-shimmer) 37%, var(--surface-2) 63%);
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
 }
 
-.skeleton-line-wide {
-  width: 40%;
+.skeleton-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  flex-shrink: 0;
 }
 
-.skeleton-line-narrow {
-  width: 22%;
+.skeleton-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  flex-shrink: 0;
+}
+
+.skeleton-button {
+  width: 100px;
+  height: 38px;
+  border-radius: 10px;
+}
+
+.skeleton-line-store {
+  width: 130px;
+  height: 1.05rem;
+}
+
+.skeleton-line-shipping {
+  width: 85px;
+  height: 0.8rem;
+}
+
+.skeleton-line-price {
+  width: 90px;
+  height: 1.28rem;
 }
 
 @keyframes shimmer {
@@ -2349,6 +2497,64 @@ html[lang='ar'] {
   gap: 0.5rem;
 }
 
+/* ============ Toasts ============ */
+.toast-stack {
+  position: fixed;
+  bottom: 1.25rem;
+  inset-inline: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 1rem;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 420px;
+  padding: 0.8rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #fff;
+  background: var(--brand-ink);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  pointer-events: auto;
+  animation: toast-in 0.2s ease;
+}
+
+.toast-error {
+  background: #a4341a;
+}
+
+.toast-success {
+  background: var(--brand-strong);
+}
+
+.toast-info {
+  background: var(--brand-ink);
+}
+
+.toast svg {
+  flex-shrink: 0;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ============ Error screen (last resort) ============ */
 .error-screen {
   min-height: 100vh;
@@ -2450,6 +2656,21 @@ html[lang='ar'] {
   color: var(--brand-strong);
 }
 
+/* Fade-in-on-scroll wrapper (feature/category cards). display:flex with the
+   default stretch alignment keeps the wrapped card filling its grid cell
+   exactly as it did before being wrapped (uniform row heights). */
+.reveal {
+  display: flex;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* ============ Motion ============ */
 @media (prefers-reduced-motion: reduce) {
   .results-in,
@@ -2464,9 +2685,23 @@ html[lang='ar'] {
     transition: none;
   }
 
-  .search-mic-active::after {
+  .search-icon-btn-active::after {
     animation: none;
     display: none;
+  }
+
+  .search-icon-btn-spin svg {
+    animation: none;
+  }
+
+  .toast {
+    animation: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
 

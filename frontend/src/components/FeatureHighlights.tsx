@@ -6,6 +6,7 @@ import {
   SavingsIcon,
   TrustIcon,
 } from './icons'
+import { Reveal } from './Reveal'
 import { useTranslation } from '../i18n/useTranslation'
 
 const FEATURES = [
@@ -23,14 +24,16 @@ export function FeatureHighlights() {
   return (
     <section className="features" aria-label={t('feature.trust.title')}>
       <div className="features-grid">
-        {FEATURES.map(({ icon: Icon, key }) => (
-          <div className="feature-card" key={key}>
-            <div className="feature-icon">
-              <Icon />
+        {FEATURES.map(({ icon: Icon, key }, i) => (
+          <Reveal key={key} delayMs={i * 60}>
+            <div className="feature-card">
+              <div className="feature-icon">
+                <Icon />
+              </div>
+              <h3 className="feature-title">{t(`feature.${key}.title`)}</h3>
+              <p className="feature-text">{t(`feature.${key}.text`)}</p>
             </div>
-            <h3 className="feature-title">{t(`feature.${key}.title`)}</h3>
-            <p className="feature-text">{t(`feature.${key}.text`)}</p>
-          </div>
+          </Reveal>
         ))}
       </div>
     </section>
