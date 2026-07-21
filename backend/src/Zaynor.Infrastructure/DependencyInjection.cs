@@ -65,6 +65,7 @@ public static class DependencyInjection
         services.AddHttpClient();
         services.AddScoped<IProductDataSource, RainforestAmazonDataSource>();
         services.AddScoped<IProductDataSource, AliExpressProductDataSource>();
+        services.AddScoped<IProductDataSource, NoonApifyDataSource>();
 
         services.AddScoped<IProductDataSource, MockProductDataSource>();
 
