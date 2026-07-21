@@ -70,10 +70,21 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
 
         try
         {
+            // A real observed failure: "سامسنج A70" (a common colloquial
+            // Arabic spelling of Samsung, missing a "و") returned nothing at
+            // all from Google Shopping, silently falling all the way back to
+            // demo data — while the standard spelling "سامسونج" and the
+            // English "Samsung" both return real results. Normalizing known
+            // brand transliterations before searching (and before relevance
+            // checks, so they're judged consistently) fixes this without
+            // ever inventing data — it only helps Google understand what was
+            // actually typed.
+            var effectiveQuery = NormalizeArabicBrandNames(query);
+
             var client = _httpClientFactory.CreateClient(nameof(GoogleShoppingDataSource));
             using var request = new HttpRequestMessage(HttpMethod.Post, Endpoint)
             {
-                Content = JsonContent.Create(new { q = query, gl = "sa", hl = "en" }),
+                Content = JsonContent.Create(new { q = effectiveQuery, gl = "sa", hl = "en" }),
             };
             request.Headers.Add("X-API-KEY", _apiKey);
 
@@ -92,8 +103,15 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
                 if (string.IsNullOrWhiteSpace(item.Title)
                     || string.IsNullOrWhiteSpace(item.Source)
                     || ParsePrice(item.Price) is not { } price || price <= 0
-                    || !IsRelevant(query, item.Title)
-                    || IsAccessoryMismatch(query, item.Title))
+                    // Merchants return titles in whichever script they list
+                    // in — Arabic sellers stay Arabic regardless of query
+                    // language — so a query is judged relevant/on-topic if
+                    // it matches in EITHER its original or brand-normalized
+                    // form; a real Arabic-titled Jarir listing must not be
+                    // dropped just because "Samsung" (normalized for Google)
+                    // doesn't literally appear in its Arabic title.
+                    || (!IsRelevant(query, item.Title) && !IsRelevant(effectiveQuery, item.Title))
+                    || IsAccessoryMismatch(query, effectiveQuery, item.Title))
                 {
                     continue;
                 }
@@ -167,6 +185,58 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
 
     private static bool IsNoon(string? source) =>
         !string.IsNullOrWhiteSpace(source) && source.Contains("noon", StringComparison.OrdinalIgnoreCase);
+
+    // Common colloquial/informal Arabic spellings of major brand names, as
+    // typed in everyday Gulf/Saudi Arabic — not necessarily "correct"
+    // transliteration (e.g. "سامسنج" is missing a "و" versus the standard
+    // "سامسونج"), but exactly how people actually search. Mapped to the
+    // brand's own English name, since that's what merchant listings and
+    // Google Shopping's own catalog consistently use regardless of the
+    // storefront's display language.
+    private static readonly Dictionary<string, string> ArabicBrandNames = new(StringComparer.Ordinal)
+    {
+        ["سامسنج"] = "Samsung",
+        ["سامسونج"] = "Samsung",
+        ["سامسوونج"] = "Samsung",
+        ["ابل"] = "Apple",
+        ["آبل"] = "Apple",
+        ["أبل"] = "Apple",
+        ["ايفون"] = "iPhone",
+        ["آيفون"] = "iPhone",
+        ["أيفون"] = "iPhone",
+        ["سوني"] = "Sony",
+        ["هواوي"] = "Huawei",
+        ["شاومي"] = "Xiaomi",
+        ["زيومي"] = "Xiaomi",
+        ["ريلمي"] = "Realme",
+        ["اوبو"] = "Oppo",
+        ["أوبو"] = "Oppo",
+        ["فيفو"] = "Vivo",
+        ["نوكيا"] = "Nokia",
+        ["توشيبا"] = "Toshiba",
+        ["ديل"] = "Dell",
+        ["لينوفو"] = "Lenovo",
+        ["ايسوس"] = "Asus",
+        ["آسوس"] = "Asus",
+        ["مايكروسوفت"] = "Microsoft",
+        ["جوجل"] = "Google",
+        ["بلايستيشن"] = "PlayStation",
+        ["بلاي ستيشن"] = "PlayStation",
+        ["اكس بوكس"] = "Xbox",
+        ["إكس بوكس"] = "Xbox",
+        ["نينتندو"] = "Nintendo",
+    };
+
+    /// <summary>Replaces any known Arabic brand spelling (single- or multi-word) with its English name.</summary>
+    private static string NormalizeArabicBrandNames(string query)
+    {
+        foreach (var (arabic, english) in ArabicBrandNames)
+        {
+            query = query.Replace(arabic, english, StringComparison.Ordinal);
+        }
+
+        return query;
+    }
 
     private static readonly string[] StopWords = ["a", "an", "the", "for", "of", "with", "and", "in", "on", "to", "by"];
     private static readonly char[] TokenSeparators = [' ', '-', '_', ',', '.', '/', '(', ')'];
@@ -250,23 +320,39 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
         // Controller" bundle listing would be wrongly caught by that, since
         // controllers are a genuine part of many authentic console bundles.
         "shirt", "hoodie", "keychain", "poster",
-        // Arabic equivalents.
-        "غطاء", "واقي", "واق", "قطعة غيار", "قطع غيار", "صيانة", "اصلاح", "إصلاح", "كفر", "شاحن",
+        // Arabic equivalents — expanded after a real leak: searching
+        // "سامسونج A70" (the standard-spelling Arabic query, which itself
+        // needed the transliteration fix above to even reach Google Shopping
+        // with results at all) returned six offers, and every single one was
+        // a screen protector, SIM tray, back cover, battery, or replacement
+        // screen — none of which "شاشة"/"بطارية"/"عدسة"/etc. below existed
+        // to catch at the time.
+        "غطاء", "غطا", "واقي", "واق", "قطعة غيار", "قطع غيار", "صيانة", "اصلاح", "إصلاح", "كفر", "شاحن",
+        // "مدخل"/"فتحة" (slot/port) rather than "شريحة" (SIM) itself — a
+        // genuine phone listing legitimately says "ثنائي الشريحة" (dual-SIM)
+        // as a feature, so excluding on bare "شريحة" would wrongly catch
+        // real phones too; the hardware-port word is what's actually unique
+        // to the SIM-tray-as-a-spare-part listings.
+        "شاشة", "بطارية", "عدسة", "مدخل", "فتحة", "لاصقة", "زجاج مقوى",
+        "جراب", "حافظة", "كابل", "زجاج خلفي", "تيشرت", "قميص",
     ];
 
     /// <summary>
     /// True when the title is clearly an accessory FOR the searched product
     /// rather than the product itself — unless the query is itself looking
-    /// for that accessory (e.g. a genuine "iphone 15 case" search).
+    /// for that accessory (e.g. a genuine "iphone 15 case" search). Checked
+    /// against both the original and brand-normalized query text, since
+    /// either could be the one carrying the accessory word the user typed.
     /// </summary>
-    private static bool IsAccessoryMismatch(string query, string title)
+    private static bool IsAccessoryMismatch(string query, string effectiveQuery, string title)
     {
-        var queryLower = query.ToLowerInvariant();
+        var q1 = query.ToLowerInvariant();
+        var q2 = effectiveQuery.ToLowerInvariant();
 
         // If the query itself signals accessory intent, trust it wholesale —
         // a title using a different accessory synonym ("case" vs. "cover")
         // than the query shouldn't still get excluded.
-        if (AccessoryKeywords.Any(keyword => queryLower.Contains(keyword, StringComparison.Ordinal)))
+        if (AccessoryKeywords.Any(keyword => q1.Contains(keyword, StringComparison.Ordinal) || q2.Contains(keyword, StringComparison.Ordinal)))
         {
             return false;
         }

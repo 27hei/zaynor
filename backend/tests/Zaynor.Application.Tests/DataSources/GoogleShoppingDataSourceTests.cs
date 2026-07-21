@@ -18,11 +18,16 @@ public class GoogleShoppingDataSourceTests
     private sealed class StubHandler(string json) : HttpMessageHandler
     {
         public HttpRequestMessage? LastRequest { get; private set; }
+        public string? LastRequestBody { get; private set; }
 
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
         {
             LastRequest = request;
+            // The real SearchAsync disposes its HttpRequestMessage (and its
+            // Content) before returning, so the body must be captured here,
+            // not read from LastRequest afterward.
+            LastRequestBody = request.Content?.ReadAsStringAsync(cancellationToken).GetAwaiter().GetResult();
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(json, Encoding.UTF8, "application/json"),
@@ -109,6 +114,56 @@ public class GoogleShoppingDataSourceTests
         Assert.Equal("https://www.google.com/search?ibp=oshop&prds=amazon-a", amazon.ProductUrl);
 
         Assert.Equal("test-key", handler.LastRequest!.Headers.GetValues("X-API-KEY").Single());
+    }
+
+    [Fact]
+    public async Task NormalizesColloquialArabicBrandSpellingsBeforeSearching()
+    {
+        // Real observed failure: "سامسنج A70" (a common colloquial Arabic
+        // spelling of Samsung, missing a "و") returned nothing at all from
+        // Google Shopping — normalizing to "Samsung" before searching is
+        // what makes this query find real results instead of falling back
+        // to demo data.
+        var handler = new StubHandler("""{"shopping":[]}""");
+        var source = new GoogleShoppingDataSource(
+            new StubFactory(handler),
+            Config(("DataSources:Serper:ApiKey", "test-key")),
+            NullLogger<GoogleShoppingDataSource>.Instance);
+
+        await source.SearchAsync("سامسنج A70");
+
+        Assert.Contains("Samsung A70", handler.LastRequestBody);
+        Assert.DoesNotContain("سامسنج", handler.LastRequestBody);
+    }
+
+    [Fact]
+    public async Task DiscardsArabicTitledRepairPartsForTheModelBeingSearched()
+    {
+        // Real observed leak: searching "سامسونج A70" (the standard Arabic
+        // spelling) returned six offers — a screen protector sticker, a SIM
+        // tray, a back cover with camera lens, a battery, and two
+        // replacement screens — and not one was the actual phone.
+        const string json = """
+        {
+          "shopping": [
+            { "title": "لاصقة حماية للشاشة من الزجاج المقوى لهاتف سامسونج جالاكسي A70 شفاف", "source": "Noon", "price": "SAR 9.00", "link": "https://www.google.com/search?ibp=oshop&prds=a" },
+            { "title": "مدخل شريحة سامسونج A70", "source": "نيو كوم", "price": "SAR 19.00", "link": "https://www.google.com/search?ibp=oshop&prds=b" },
+            { "title": "غطا خلفي سامسونج A70 مع عدسة الكاميرا", "source": "جوال اكسبريس", "price": "SAR 25.00", "link": "https://www.google.com/search?ibp=oshop&prds=c" },
+            { "title": "بطارية سامسونج A70", "source": "شاشة ستور", "price": "SAR 60.00", "link": "https://www.google.com/search?ibp=oshop&prds=d" },
+            { "title": "شاشة سامسونج A70 5G", "source": "salla.sa", "price": "SAR 310.00", "link": "https://www.google.com/search?ibp=oshop&prds=e" },
+            { "title": "سامسونج جالكسي A70 128 جيجابايت", "source": "Jarir", "price": "SAR 735.00", "link": "https://www.google.com/search?ibp=oshop&prds=f" }
+          ]
+        }
+        """;
+        var source = new GoogleShoppingDataSource(
+            new StubFactory(new StubHandler(json)),
+            Config(("DataSources:Serper:ApiKey", "test-key")),
+            NullLogger<GoogleShoppingDataSource>.Instance);
+
+        var offers = await source.SearchAsync("سامسونج A70");
+
+        var offer = Assert.Single(offers);
+        Assert.Equal("Jarir", offer.StoreName);
     }
 
     [Fact]
