@@ -243,6 +243,13 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
         "motherboard", "mainboard", "logic board", "charging port", "dock connector",
         "camera lens", "repair service", "repair kit", "inspection service",
         "spare part", "spare parts", "sim tray", "rear glass", "back glass",
+        // Apparel/merch bundled in by resellers (e.g. a console search
+        // surfacing a "T-Shirt & Controller" bundle) — unambiguous, since
+        // no genuine device listing mentions clothing. Deliberately not
+        // excluding bare "controller": a real "Console with Wireless
+        // Controller" bundle listing would be wrongly caught by that, since
+        // controllers are a genuine part of many authentic console bundles.
+        "shirt", "hoodie", "keychain", "poster",
         // Arabic equivalents.
         "غطاء", "واقي", "واق", "قطعة غيار", "قطع غيار", "صيانة", "اصلاح", "إصلاح", "كفر", "شاحن",
     ];

@@ -261,6 +261,52 @@ public class GoogleShoppingDataSourceTests
     }
 
     [Fact]
+    public async Task DiscardsMerchBundlesThatArentThePlayedDeviceItself()
+    {
+        // A real observed leak: searching "Xbox Series X" surfaced a
+        // "T-Shirt & Controller" bundle at a price low enough to survive
+        // the price-outlier filter, but not the actual console. Bare
+        // "controller" isn't excluded (a genuine "Console with Wireless
+        // Controller" bundle would wrongly be caught by that), but the
+        // apparel mention is an unambiguous signal.
+        const string json = """
+        {
+          "shopping": [
+            {
+              "title": "Galaxy Bundle – T-Shirt & Xbox Series X Controller",
+              "source": "DreamController",
+              "price": "SAR 763.00",
+              "link": "https://www.google.com/search?ibp=oshop&prds=bundle"
+            },
+            {
+              "title": "Microsoft Xbox Series X Console",
+              "source": "dokan-ps",
+              "price": "SAR 2832.68",
+              "link": "https://www.google.com/search?ibp=oshop&prds=console"
+            },
+            {
+              "title": "Xbox Series X 1TB with Wireless Controller",
+              "source": "desertcart.co.za",
+              "price": "SAR 6195.24",
+              "link": "https://www.google.com/search?ibp=oshop&prds=bundle2"
+            }
+          ]
+        }
+        """;
+        var source = new GoogleShoppingDataSource(
+            new StubFactory(new StubHandler(json)),
+            Config(("DataSources:Serper:ApiKey", "test-key")),
+            NullLogger<GoogleShoppingDataSource>.Instance);
+
+        var offers = await source.SearchAsync("Xbox Series X");
+
+        Assert.DoesNotContain(offers, o => o.StoreName == "DreamController");
+        // A genuine console+controller bundle must still survive.
+        Assert.Contains(offers, o => o.StoreName == "desertcart.co.za");
+        Assert.Contains(offers, o => o.StoreName == "dokan-ps");
+    }
+
+    [Fact]
     public async Task DiscardsAccessoriesThatShareWordsWithTheProductBeingSearched()
     {
         // A real observed failure: searching a phone returned its case at a
