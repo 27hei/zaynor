@@ -7,14 +7,13 @@ using Zaynor.Infrastructure.DataSources;
 namespace Zaynor.Application.Tests.DataSources;
 
 /// <summary>
-/// Proves the Noon (Serper/Google Shopping) live source picks out only the
-/// Noon-sourced result, maps it to a StoreOffer with a taggable Noon
-/// site-search URL (not Google's own compare-prices link), and stays
-/// dormant with no key. The HTTP layer is stubbed so this runs offline; the
-/// live connection itself is verified separately once a real key is
-/// configured.
+/// Proves the open-scope Google Shopping (Serper) source maps every real
+/// merchant into a StoreOffer (not just Noon), dedupes repeat listings from
+/// the same merchant down to its cheapest, builds a taggable Noon
+/// site-search URL specifically for Noon, and stays dormant with no key.
+/// The HTTP layer is stubbed so this runs offline.
 /// </summary>
-public class NoonSerperDataSourceTests
+public class GoogleShoppingDataSourceTests
 {
     private sealed class StubHandler(string json) : HttpMessageHandler
     {
@@ -43,7 +42,7 @@ public class NoonSerperDataSourceTests
             .Build();
 
     [Fact]
-    public async Task WithApiKey_PicksOnlyTheNoonResult_AndBuildsATaggableSearchUrl()
+    public async Task WithApiKey_ReturnsEveryMerchant_DedupedAndMapped()
     {
         const string json = """
         {
@@ -53,39 +52,56 @@ public class NoonSerperDataSourceTests
               "source": "eXtra Stores",
               "price": "SAR 2,749.00",
               "imageUrl": "https://example.com/extra.jpg",
-              "link": "https://www.google.com/search?ibp=oshop&prds=..."
+              "link": "https://www.google.com/search?ibp=oshop&prds=extra"
             },
             {
               "title": "Apple iPhone 15 Plus",
               "source": "noon.com",
               "price": "SAR 2,699.00",
               "imageUrl": "https://example.com/noon.jpg",
-              "link": "https://www.google.com/search?ibp=oshop&prds=..."
+              "link": "https://www.google.com/search?ibp=oshop&prds=noon"
+            },
+            {
+              "title": "Apple iPhone 15 Black",
+              "source": "Amazon",
+              "price": "SAR 1,880.00",
+              "imageUrl": "https://example.com/amazon-a.jpg",
+              "link": "https://www.google.com/search?ibp=oshop&prds=amazon-a"
+            },
+            {
+              "title": "Apple iPhone 15 (Renewed)",
+              "source": "Amazon",
+              "price": "SAR 1,995.00",
+              "imageUrl": "https://example.com/amazon-b.jpg",
+              "link": "https://www.google.com/search?ibp=oshop&prds=amazon-b"
             }
           ]
         }
         """;
         var handler = new StubHandler(json);
-        var source = new NoonSerperDataSource(
+        var source = new GoogleShoppingDataSource(
             new StubFactory(handler),
             Config(("DataSources:Serper:ApiKey", "test-key")),
-            NullLogger<NoonSerperDataSource>.Instance);
+            NullLogger<GoogleShoppingDataSource>.Instance);
 
         var offers = await source.SearchAsync("iphone 15");
 
-        // Only the noon.com row survives — eXtra isn't Noon.
-        Assert.Single(offers);
-        var offer = offers[0];
-        Assert.Equal("Noon", offer.StoreName);
-        Assert.Equal("Apple iPhone 15 Plus", offer.ProductTitle);
-        Assert.Equal(2699.00m, offer.Price);
-        Assert.Equal("SAR", offer.Currency);
-        Assert.Equal("https://example.com/noon.jpg", offer.ImageUrl);
+        // 3 unique merchants survive: eXtra, Noon, Amazon (deduped to its cheapest).
+        Assert.Equal(3, offers.Count);
 
-        // The outbound URL is our own Noon search (taggable by /api/out),
-        // not Google's compare-prices link.
-        Assert.StartsWith("https://www.noon.com/saudi-en/search/?q=", offer.ProductUrl);
-        Assert.Contains(Uri.EscapeDataString("Apple iPhone 15 Plus"), offer.ProductUrl);
+        var noon = Assert.Single(offers, o => o.StoreName == "Noon");
+        Assert.Equal(2699.00m, noon.Price);
+        Assert.Equal("SAR", noon.Currency);
+        // Noon's URL is our own taggable site-search, not Google's link.
+        Assert.StartsWith("https://www.noon.com/saudi-en/search/?q=", noon.ProductUrl);
+
+        var extra = Assert.Single(offers, o => o.StoreName == "eXtra Stores");
+        Assert.Equal("https://www.google.com/search?ibp=oshop&prds=extra", extra.ProductUrl);
+
+        // Amazon deduped to the cheaper of its two listings.
+        var amazon = Assert.Single(offers, o => o.StoreName == "Amazon");
+        Assert.Equal(1880.00m, amazon.Price);
+        Assert.Equal("https://www.google.com/search?ibp=oshop&prds=amazon-a", amazon.ProductUrl);
 
         Assert.Equal("test-key", handler.LastRequest!.Headers.GetValues("X-API-KEY").Single());
     }
@@ -94,10 +110,10 @@ public class NoonSerperDataSourceTests
     public async Task WithoutApiKey_IsDormant_AndReturnsNothing()
     {
         var handler = new StubHandler("{\"shopping\":[]}");
-        var source = new NoonSerperDataSource(
+        var source = new GoogleShoppingDataSource(
             new StubFactory(handler),
             Config(), // no key configured
-            NullLogger<NoonSerperDataSource>.Instance);
+            NullLogger<GoogleShoppingDataSource>.Instance);
 
         var offers = await source.SearchAsync("iphone 15");
 

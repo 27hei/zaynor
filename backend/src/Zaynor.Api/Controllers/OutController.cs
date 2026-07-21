@@ -18,7 +18,11 @@ public class OutController : ControllerBase
 {
     private static readonly string[] AllowedHosts =
     [
-        "amazon.sa", "noon.com", "jarir.com", "extra.com", "aliexpress.com",
+        // google.com covers every non-Noon merchant from GoogleShoppingDataSource:
+        // Google's own compare-prices link is the only URL we have for those
+        // (open-scope, any merchant Google Shopping returns — we can't
+        // allowlist domains we've never seen ahead of time).
+        "amazon.sa", "noon.com", "jarir.com", "extra.com", "aliexpress.com", "google.com",
     ];
 
     private readonly ZaynorDbContext _db;
