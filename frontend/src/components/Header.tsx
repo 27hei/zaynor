@@ -82,7 +82,7 @@ export function Header() {
         </nav>
 
         <div className="header-actions">
-          {location.pathname !== '/' && <HeaderSearch />}
+          {location.pathname !== '/' && location.pathname !== '/product' && <HeaderSearch />}
 
           {user && (
             <Link to="/account" className="header-cart" aria-label={t('account.savedTitle')} onClick={close}>

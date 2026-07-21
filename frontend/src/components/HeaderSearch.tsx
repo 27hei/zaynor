@@ -24,7 +24,7 @@ export function HeaderSearch() {
     event.preventDefault()
     const trimmed = value.trim()
     if (!trimmed) return
-    navigate(`/?q=${encodeURIComponent(trimmed)}`)
+    navigate(`/product?q=${encodeURIComponent(trimmed)}`)
     setValue('')
     setOpen(false)
   }

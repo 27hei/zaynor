@@ -2,6 +2,7 @@ import type { AggregatedOffer } from '../api/types'
 import { formatPrice } from '../format'
 import { productArtFor } from '../productImage'
 import { useTranslation } from '../i18n/useTranslation'
+import { StoreRating } from './StoreRating'
 
 interface ProductSummaryProps {
   query: string
@@ -11,6 +12,8 @@ interface ProductSummaryProps {
 /**
  * The product header above results: illustration (or the real product image
  * when a feed provides one), title, and the at-a-glance market summary.
+ * The rating shown is the best-priced offer's own rating (a real, per-store
+ * figure) — never an invented cross-store average.
  */
 export function ProductSummary({ query, offers }: ProductSummaryProps) {
   const { t } = useTranslation()
@@ -30,6 +33,9 @@ export function ProductSummary({ query, offers }: ProductSummaryProps) {
               price: formatPrice(best.price, best.currency),
             })}
           </p>
+        )}
+        {best?.rating != null && (
+          <StoreRating rating={best.rating} ratingCount={best.ratingCount} />
         )}
       </div>
     </div>

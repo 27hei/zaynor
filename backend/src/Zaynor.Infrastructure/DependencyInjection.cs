@@ -62,7 +62,17 @@ public static class DependencyInjection
         // Each is dormant until its API key is configured, so registering them
         // unconditionally changes nothing until a key exists (config-only
         // activation). HttpClient is needed for their outbound calls.
+        //
+        // A short per-client timeout matters for perceived search speed: all
+        // sources run concurrently (AggregationService.QueryAllAsync), so the
+        // whole search is only ever as fast as its slowest source. Without
+        // this, one hung upstream API would silently hold every search to
+        // .NET's 100s HttpClient default instead of a few seconds.
+        var liveSourceTimeout = TimeSpan.FromSeconds(8);
         services.AddHttpClient();
+        services.AddHttpClient(nameof(RainforestAmazonDataSource), c => c.Timeout = liveSourceTimeout);
+        services.AddHttpClient(nameof(AliExpressProductDataSource), c => c.Timeout = liveSourceTimeout);
+        services.AddHttpClient(nameof(GoogleShoppingDataSource), c => c.Timeout = liveSourceTimeout);
         services.AddScoped<IProductDataSource, RainforestAmazonDataSource>();
         services.AddScoped<IProductDataSource, AliExpressProductDataSource>();
         services.AddScoped<IProductDataSource, GoogleShoppingDataSource>();

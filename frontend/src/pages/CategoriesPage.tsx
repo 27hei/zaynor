@@ -59,7 +59,7 @@ export function CategoriesPage() {
                   <button
                     type="button"
                     className="catalog-item"
-                    onClick={() => navigate(`/?q=${encodeURIComponent(p.name)}`)}
+                    onClick={() => navigate(`/product?q=${encodeURIComponent(p.name)}`)}
                   >
                     <img
                       className="catalog-item-art"
@@ -90,7 +90,7 @@ export function CategoriesPage() {
               key={key}
               type="button"
               className="category-card"
-              onClick={() => navigate(`/?q=${encodeURIComponent(seed)}`)}
+              onClick={() => navigate(`/product?q=${encodeURIComponent(seed)}`)}
             >
               <span className="category-icon">
                 <Icon />

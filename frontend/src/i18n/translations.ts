@@ -31,6 +31,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'hero.clearRecent': 'Clear',
     'hero.trustLine': 'Comparing offers across',
     'hero.reset': 'Reset',
+    'hero.voiceSearch': 'Search by voice',
+    'hero.listening': 'Listening…',
 
     'results.searching': 'Searching stores…',
     'results.noResults': 'No offers found for "{query}".',
@@ -74,6 +76,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     'offer.freeShipping': 'Free shipping',
     'offer.deliveryNextDay': 'Next-day delivery',
     'offer.delivery': 'Delivery in {days} days',
+    'offer.ratingLabel': 'Rated {rating} out of 5',
+
+    'product.backToSearch': 'New search',
+    'product.pageNote': 'Prices, images, and ratings shown are exactly what each store reports — nothing here is estimated.',
 
     'feature.trust.title': 'Trust',
     'feature.trust.text': 'Neutral recommendations — the best deal wins, even without commission.',
@@ -257,6 +263,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'hero.clearRecent': 'مسح',
     'hero.trustLine': 'نقارن العروض عبر',
     'hero.reset': 'إعادة تعيين',
+    'hero.voiceSearch': 'البحث بالصوت',
+    'hero.listening': 'أستمع…',
 
     'results.searching': 'جارٍ البحث في المتاجر…',
     'results.noResults': 'لا توجد عروض لـ "{query}".',
@@ -300,6 +308,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     'offer.freeShipping': 'شحن مجاني',
     'offer.deliveryNextDay': 'توصيل في اليوم التالي',
     'offer.delivery': 'التوصيل خلال {days} أيام',
+    'offer.ratingLabel': 'تقييم {rating} من 5',
+
+    'product.backToSearch': 'بحث جديد',
+    'product.pageNote': 'الأسعار والصور والتقييمات المعروضة هي بالضبط كما يعلن عنها كل متجر — لا شيء هنا مقدَّر أو مفترض.',
 
     'feature.trust.title': 'ثقة',
     'feature.trust.text': 'توصيات محايدة — الأفضل يفوز، حتى بدون عمولة.',

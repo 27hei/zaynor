@@ -5,6 +5,26 @@ import { useTranslation } from '../i18n/useTranslation'
 const DEBOUNCE_MS = 200
 const MIN_CHARS = 2
 
+// The Web Speech API is real, browser-native, and free — no server round
+// trip or third-party key needed. It isn't standardized (no lib.dom types,
+// no Firefox support), so it's read once, loosely typed, and the mic button
+// simply doesn't render where it's unavailable (progressive enhancement).
+type SpeechRecognitionLike = {
+  lang: string
+  interimResults: boolean
+  maxAlternatives: number
+  start: () => void
+  stop: () => void
+  onresult: ((event: { results: { [i: number]: { [j: number]: { transcript: string } } } }) => void) | null
+  onerror: (() => void) | null
+  onend: (() => void) | null
+}
+const SpeechRecognitionCtor: (new () => SpeechRecognitionLike) | undefined =
+  typeof window !== 'undefined'
+    ? ((window as unknown as Record<string, unknown>).SpeechRecognition as new () => SpeechRecognitionLike) ??
+      ((window as unknown as Record<string, unknown>).webkitSpeechRecognition as new () => SpeechRecognitionLike)
+    : undefined
+
 interface SearchBarProps {
   value: string
   onChange: (value: string) => void
@@ -29,14 +49,40 @@ export function SearchBar({
   recentSearches = [],
   onClearRecent,
 }: SearchBarProps) {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
+  const [listening, setListening] = useState(false)
   const debounceTimer = useRef<number | undefined>(undefined)
   const fetchController = useRef<AbortController | null>(null)
   const suppressFetch = useRef(false)
   const isFirstRender = useRef(true)
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
+
+  useEffect(() => () => recognitionRef.current?.stop(), [])
+
+  function toggleVoiceSearch() {
+    if (!SpeechRecognitionCtor) return
+    if (listening) {
+      recognitionRef.current?.stop()
+      return
+    }
+    const recognition = new SpeechRecognitionCtor()
+    recognition.lang = lang === 'ar' ? 'ar-SA' : 'en-US'
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript
+      onChange(transcript)
+      onSearch(transcript)
+    }
+    recognition.onerror = () => setListening(false)
+    recognition.onend = () => setListening(false)
+    recognitionRef.current = recognition
+    setListening(true)
+    recognition.start()
+  }
 
   const isShort = value.trim().length < MIN_CHARS
   const items = isShort ? recentSearches : suggestions
@@ -175,6 +221,23 @@ export function SearchBar({
           onBlur={() => window.setTimeout(close, 150)}
           disabled={disabled}
         />
+
+        {SpeechRecognitionCtor && (
+          <button
+            type="button"
+            className={listening ? 'search-mic search-mic-active' : 'search-mic'}
+            aria-label={listening ? t('hero.listening') : t('hero.voiceSearch')}
+            aria-pressed={listening}
+            onClick={toggleVoiceSearch}
+            disabled={disabled}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <rect x="9" y="2" width="6" height="12" rx="3" />
+              <path d="M5 10a7 7 0 0 0 14 0" />
+              <path d="M12 19v3" />
+            </svg>
+          </button>
+        )}
 
         {showDropdown && (
           <ul id="search-suggestions" className="search-suggestions" role="listbox">

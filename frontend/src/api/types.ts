@@ -11,6 +11,8 @@ export interface AggregatedOffer {
   imageUrl: string | null
   freeShipping: boolean
   deliveryDays: number | null
+  rating: number | null
+  ratingCount: number | null
   normalizedKey: string
   isLowestPrice: boolean
 }

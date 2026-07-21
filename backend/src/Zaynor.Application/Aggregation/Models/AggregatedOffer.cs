@@ -26,6 +26,12 @@ public sealed record AggregatedOffer
     /// <summary>Estimated delivery time in days, or null when unknown.</summary>
     public int? DeliveryDays { get; init; }
 
+    /// <summary>Star rating (0-5) when the source provides one; null otherwise (never fabricated).</summary>
+    public decimal? Rating { get; init; }
+
+    /// <summary>Number of ratings behind <see cref="Rating"/>, or null when unknown.</summary>
+    public int? RatingCount { get; init; }
+
     /// <summary>Normalized matching key for this offer's product (spec FR3).</summary>
     public required string NormalizedKey { get; init; }
 

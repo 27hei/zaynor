@@ -3,6 +3,7 @@ import type { AggregatedOffer } from '../api/types'
 import { formatPrice } from '../format'
 import { useTranslation } from '../i18n/useTranslation'
 import { StoreLogo } from './StoreLogo'
+import { StoreRating } from './StoreRating'
 import { outboundUrl } from '../api/client'
 
 const VISIBLE_BY_DEFAULT = 3
@@ -97,6 +98,9 @@ export function OfferList({ offers }: OfferListProps) {
                       <span className="offer-tag">{t('results.lowestPrice')}</span>
                     )}
                     {!offer.inStock && <span className="offer-oos">{t('results.outOfStock')}</span>}
+                    {offer.rating != null && (
+                      <StoreRating rating={offer.rating} ratingCount={offer.ratingCount} />
+                    )}
                   </span>
                   {shipping && <span className="offer-shipping">{shipping}</span>}
                 </div>

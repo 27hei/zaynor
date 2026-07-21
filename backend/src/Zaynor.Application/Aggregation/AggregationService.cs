@@ -99,6 +99,16 @@ public sealed class AggregationService : IAggregationService
         {
             return await source.SearchAsync(query, cancellationToken);
         }
+        // A source's own HttpClient.Timeout firing also throws an
+        // OperationCanceledException (TaskCanceledException) — distinguish
+        // that from the caller's own cancellationToken being cancelled so a
+        // single slow upstream API degrades gracefully instead of aborting
+        // the whole search.
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogWarning("Data source {Source} timed out for query {Query}; skipping it", source.SourceName, query);
+            return Array.Empty<StoreOffer>();
+        }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger.LogWarning(ex, "Data source {Source} failed for query {Query}; skipping it", source.SourceName, query);
@@ -129,6 +139,8 @@ public sealed class AggregationService : IAggregationService
                 ImageUrl = offer.ImageUrl,
                 FreeShipping = offer.FreeShipping,
                 DeliveryDays = offer.DeliveryDays,
+                Rating = offer.Rating,
+                RatingCount = offer.RatingCount,
                 NormalizedKey = ProductNormalizer.Normalize(offer.ProductTitle),
                 IsLowestPrice = i == 0,
             });
