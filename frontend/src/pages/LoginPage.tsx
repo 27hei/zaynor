@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import { useTranslation } from '../i18n/useTranslation'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { AuthLayout } from '../components/AuthLayout'
 
 export function LoginPage() {
   const { t } = useTranslation()
@@ -30,47 +31,49 @@ export function LoginPage() {
   }
 
   return (
-    <section className="auth-card">
-      <h1 className="auth-title">{t('auth.loginTitle')}</h1>
-      <p className="auth-subtitle">{t('auth.loginSubtitle')}</p>
+    <AuthLayout>
+      <section className="auth-card">
+        <h1 className="auth-title">{t('auth.loginTitle')}</h1>
+        <p className="auth-subtitle">{t('auth.loginSubtitle')}</p>
 
-      <form className="auth-form" onSubmit={handleSubmit}>
-        {error && <p className="auth-error" role="alert">{error}</p>}
+        <form className="auth-form" onSubmit={handleSubmit}>
+          {error && <p className="auth-error" role="alert">{error}</p>}
 
-        <label className="field">
-          <span className="field-label">{t('auth.email')}</span>
-          <input
-            type="email"
-            className="field-input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={t('auth.emailPlaceholder')}
-            autoComplete="email"
-            required
-          />
-        </label>
+          <label className="field">
+            <span className="field-label">{t('auth.email')}</span>
+            <input
+              type="email"
+              className="field-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={t('auth.emailPlaceholder')}
+              autoComplete="email"
+              required
+            />
+          </label>
 
-        <label className="field">
-          <span className="field-label">{t('auth.password')}</span>
-          <input
-            type="password"
-            className="field-input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={t('auth.passwordPlaceholder')}
-            autoComplete="current-password"
-            required
-          />
-        </label>
+          <label className="field">
+            <span className="field-label">{t('auth.password')}</span>
+            <input
+              type="password"
+              className="field-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t('auth.passwordPlaceholder')}
+              autoComplete="current-password"
+              required
+            />
+          </label>
 
-        <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-          {submitting ? t('auth.submitting') : t('auth.loginButton')}
-        </button>
-      </form>
+          <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
+            {submitting ? t('auth.submitting') : t('auth.loginButton')}
+          </button>
+        </form>
 
-      <p className="auth-switch">
-        {t('auth.noAccount')} <Link to="/register">{t('nav.register')}</Link>
-      </p>
-    </section>
+        <p className="auth-switch">
+          {t('auth.noAccount')} <Link to="/register">{t('nav.register')}</Link>
+        </p>
+      </section>
+    </AuthLayout>
   )
 }
