@@ -38,7 +38,11 @@ public sealed class NoonApifyDataSource : IProductDataSource
     // match is surfaced — several listings from one search aren't the same
     // product compared across stores, they're just search results.
     private const int MaxResults = 1;
-    private const int RequestedItems = 5;
+
+    // The actor rejects maxItems below 50 (server-side validation); this is
+    // a request cap, not a fixed charge — Apify bills per item the run
+    // actually returns, not per item requested.
+    private const int RequestedItems = 50;
     private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(25);
 
     private readonly IHttpClientFactory _httpClientFactory;

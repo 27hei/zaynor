@@ -54,6 +54,8 @@ export const translations: Record<Lang, Record<string, string>> = {
       'Sample data — this product is not covered by our price catalog yet, so these are demonstration prices, not market prices.',
     'results.wakeHint':
       'The first request can take up to a minute while the server wakes up — thanks for your patience.',
+    'results.noonFallbackText': "Noon isn't in these results yet — search for it directly on Noon.",
+    'results.noonFallbackCta': 'Search on Noon',
 
     'summary.meta': '{count} offers · best price {price}',
 
@@ -270,6 +272,8 @@ export const translations: Record<Lang, Record<string, string>> = {
       'بيانات تجريبية — هذا المنتج غير مغطى في كتالوج الأسعار بعد، فهذه أسعار توضيحية وليست أسعار السوق.',
     'results.wakeHint':
       'قد يستغرق أول طلب حتى دقيقة ريثما يستيقظ الخادم — شكرًا لصبرك.',
+    'results.noonFallbackText': 'نون غير موجود ضمن هذي النتائج — ابحث عنه مباشرة في نون.',
+    'results.noonFallbackCta': 'ابحث في نون',
 
     'summary.meta': '{count} عروض · أفضل سعر {price}',
 

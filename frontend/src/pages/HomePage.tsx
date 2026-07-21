@@ -13,6 +13,7 @@ import { FeatureHighlights } from '../components/FeatureHighlights'
 import { HomeCategories } from '../components/HomeCategories'
 import { LivePricesTeaser } from '../components/LivePricesTeaser'
 import { StoreLogo } from '../components/StoreLogo'
+import { NoonFallbackLink } from '../components/NoonFallbackLink'
 import { TRACKED_STORE_NAMES } from '../storeBrand'
 import { ProductSummary } from '../components/ProductSummary'
 import { PriceHistorySection } from '../components/PriceHistorySection'
@@ -120,6 +121,9 @@ export function HomePage() {
 
   const hasSearched = result !== null
   const hasResults = !!result && result.offers.length > 0
+  // Noon has no live search feed (spec: no official API) — offer a direct
+  // search fallback whenever it isn't already one of the real offers shown.
+  const hasNoonOffer = !!result && result.offers.some((o) => o.storeName === 'Noon')
 
   const statusMessage = loading
     ? t('results.searching')
@@ -199,7 +203,10 @@ export function HomePage() {
       )}
 
       {!loading && !error && hasSearched && !hasResults && (
-        <p className="hint">{t('results.noResults', { query: result!.query })}</p>
+        <>
+          <p className="hint">{t('results.noResults', { query: result!.query })}</p>
+          <NoonFallbackLink query={result!.query} />
+        </>
       )}
 
       {!loading && hasResults && (
@@ -247,6 +254,8 @@ export function HomePage() {
           )}
 
           <OfferList offers={result!.offers} />
+
+          {!hasNoonOffer && <NoonFallbackLink query={result!.query} />}
 
           <PriceHistorySection key={result!.query} query={result!.query} />
         </section>
