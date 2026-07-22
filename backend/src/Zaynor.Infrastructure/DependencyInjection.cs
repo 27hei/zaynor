@@ -89,13 +89,18 @@ public static class DependencyInjection
         services.AddHttpClient();
         services.AddHttpClient(nameof(RainforestAmazonDataSource), c => c.Timeout = liveSourceTimeout);
         services.AddHttpClient(nameof(AliExpressProductDataSource), c => c.Timeout = liveSourceTimeout);
-        services.AddHttpClient(nameof(GoogleShoppingDataSource), c => c.Timeout = liveSourceTimeout);
+        // GoogleShoppingDataSource (SerpApi) makes a base call plus several
+        // parallel per-product expansions to resolve real per-merchant
+        // links (see its own remarks) — a longer timeout than the other
+        // single-call sources so that round trip isn't cut short.
+        services.AddHttpClient(nameof(GoogleShoppingDataSource), c => c.Timeout = TimeSpan.FromSeconds(15));
         services.AddScoped<IProductDataSource, RainforestAmazonDataSource>();
         services.AddScoped<IProductDataSource, AliExpressProductDataSource>();
         services.AddScoped<IProductDataSource, GoogleShoppingDataSource>();
 
-        // "Search by photo" — reuses the same Serper account/key as
-        // GoogleShoppingDataSource for its reverse-image (Lens) endpoint.
+        // "Search by photo" — Serper's reverse-image (Lens) endpoint. Its own
+        // account/key (DataSources:Serper:ApiKey), separate from
+        // GoogleShoppingDataSource's SerpApi key above.
         services.AddSingleton<ITempImageStore, MemoryTempImageStore>();
         services.AddHttpClient(nameof(SerperLensQueryResolver), c => c.Timeout = liveSourceTimeout);
         services.AddScoped<IImageQueryResolver, SerperLensQueryResolver>();

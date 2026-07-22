@@ -11,37 +11,46 @@ namespace Zaynor.Infrastructure.DataSources;
 
 /// <summary>
 /// A REAL, live data source: prices/images across every merchant Google
-/// Shopping tracks for a query, via Serper (serper.dev) — not just Noon.
-/// Merchants feed Google Shopping directly (Merchant Center), so this works
-/// even for stores whose own sites block direct/automated requests (Noon
-/// confirmed by hand: every direct fetch attempt failed from this hosting
-/// environment; Google's own crawler is specifically trusted, and Serper
-/// queries Google, not the merchant, so it never hits that wall).
+/// Shopping tracks for a query, via SerpApi — not just Noon.
 ///
-/// Deliberately unfiltered by trust/reputation (spec: founder's call — the
-/// user asked for every merchant Google returns, not just vetted ones).
-/// Noon gets special handling because we can build a taggable outbound URL
-/// for it (a Noon site-search, tagged by /api/out); every other merchant's
-/// link is Google's own compare-prices page, since we have no way to
-/// construct or verify that merchant's real site URL.
+/// Real reported bug this replaces an earlier attempt at: a flat Google
+/// Shopping search result only ever carries Google's own "prds=" product-
+/// panel link for each listing, which is a client-side overlay tied to the
+/// search session that generated it — opened fresh (a new tab, a different
+/// device, after time passes) it reliably shows "no details available for
+/// this product" instead of the offer, for ANY merchant, and there is no
+/// reliable way to guess a given merchant's own site-search URL pattern
+/// (verified by hand: several real store domains simply don't follow a
+/// predictable pattern). SerpApi's separate Google Immersive Product API —
+/// the same panel a real user expands by clicking a product in Google
+/// Shopping — genuinely returns each seller's own direct product-page URL
+/// (verified: Jarir, Amazon, eXtra, desertcart and multiple small resellers
+/// all came back with real, working links). This source calls Shopping
+/// first for the candidate products, then expands a capped number of them
+/// through Immersive Product to resolve real per-merchant links — the two
+/// calls run per query, so store coverage is real but bounded (spec:
+/// founder's call, chosen over paying for many more expansions).
 ///
-/// Config-only activation: dormant until DataSources:Serper:ApiKey is set
-/// (env: DataSources__Serper__ApiKey). Billed per request by Serper (very
-/// cheap: ~$1/1,000 after a 2,500-request free allowance). Queried on every
-/// search alongside the curated catalog — max store coverage matters more
-/// here than conserving quota (spec: founder's call).
+/// Config-only activation: dormant until DataSources:SerpApi:ApiKey is set
+/// (env: DataSources__SerpApi__ApiKey). Separate from DataSources:Serper,
+/// which SerperLensQueryResolver still uses for reverse-image search.
 /// </summary>
 public sealed class GoogleShoppingDataSource : IProductDataSource
 {
-    private const string Endpoint = "https://google.serper.dev/shopping";
+    private const string Endpoint = "https://serpapi.com/search.json";
 
-    // A generous cap, not the single-best-match philosophy used elsewhere —
-    // the point here is breadth across many real merchants.
+    // Each expansion is its own billed SerpApi call, so only the top N
+    // candidate products get resolved to real per-merchant links. One
+    // expansion alone regularly returns up to 13 real stores, so this
+    // still gives broad coverage without letting cost scale with the
+    // dozens of raw listings Google Shopping can return for a query.
+    private const int MaxProductsToExpand = 4;
     private const int MaxResults = 30;
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<GoogleShoppingDataSource> _logger;
     private readonly string? _apiKey;
+    private readonly string _linkSigningKey;
 
     public GoogleShoppingDataSource(
         IHttpClientFactory httpClientFactory,
@@ -50,12 +59,16 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
-        _apiKey = configuration["DataSources:Serper:ApiKey"];
+        _apiKey = configuration["DataSources:SerpApi:ApiKey"];
+        // Reuses the app's JWT signing key for outbound-link signatures
+        // (see StoreOffer.Signature/OutboundLinkSigner) — a real secret
+        // already provisioned for this app, no need for a second one.
+        _linkSigningKey = configuration["Jwt:Key"] ?? string.Empty;
     }
 
     public string SourceName => "GoogleShopping";
 
-    /// <summary>Active only once a Serper API key is configured; otherwise fully dormant.</summary>
+    /// <summary>Active only once a SerpApi key is configured; otherwise fully dormant.</summary>
     public bool IsEnabled => !string.IsNullOrWhiteSpace(_apiKey);
 
     /// <summary>Paid-per-request API — queried on every search, alongside the curated catalog and other live feeds.</summary>
@@ -82,85 +95,64 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
             var effectiveQuery = ArabicBrandNormalizer.Normalize(query);
 
             var client = _httpClientFactory.CreateClient(nameof(GoogleShoppingDataSource));
-            using var request = new HttpRequestMessage(HttpMethod.Post, Endpoint)
-            {
-                Content = JsonContent.Create(new { q = effectiveQuery, gl = "sa", hl = "en" }),
-            };
-            request.Headers.Add("X-API-KEY", _apiKey);
+            var products = await FetchShoppingResultsAsync(client, effectiveQuery, cancellationToken);
 
-            var response = await client.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            var toExpand = products
+                .Where(p => !string.IsNullOrWhiteSpace(p.ImmersiveProductPageToken))
+                .Take(MaxProductsToExpand)
+                .ToList();
 
-            var envelope = await response.Content.ReadFromJsonAsync<SerperEnvelope>(cancellationToken: cancellationToken);
-            var items = envelope?.Shopping ?? [];
+            // Independent calls — run together so total latency stays close
+            // to one round trip instead of stacking sequentially.
+            var expansions = await Task.WhenAll(toExpand.Select(p =>
+                FetchStoresAsync(client, p.ImmersiveProductPageToken!, cancellationToken)));
 
-            // One offer per merchant (cheapest listing) — several listings
-            // from the same store aren't different stores to compare.
             var bestPerMerchant = new Dictionary<string, StoreOffer>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var item in items)
+            for (var i = 0; i < toExpand.Count; i++)
             {
-                if (string.IsNullOrWhiteSpace(item.Title)
-                    || string.IsNullOrWhiteSpace(item.Source)
-                    || ParsePrice(item.Price) is not { } price || price <= 0
-                    // Merchants return titles in whichever script they list
-                    // in — Arabic sellers stay Arabic regardless of query
-                    // language — so a query is judged relevant/on-topic if
-                    // it matches in EITHER its original or brand-normalized
-                    // form; a real Arabic-titled Jarir listing must not be
-                    // dropped just because "Samsung" (normalized for Google)
-                    // doesn't literally appear in its Arabic title.
-                    || (!IsRelevant(query, item.Title) && !IsRelevant(effectiveQuery, item.Title))
-                    || IsAccessoryMismatch(query, effectiveQuery, item.Title))
+                var product = toExpand[i];
+                foreach (var store in expansions[i])
                 {
-                    continue;
-                }
+                    var listingTitle = string.IsNullOrWhiteSpace(store.Title) ? product.Title : store.Title;
 
-                var isNoon = IsNoon(item.Source);
-                var storeName = isNoon ? "Noon" : item.Source!;
-
-                // Real reported bug, twice over: Google's own compare-prices
-                // link ("prds=" deep link) is a client-side product-panel
-                // overlay tied to the search session that generated it —
-                // opened fresh (a new tab, a different device, after time
-                // passes) it reliably shows "no details available for this
-                // product" instead of the offer, for ANY merchant, not just
-                // the well-known ones. Two layers fix this permanently
-                // rather than one store at a time:
-                //  1. Merchants with a verified, stable site-search pattern
-                //     (eBay, AliExpress, Amazon, Noon) get a direct link.
-                //  2. Every other merchant — an open-ended, ever-changing
-                //     set Google Shopping returns, impossible to allowlist
-                //     by domain ahead of time — gets a PLAIN Google search
-                //     for the exact listing (title + store) instead of the
-                //     broken "prds=" panel. A plain search results page has
-                //     no session dependency, so it always renders something
-                //     real; this is what actually stops the dead end for
-                //     good, not just for the stores named above.
-                var productUrl = BuildDirectStoreUrl(item.Source!, item.Title!)
-                    ?? $"https://www.google.com/search?q={Uri.EscapeDataString(item.Title! + " " + item.Source!)}";
-
-                if (string.IsNullOrWhiteSpace(productUrl))
-                {
-                    continue;
-                }
-
-                if (!bestPerMerchant.TryGetValue(storeName, out var existing) || price < existing.Price)
-                {
-                    bestPerMerchant[storeName] = new StoreOffer
+                    if (string.IsNullOrWhiteSpace(store.Name)
+                        || string.IsNullOrWhiteSpace(store.Link)
+                        || string.IsNullOrWhiteSpace(listingTitle)
+                        || ResolvePrice(store.ExtractedPrice, store.Price) is not { } price || price <= 0
+                        // Merchants return titles in whichever script they
+                        // list in — a query is judged relevant/on-topic if
+                        // it matches in EITHER its original or brand-
+                        // normalized form (spec: real Arabic-titled Jarir
+                        // listings must not be dropped just because
+                        // "Samsung" doesn't literally appear in Arabic).
+                        || (!IsRelevant(query, listingTitle) && !IsRelevant(effectiveQuery, listingTitle))
+                        || IsAccessoryMismatch(query, effectiveQuery, listingTitle))
                     {
-                        StoreName = storeName,
-                        ProductTitle = item.Title!,
-                        Price = price,
-                        Currency = "SAR",
-                        ProductUrl = productUrl,
-                        InStock = true,
-                        ImageUrl = item.ImageUrl,
-                        FreeShipping = false,
-                        DeliveryDays = null,
-                        Rating = item.Rating is { } r ? (decimal)r : null,
-                        RatingCount = item.RatingCount,
-                    };
+                        continue;
+                    }
+
+                    var isNoon = IsNoon(store.Name);
+                    var storeName = isNoon ? "Noon" : store.Name!;
+
+                    if (!bestPerMerchant.TryGetValue(storeName, out var existing) || price < existing.Price)
+                    {
+                        bestPerMerchant[storeName] = new StoreOffer
+                        {
+                            StoreName = storeName,
+                            ProductTitle = listingTitle!,
+                            Price = price,
+                            Currency = "SAR",
+                            ProductUrl = store.Link!,
+                            InStock = true,
+                            ImageUrl = product.Thumbnail,
+                            FreeShipping = false,
+                            DeliveryDays = null,
+                            Rating = store.Rating is { } r ? (decimal)r : product.Rating is { } pr ? (decimal)pr : null,
+                            RatingCount = store.Reviews ?? product.Reviews,
+                            Signature = OutboundLinkSigner.Sign(store.Link!, _linkSigningKey),
+                        };
+                    }
                 }
             }
 
@@ -172,6 +164,30 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
             return Array.Empty<StoreOffer>();
         }
     }
+
+    private async Task<List<SerpApiShoppingResult>> FetchShoppingResultsAsync(
+        HttpClient client, string query, CancellationToken cancellationToken)
+    {
+        var url = $"{Endpoint}?engine=google_shopping&q={Uri.EscapeDataString(query)}&gl=sa&hl=en&api_key={Uri.EscapeDataString(_apiKey!)}";
+        var response = await client.GetAsync(url, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var envelope = await response.Content.ReadFromJsonAsync<SerpApiShoppingEnvelope>(cancellationToken: cancellationToken);
+        return envelope?.ShoppingResults ?? [];
+    }
+
+    private async Task<List<SerpApiStore>> FetchStoresAsync(
+        HttpClient client, string pageToken, CancellationToken cancellationToken)
+    {
+        var url = $"{Endpoint}?engine=google_immersive_product&page_token={Uri.EscapeDataString(pageToken)}&more_stores=true&api_key={Uri.EscapeDataString(_apiKey!)}";
+        var response = await client.GetAsync(url, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var envelope = await response.Content.ReadFromJsonAsync<SerpApiImmersiveEnvelope>(cancellationToken: cancellationToken);
+        return envelope?.ProductResults?.Stores ?? [];
+    }
+
+    /// <summary>SerpApi provides a parsed <c>extracted_price</c> number; the raw "SAR X.XX" string is only a fallback.</summary>
+    private static decimal? ResolvePrice(double? extractedPrice, string? priceRaw) =>
+        extractedPrice is { } p ? (decimal)p : ParsePrice(priceRaw);
 
     /// <summary>
     /// A real observed gap in the keyword filters above: some listings
@@ -209,38 +225,6 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
 
     private static bool IsNoon(string? source) =>
         !string.IsNullOrWhiteSpace(source) && source.Contains("noon", StringComparison.OrdinalIgnoreCase);
-
-    /// <summary>
-    /// Direct site-search URL builders for merchants whose search-page
-    /// pattern is stable and verified — checked in order, first match wins.
-    /// Deliberately NOT a complete list of every store Google Shopping
-    /// returns: several other real merchant names were tried (Jarir, eXtra,
-    /// desertcart) and each either 404'd, hit a generic error page, or
-    /// silently redirected to a homepage instead of real search results —
-    /// shipping a wrong direct link is worse than Google's own page, which
-    /// at least sometimes resolves. Only add an entry here once it's been
-    /// verified to land on real search results.
-    /// </summary>
-    private static readonly (string Match, Func<string, string> Build)[] DirectStoreUrlBuilders =
-    [
-        ("noon", title => $"https://www.noon.com/saudi-en/search/?q={Uri.EscapeDataString(title)}"),
-        ("amazon", title => $"https://www.amazon.sa/s?k={Uri.EscapeDataString(title)}"),
-        ("aliexpress", title => $"https://www.aliexpress.com/wholesale?SearchText={Uri.EscapeDataString(title)}"),
-        ("ebay", title => $"https://www.ebay.com/sch/i.html?_nkw={Uri.EscapeDataString(title)}"),
-    ];
-
-    private static string? BuildDirectStoreUrl(string source, string title)
-    {
-        foreach (var (match, build) in DirectStoreUrlBuilders)
-        {
-            if (source.Contains(match, StringComparison.OrdinalIgnoreCase))
-            {
-                return build(title);
-            }
-        }
-
-        return null;
-    }
 
     private static readonly string[] StopWords = ["a", "an", "the", "for", "of", "with", "and", "in", "on", "to", "by"];
     private static readonly char[] TokenSeparators = [' ', '-', '_', ',', '.', '/', '(', ')'];
@@ -373,7 +357,7 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
             .Distinct()
             .ToList();
 
-    /// <summary>Serper's price is a "SAR 2,699.00"-style string — parse leniently.</summary>
+    /// <summary>Fallback for the rare case <c>extracted_price</c> is absent — parses a "SAR 2,699.00"-style string leniently.</summary>
     private static decimal? ParsePrice(string? priceRaw)
     {
         if (string.IsNullOrWhiteSpace(priceRaw))
@@ -387,15 +371,28 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
             : null;
     }
 
-    private sealed record SerperEnvelope(
-        [property: JsonPropertyName("shopping")] List<SerperShoppingItem>? Shopping);
+    private sealed record SerpApiShoppingEnvelope(
+        [property: JsonPropertyName("shopping_results")] List<SerpApiShoppingResult>? ShoppingResults);
 
-    private sealed record SerperShoppingItem(
+    private sealed record SerpApiShoppingResult(
         [property: JsonPropertyName("title")] string? Title,
-        [property: JsonPropertyName("source")] string? Source,
-        [property: JsonPropertyName("price")] string? Price,
-        [property: JsonPropertyName("imageUrl")] string? ImageUrl,
-        [property: JsonPropertyName("link")] string? Link,
+        [property: JsonPropertyName("thumbnail")] string? Thumbnail,
         [property: JsonPropertyName("rating")] double? Rating,
-        [property: JsonPropertyName("ratingCount")] int? RatingCount);
+        [property: JsonPropertyName("reviews")] int? Reviews,
+        [property: JsonPropertyName("immersive_product_page_token")] string? ImmersiveProductPageToken);
+
+    private sealed record SerpApiImmersiveEnvelope(
+        [property: JsonPropertyName("product_results")] SerpApiProductResults? ProductResults);
+
+    private sealed record SerpApiProductResults(
+        [property: JsonPropertyName("stores")] List<SerpApiStore>? Stores);
+
+    private sealed record SerpApiStore(
+        [property: JsonPropertyName("name")] string? Name,
+        [property: JsonPropertyName("title")] string? Title,
+        [property: JsonPropertyName("link")] string? Link,
+        [property: JsonPropertyName("price")] string? Price,
+        [property: JsonPropertyName("extracted_price")] double? ExtractedPrice,
+        [property: JsonPropertyName("rating")] double? Rating,
+        [property: JsonPropertyName("reviews")] int? Reviews);
 }

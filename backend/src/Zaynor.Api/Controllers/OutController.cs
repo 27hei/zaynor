@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Zaynor.Application.Aggregation;
 using Zaynor.Domain.Entities;
 using Zaynor.Infrastructure.Persistence;
 
@@ -8,9 +9,14 @@ namespace Zaynor.Api.Controllers;
 /// <summary>
 /// Outbound click tracking (spec Sections 10/20): logs every "go to store"
 /// click — the metric affiliate networks value — then 302-redirects to the
-/// store. Only known store domains are allowed, so this can never become an
-/// open redirect. Affiliate tracking params ride through here once accounts
-/// exist.
+/// store. A destination is trusted either because its domain is on the
+/// static known-store list below, or because it carries a valid signature
+/// (see <see cref="OutboundLinkSigner"/>) proving it came from our own
+/// search results — real merchants the Immersive Product API resolves live
+/// (Mazeed, LetsTango, desertcart, ...) are an open-ended set impossible to
+/// allowlist by domain ahead of time, so the signature is what keeps this
+/// from becoming an open redirect for those, the same way the static list
+/// does for everyone else.
 /// </summary>
 [ApiController]
 [Route("api/out")]
@@ -18,11 +24,7 @@ public class OutController : ControllerBase
 {
     private static readonly string[] AllowedHosts =
     [
-        // google.com covers every non-Noon merchant from GoogleShoppingDataSource:
-        // Google's own compare-prices link is the only URL we have for those
-        // (open-scope, any merchant Google Shopping returns — we can't
-        // allowlist domains we've never seen ahead of time).
-        "amazon.sa", "noon.com", "jarir.com", "extra.com", "aliexpress.com", "ebay.com", "google.com",
+        "amazon.sa", "noon.com", "jarir.com", "extra.com", "aliexpress.com", "ebay.com",
     ];
 
     private readonly ZaynorDbContext _db;
@@ -31,12 +33,15 @@ public class OutController : ControllerBase
     private readonly string? _noonUtmSuffix;
     private readonly string? _deeplinkTemplate;
     private readonly string[] _deeplinkHosts;
+    private readonly string _linkSigningKey;
 
     public OutController(ZaynorDbContext db, ILogger<OutController> logger, IConfiguration configuration)
     {
         _db = db;
         _logger = logger;
         _amazonTag = configuration["Affiliate:AmazonTag"];
+        // Same key GoogleShoppingDataSource signs with (see OutboundLinkSigner remarks).
+        _linkSigningKey = configuration["Jwt:Key"] ?? string.Empty;
 
         // Noon tags per-URL via query params appended directly to the same
         // noon.com link (utm_campaign/utm_medium/utm_source from the noon
@@ -57,12 +62,15 @@ public class OutController : ControllerBase
         [FromQuery] string? u,
         [FromQuery] string? store,
         [FromQuery] string? product,
+        [FromQuery] string? sig,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(u)
-            || !Uri.TryCreate(u, UriKind.Absolute, out var uri)
-            || uri.Scheme != Uri.UriSchemeHttps
-            || !AllowedHosts.Any(h => uri.Host == h || uri.Host.EndsWith("." + h, StringComparison.OrdinalIgnoreCase)))
+        var isKnownHost = Uri.TryCreate(u, UriKind.Absolute, out var uri)
+            && uri.Scheme == Uri.UriSchemeHttps
+            && AllowedHosts.Any(h => uri.Host == h || uri.Host.EndsWith("." + h, StringComparison.OrdinalIgnoreCase));
+        var isSignedByUs = uri is not null && OutboundLinkSigner.Verify(u!, sig, _linkSigningKey);
+
+        if (string.IsNullOrWhiteSpace(u) || uri is null || uri.Scheme != Uri.UriSchemeHttps || !(isKnownHost || isSignedByUs))
         {
             return BadRequest(new { error = "Unknown store link." });
         }

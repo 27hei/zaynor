@@ -75,8 +75,9 @@ export async function getPriceHistory(query: string): Promise<PriceHistoryRespon
 }
 
 /** Outbound store link routed through click tracking (spec Sections 10/20). */
-export function outboundUrl(url: string, store: string, product: string): string {
-  return `${API_BASE_URL}/api/out?u=${encodeURIComponent(url)}&store=${encodeURIComponent(store)}&product=${encodeURIComponent(product)}`
+export function outboundUrl(url: string, store: string, product: string, signature?: string | null): string {
+  const sig = signature ? `&sig=${encodeURIComponent(signature)}` : ''
+  return `${API_BASE_URL}/api/out?u=${encodeURIComponent(url)}&store=${encodeURIComponent(store)}&product=${encodeURIComponent(product)}${sig}`
 }
 
 export interface CatalogSummary {

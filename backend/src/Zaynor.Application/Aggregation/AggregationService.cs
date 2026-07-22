@@ -157,6 +157,7 @@ public sealed class AggregationService : IAggregationService
                 NormalizedKey = ProductNormalizer.Normalize(offer.ProductTitle),
                 IsLowestPrice = i == 0,
                 HasAffiliateLink = AffiliateEligibility.IsMonetized(offer.ProductUrl, affiliateSettings),
+                Signature = offer.Signature,
             });
         }
 

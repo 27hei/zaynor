@@ -125,7 +125,7 @@ export function OfferList({ offers }: OfferListProps) {
                 <span className="offer-link-wrap">
                   <a
                     className="offer-link"
-                    href={outboundUrl(offer.productUrl, offer.storeName, offer.productTitle)}
+                    href={outboundUrl(offer.productUrl, offer.storeName, offer.productTitle, offer.signature)}
                     target="_blank"
                     rel="noopener noreferrer sponsored"
                   >

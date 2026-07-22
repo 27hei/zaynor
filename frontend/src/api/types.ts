@@ -17,6 +17,8 @@ export interface AggregatedOffer {
   isLowestPrice: boolean
   /** True when this specific store's link currently carries an active affiliate tag. */
   hasAffiliateLink: boolean
+  /** Proves to /api/out this link came from a real search result — required for stores outside its static known-domain list. */
+  signature: string | null
 }
 
 export interface Recommendation {

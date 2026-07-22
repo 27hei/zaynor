@@ -45,4 +45,16 @@ public sealed record AggregatedOffer
     /// offer is the best deal, only which one currently supports Zaynor.
     /// </summary>
     public bool HasAffiliateLink { get; init; }
+
+    /// <summary>
+    /// Proves to <c>/api/out</c> that this exact URL came from our own search
+    /// results, not an attacker-supplied redirect target — set for stores
+    /// outside the static known-domain list (spec: real stores like Mazeed,
+    /// LetsTango, desertcart, ... discovered live via the Immersive Product
+    /// API, an open-ended set impossible to allowlist by domain ahead of
+    /// time). Null for sources whose domains are already on that static
+    /// list (Amazon, Noon, curated catalog, ...) — no signature needed
+    /// there. See <see cref="OutboundLinkSigner"/>.
+    /// </summary>
+    public string? Signature { get; init; }
 }

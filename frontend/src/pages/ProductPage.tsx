@@ -241,7 +241,7 @@ export function ProductPage() {
               recommendation={result!.recommendation}
               bestUrl={(() => {
                 const best = result!.offers.find((o) => o.isLowestPrice)
-                return best ? outboundUrl(best.productUrl, best.storeName, result!.query) : undefined
+                return best ? outboundUrl(best.productUrl, best.storeName, result!.query, best.signature) : undefined
               })()}
             />
           )}

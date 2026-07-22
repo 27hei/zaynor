@@ -33,4 +33,14 @@ public sealed record StoreOffer
 
     /// <summary>Number of ratings behind <see cref="Rating"/>, or null when unknown.</summary>
     public int? RatingCount { get; init; }
+
+    /// <summary>
+    /// Set only by sources whose merchant domains aren't on <c>/api/out</c>'s
+    /// static known-domain list (currently: <c>GoogleShoppingDataSource</c>,
+    /// which resolves real links to an open-ended set of stores via the
+    /// Immersive Product API) — proves the URL came from a real search
+    /// result rather than an attacker-supplied redirect target. See
+    /// <see cref="OutboundLinkSigner"/>.
+    /// </summary>
+    public string? Signature { get; init; }
 }

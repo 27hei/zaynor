@@ -155,6 +155,44 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
     }
 
     [Fact]
+    public async Task Outbound_SignedUnknownDomain_Redirects()
+    {
+        // The Immersive Product API resolves real, working links to an
+        // open-ended set of merchants (Mazeed, LetsTango, desertcart, ...)
+        // that can never all be on the static AllowedHosts list — a valid
+        // signature (computed the same way GoogleShoppingDataSource does)
+        // is what proves this specific URL came from a real search result
+        // rather than an attacker-supplied redirect target.
+        var client = _factory.CreateClient(
+            new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        const string signingKey = "integration-test-signing-key-0123456789-0123456789-0123456789";
+        var url = "https://mazeed.sa/products/some-real-listing";
+        var sig = Zaynor.Application.Aggregation.OutboundLinkSigner.Sign(url, signingKey);
+
+        var response = await client.GetAsync(
+            $"/api/out?u={Uri.EscapeDataString(url)}&store=Mazeed&product=Test&sig={Uri.EscapeDataString(sig)}");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal(url, response.Headers.Location!.ToString());
+    }
+
+    [Fact]
+    public async Task Outbound_UnsignedUnknownDomain_IsStillRejected()
+    {
+        // Without a valid signature, an unrecognized domain must still be
+        // rejected exactly as before — the signature is an addition, not a
+        // relaxation, of the open-redirect protection.
+        var client = _factory.CreateClient(
+            new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync(
+            $"/api/out?u={Uri.EscapeDataString("https://mazeed.sa/products/some-real-listing")}&store=Mazeed&product=Test");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Outbound_AmazonLink_CarriesTheAssociatesTag()
     {
         var client = _factory.CreateClient(
