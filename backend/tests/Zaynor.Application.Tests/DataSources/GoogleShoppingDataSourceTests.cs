@@ -104,8 +104,13 @@ public class GoogleShoppingDataSourceTests
         Assert.Equal(4.6m, noon.Rating);
         Assert.Equal(8900, noon.RatingCount);
 
+        // No verified direct-link pattern for eXtra — falls back to a plain
+        // (always-rendering) Google search rather than Google's fragile
+        // "prds=" panel link, which showed "no details available" for real
+        // users regardless of which merchant it pointed at.
         var extra = Assert.Single(offers, o => o.StoreName == "eXtra Stores");
-        Assert.Equal("https://www.google.com/search?ibp=oshop&prds=extra", extra.ProductUrl);
+        Assert.StartsWith("https://www.google.com/search?q=", extra.ProductUrl);
+        Assert.DoesNotContain("prds=", extra.ProductUrl);
         Assert.Null(extra.Rating); // no rating field in the stub for this item — never fabricated
 
         // Amazon deduped to the cheaper of its two listings. Its URL is our
@@ -151,10 +156,11 @@ public class GoogleShoppingDataSourceTests
         var aliexpress = Assert.Single(offers, o => o.StoreName == "AliExpress");
         Assert.StartsWith("https://www.aliexpress.com/wholesale?SearchText=", aliexpress.ProductUrl);
 
-        // No verified pattern for this one — Google's link remains the
-        // fallback, same as before this fix.
+        // No verified pattern for this one — falls back to a plain Google
+        // search (title + store), never Google's broken "prds=" panel link.
         var boutique = Assert.Single(offers, o => o.StoreName == "Some Random Boutique Store");
-        Assert.Equal("https://www.google.com/search?ibp=oshop&prds=c", boutique.ProductUrl);
+        Assert.StartsWith("https://www.google.com/search?q=", boutique.ProductUrl);
+        Assert.DoesNotContain("prds=", boutique.ProductUrl);
     }
 
     [Fact]

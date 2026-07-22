@@ -119,18 +119,26 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
                 var isNoon = IsNoon(item.Source);
                 var storeName = isNoon ? "Noon" : item.Source!;
 
-                // Real reported bug: Google's own compare-prices link
-                // ("prds=" deep link) is a client-side product-panel overlay
-                // tied to the search session that generated it — opened
-                // fresh (a new tab, a different device, after time passes)
-                // it frequently shows "no details available for this
-                // product" instead of the offer. For every merchant whose
-                // own site has a stable, verifiable search-URL pattern, build
-                // that instead, so the click lands on a real page every
-                // time. Google's link remains the fallback only for
-                // merchants with no recognized pattern (mostly small
-                // resellers), same as before.
-                var productUrl = BuildDirectStoreUrl(item.Source!, item.Title!) ?? item.Link;
+                // Real reported bug, twice over: Google's own compare-prices
+                // link ("prds=" deep link) is a client-side product-panel
+                // overlay tied to the search session that generated it —
+                // opened fresh (a new tab, a different device, after time
+                // passes) it reliably shows "no details available for this
+                // product" instead of the offer, for ANY merchant, not just
+                // the well-known ones. Two layers fix this permanently
+                // rather than one store at a time:
+                //  1. Merchants with a verified, stable site-search pattern
+                //     (eBay, AliExpress, Amazon, Noon) get a direct link.
+                //  2. Every other merchant — an open-ended, ever-changing
+                //     set Google Shopping returns, impossible to allowlist
+                //     by domain ahead of time — gets a PLAIN Google search
+                //     for the exact listing (title + store) instead of the
+                //     broken "prds=" panel. A plain search results page has
+                //     no session dependency, so it always renders something
+                //     real; this is what actually stops the dead end for
+                //     good, not just for the stores named above.
+                var productUrl = BuildDirectStoreUrl(item.Source!, item.Title!)
+                    ?? $"https://www.google.com/search?q={Uri.EscapeDataString(item.Title! + " " + item.Source!)}";
 
                 if (string.IsNullOrWhiteSpace(productUrl))
                 {
