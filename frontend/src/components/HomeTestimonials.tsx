@@ -41,12 +41,12 @@ export function HomeTestimonials() {
               {[1, 2, 3, 4, 5].map((n) => (
                 <svg
                   key={n}
-                  width="14"
-                  height="14"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill={n <= review.rating ? 'currentColor' : 'none'}
                   stroke="currentColor"
-                  strokeWidth="1.5"
+                  strokeWidth="1.75"
                   aria-hidden="true"
                 >
                   <path d={STAR_PATH} />

@@ -10,12 +10,12 @@ const STAR_PATH = 'M12 2.5l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17.6l-6.1 3.3 1.5-6.
 function Star({ filled }: { filled: boolean }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="22"
+      height="22"
       viewBox="0 0 24 24"
       fill={filled ? 'currentColor' : 'none'}
       stroke="currentColor"
-      strokeWidth="1.5"
+      strokeWidth="1.75"
       aria-hidden="true"
     >
       <path d={STAR_PATH} />

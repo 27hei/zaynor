@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
-import { getAllReviews, replyToReview } from '../api/client'
+import { deleteReview, getAllReviews, replyToReview } from '../api/client'
 import type { ReviewDto } from '../api/types'
 import { useTranslation } from '../i18n/useTranslation'
 import { usePageTitle } from '../hooks/usePageTitle'
 
-function AdminReviewRow({ review, onReplied }: { review: ReviewDto; onReplied: (updated: ReviewDto) => void }) {
+function AdminReviewRow({
+  review,
+  onReplied,
+  onDeleted,
+}: {
+  review: ReviewDto
+  onReplied: (updated: ReviewDto) => void
+  onDeleted: (id: number) => void
+}) {
   const { t } = useTranslation()
   const [reply, setReply] = useState(review.adminReply ?? '')
   const [sending, setSending] = useState(false)
@@ -21,12 +29,20 @@ function AdminReviewRow({ review, onReplied }: { review: ReviewDto; onReplied: (
     }
   }
 
+  async function handleDelete() {
+    await deleteReview(review.id)
+    onDeleted(review.id)
+  }
+
   return (
     <li className="review-item">
       <div className="review-item-header">
         <span className="review-author">
           {review.storeName} · {review.rating}/5 · {review.displayName ?? t('reviews.anonymousLabel')}
         </span>
+        <button type="button" className="site-review-delete" onClick={handleDelete}>
+          {t('siteReviews.delete')}
+        </button>
       </div>
       <p className="review-comment">{review.comment}</p>
       <form className="ticket-form" onSubmit={handleSubmit}>
@@ -66,13 +82,17 @@ export function AdminReviewsPage() {
     setReviews((prev) => prev.map((r) => (r.id === updated.id ? updated : r)))
   }
 
+  function handleDeleted(id: number) {
+    setReviews((prev) => prev.filter((r) => r.id !== id))
+  }
+
   return (
     <section className="account">
       <h1 className="page-title">{t('admin.allReviews')}</h1>
 
       <ul className="review-list">
         {reviews.map((review) => (
-          <AdminReviewRow key={review.id} review={review} onReplied={handleReplied} />
+          <AdminReviewRow key={review.id} review={review} onReplied={handleReplied} onDeleted={handleDeleted} />
         ))}
       </ul>
     </section>

@@ -125,6 +125,19 @@ public sealed class ReviewService : IReviewService
         return ToDto(review, store.Name);
     }
 
+    public async Task<bool> DeleteAsync(int reviewId, CancellationToken cancellationToken = default)
+    {
+        var review = await _db.Reviews.FirstOrDefaultAsync(r => r.Id == reviewId, cancellationToken);
+        if (review is null)
+        {
+            return false;
+        }
+
+        _db.Reviews.Remove(review);
+        await _db.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     private static ReviewDto ToDto(Review review, string storeName) => new()
     {
         Id = review.Id,

@@ -456,6 +456,39 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
     }
 
     [Fact]
+    public async Task Reviews_Delete_RequiresAdminRole_AndRemovesItPublicly()
+    {
+        var client = _factory.CreateClient();
+        var email = $"it-review-{Guid.NewGuid():N}@test.local";
+        var register = await client.PostAsJsonAsync(
+            "/api/auth/register", new { email, password = "password123", locale = "ar" });
+        var auth = await register.Content.ReadFromJsonAsync<AuthResponse>();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.Token);
+
+        var storeName = $"DeleteTest-{Guid.NewGuid():N}";
+        var submit = await client.PostAsJsonAsync("/api/reviews", new { storeName, rating = 5, comment = "Test data to remove." });
+        var review = await submit.Content.ReadFromJsonAsync<ReviewDto>();
+
+        var forbidden = await client.DeleteAsync($"/api/admin/reviews/{review!.Id}");
+        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+
+        using var adminFactory = _factory.WithWebHostBuilder(builder =>
+            builder.ConfigureAppConfiguration((_, config) =>
+                config.AddInMemoryCollection(new Dictionary<string, string?> { ["Admin:Email"] = email })));
+        var adminClient = adminFactory.CreateClient();
+
+        var relogin = await adminClient.PostAsJsonAsync("/api/auth/login", new { email, password = "password123" });
+        var adminAuth = await relogin.Content.ReadFromJsonAsync<AuthResponse>();
+        adminClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminAuth!.Token);
+
+        var delete = await adminClient.DeleteAsync($"/api/admin/reviews/{review.Id}");
+        Assert.Equal(HttpStatusCode.NoContent, delete.StatusCode);
+
+        var publicList = await client.GetFromJsonAsync<List<ReviewDto>>($"/api/reviews?storeName={storeName}");
+        Assert.Empty(publicList!);
+    }
+
+    [Fact]
     public async Task SupportTickets_RequireAuthentication()
     {
         var response = await _factory.CreateClient().GetAsync("/api/support/tickets");

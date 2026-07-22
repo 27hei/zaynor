@@ -265,6 +265,11 @@ export async function replyToReview(reviewId: number, reply: string): Promise<Re
   return (await response.json()) as ReviewDto
 }
 
+/** Admin-only: removes a store review outright (spam/test data, or a deliberate moderation call). */
+export async function deleteReview(reviewId: number): Promise<void> {
+  await authFetch(`/api/admin/reviews/${reviewId}`, { method: 'DELETE' })
+}
+
 // --- Support tickets ---
 
 export async function getMyTickets(): Promise<SupportTicketDto[]> {

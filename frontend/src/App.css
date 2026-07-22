@@ -21,6 +21,10 @@
   --text-muted: #526158;
   --hairline: #e6ebe8;
   --hairline-strong: #d7ded9;
+  /* Unselected star outline — needs more contrast than --hairline-strong
+     (which nearly disappears against the dark canvas) so an empty rating
+     input still clearly reads as "5 stars, none picked yet". */
+  --star-idle: #b9c2bc;
 
   /* Depth — layered, soft */
   --shadow-xs: 0 1px 2px rgba(11, 31, 24, 0.04);
@@ -74,6 +78,7 @@ html[lang='ar'] {
     --text-muted: #93aba1;
     --hairline: #2c3b36;
     --hairline-strong: #3a4c45;
+    --star-idle: #6b7f76;
 
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -120,6 +125,7 @@ html[lang='ar'] {
   --text-muted: #93aba1;
   --hairline: #2c3b36;
   --hairline-strong: #3a4c45;
+  --star-idle: #6b7f76;
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -3107,15 +3113,20 @@ html[lang='ar'] {
 
 .review-stars-input {
   display: flex;
-  gap: 0.2rem;
+  gap: 0.3rem;
 }
 
 .review-stars-input button {
   padding: 0.2rem;
   background: none;
   border: none;
-  color: var(--hairline-strong);
+  color: var(--star-idle);
   cursor: pointer;
+  transition: color 0.1s ease, transform 0.1s ease;
+}
+
+.review-stars-input button:hover {
+  transform: scale(1.1);
 }
 
 .review-stars-input button[aria-checked='true'],
@@ -3151,7 +3162,7 @@ html[lang='ar'] {
 .review-item-header {
   display: flex;
   align-items: center;
-  gap: 0.15rem;
+  gap: 0.2rem;
   color: #f0a825;
 }
 
@@ -3224,7 +3235,7 @@ html[lang='ar'] {
 
 .home-testimonial-stars {
   display: flex;
-  gap: 0.1rem;
+  gap: 0.15rem;
   color: #f0a825;
 }
 
@@ -3248,6 +3259,7 @@ html[lang='ar'] {
 }
 
 .site-review-delete {
+  margin-inline-start: auto;
   border: none;
   background: none;
   color: var(--danger, #c0392b);

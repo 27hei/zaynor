@@ -41,4 +41,13 @@ public class AdminReviewsController : ControllerBase
         var result = await _reviews.ReplyAsync(id, request.Reply, cancellationToken);
         return result is null ? NotFound() : Ok(result);
     }
+
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        var deleted = await _reviews.DeleteAsync(id, cancellationToken);
+        return deleted ? NoContent() : NotFound();
+    }
 }
