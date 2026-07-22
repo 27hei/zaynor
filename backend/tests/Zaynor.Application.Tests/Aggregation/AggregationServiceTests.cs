@@ -33,6 +33,34 @@ public class AggregationServiceTests
     }
 
     [Fact]
+    public async Task SearchAsync_PassesProductDetailsThroughUnchanged()
+    {
+        var details = new ProductDetails
+        {
+            Images = ["https://example.com/img.jpg"],
+            Brand = "Apple",
+            Description = "A phone.",
+            Specifications = ["Processor: A16"],
+            StoreHighlights = ["In stock online"],
+        };
+        var service = CreateService(FakeDataSource.Returning(FakeDataSource.Offer("Jarir", 2000m, details)));
+
+        var result = await service.SearchAsync("iphone 15");
+
+        Assert.Same(details, Assert.Single(result.Offers).ProductDetails);
+    }
+
+    [Fact]
+    public async Task SearchAsync_ProductDetailsIsNull_WhenTheSourceDidntProvideAny()
+    {
+        var service = CreateService(FakeDataSource.Returning(FakeDataSource.Offer("Jarir", 2000m)));
+
+        var result = await service.SearchAsync("iphone 15");
+
+        Assert.Null(Assert.Single(result.Offers).ProductDetails);
+    }
+
+    [Fact]
     public async Task SearchAsync_FlagsOffers_OnlyForStoresWithAnActiveAffiliateConfig()
     {
         var noonOffer = new StoreOffer

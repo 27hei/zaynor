@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Zaynor.Application.Aggregation.Models;
 using Zaynor.Application.Auth.Models;
+using Zaynor.Application.Reviews.Models;
+using Zaynor.Application.Support.Models;
 using Zaynor.Application.UserItems.Models;
 
 namespace Zaynor.Application.Tests.Integration;
@@ -116,6 +118,35 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
         var badLogin = await client.PostAsJsonAsync(
             "/api/auth/login", new { email, password = "wrong-password" });
         Assert.Equal(HttpStatusCode.Unauthorized, badLogin.StatusCode);
+    }
+
+    [Fact]
+    public async Task Admin_BootstrapPromotesTheConfiguredEmail()
+    {
+        // No self-service admin registration exists anywhere — the only way
+        // to become admin is being the specific email set in Admin:Email
+        // config, applied idempotently at startup (Program.cs). /api/auth/me
+        // reads IsAdmin fresh from the DB each call, so promotion is visible
+        // immediately even though the JWT issued at registration predates it.
+        var client = _factory.CreateClient();
+        var email = $"it-admin-{Guid.NewGuid():N}@test.local";
+
+        var register = await client.PostAsJsonAsync(
+            "/api/auth/register", new { email, password = "password123", locale = "ar" });
+        var auth = await register.Content.ReadFromJsonAsync<AuthResponse>();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.Token);
+
+        var beforePromotion = await client.GetFromJsonAsync<UserDto>("/api/auth/me");
+        Assert.False(beforePromotion!.IsAdmin);
+
+        using var adminFactory = _factory.WithWebHostBuilder(builder =>
+            builder.ConfigureAppConfiguration((_, config) =>
+                config.AddInMemoryCollection(new Dictionary<string, string?> { ["Admin:Email"] = email })));
+        var adminClient = adminFactory.CreateClient();
+        adminClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.Token);
+
+        var afterPromotion = await adminClient.GetFromJsonAsync<UserDto>("/api/auth/me");
+        Assert.True(afterPromotion!.IsAdmin);
     }
 
     [Fact]
@@ -317,5 +348,205 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
 
         var after = await client.GetFromJsonAsync<List<SavedProductDto>>("/api/saved");
         Assert.DoesNotContain(after!, s => s.Id == dto.Id);
+    }
+
+    [Fact]
+    public async Task Reviews_PublicList_RequiresNoAuth()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync($"/api/reviews?storeName=NeverReviewed-{Guid.NewGuid():N}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var reviews = await response.Content.ReadFromJsonAsync<List<ReviewDto>>();
+        Assert.Empty(reviews!);
+    }
+
+    [Fact]
+    public async Task Reviews_SubmitRequiresAuth()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync(
+            "/api/reviews", new { storeName = "Amazon.sa", rating = 5, comment = "Great!" });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Reviews_FullCycle_SubmitThenListShowsIt_EvenWhenNegative()
+    {
+        // Founder's explicit call: reviews are never hidden for being
+        // negative — a 1-star review must show up exactly like a 5-star one.
+        var client = _factory.CreateClient();
+        var email = $"it-review-{Guid.NewGuid():N}@test.local";
+        var register = await client.PostAsJsonAsync(
+            "/api/auth/register", new { email, password = "password123", locale = "ar" });
+        var auth = await register.Content.ReadFromJsonAsync<AuthResponse>();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.Token);
+
+        var storeName = $"TestStore-{Guid.NewGuid():N}";
+        var submit = await client.PostAsJsonAsync(
+            "/api/reviews", new { storeName, rating = 1, comment = "Terrible delivery experience.", displayName = "Unhappy Customer" });
+        Assert.Equal(HttpStatusCode.OK, submit.StatusCode);
+
+        var list = await client.GetFromJsonAsync<List<ReviewDto>>($"/api/reviews?storeName={storeName}");
+        var review = Assert.Single(list!);
+        Assert.Equal(1, review.Rating);
+        Assert.Equal("Terrible delivery experience.", review.Comment);
+        Assert.Equal("Unhappy Customer", review.DisplayName);
+        Assert.Null(review.AdminReply);
+    }
+
+    [Fact]
+    public async Task Reviews_CaseInsensitiveStoreNameMatch_DoesNotFragmentReviews()
+    {
+        var client = _factory.CreateClient();
+        var email = $"it-review-{Guid.NewGuid():N}@test.local";
+        var register = await client.PostAsJsonAsync(
+            "/api/auth/register", new { email, password = "password123", locale = "ar" });
+        var auth = await register.Content.ReadFromJsonAsync<AuthResponse>();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.Token);
+
+        var baseName = $"CaseTest-{Guid.NewGuid():N}";
+        await client.PostAsJsonAsync("/api/reviews", new { storeName = baseName.ToLowerInvariant(), rating = 5, comment = "First." });
+        await client.PostAsJsonAsync("/api/reviews", new { storeName = baseName.ToUpperInvariant(), rating = 4, comment = "Second." });
+
+        var list = await client.GetFromJsonAsync<List<ReviewDto>>($"/api/reviews?storeName={baseName}");
+        Assert.Equal(2, list!.Count);
+    }
+
+    [Fact]
+    public async Task Reviews_AdminReply_RequiresAdminRole_AndAppearsPublicly()
+    {
+        var client = _factory.CreateClient();
+        var email = $"it-review-{Guid.NewGuid():N}@test.local";
+        var register = await client.PostAsJsonAsync(
+            "/api/auth/register", new { email, password = "password123", locale = "ar" });
+        var auth = await register.Content.ReadFromJsonAsync<AuthResponse>();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.Token);
+
+        var storeName = $"ReplyTest-{Guid.NewGuid():N}";
+        var submit = await client.PostAsJsonAsync("/api/reviews", new { storeName, rating = 2, comment = "Slow shipping." });
+        var review = await submit.Content.ReadFromJsonAsync<ReviewDto>();
+
+        var forbidden = await client.PostAsJsonAsync($"/api/admin/reviews/{review!.Id}/reply", new { reply = "Sorry about that!" });
+        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+
+        using var adminFactory = _factory.WithWebHostBuilder(builder =>
+            builder.ConfigureAppConfiguration((_, config) =>
+                config.AddInMemoryCollection(new Dictionary<string, string?> { ["Admin:Email"] = email })));
+        var adminClient = adminFactory.CreateClient();
+
+        // The token from registration predates promotion and has no Admin
+        // role claim — [Authorize(Roles = "Admin")] checks the JWT's claims,
+        // not a fresh DB read, so a new login (issued after the bootstrap
+        // above promoted this email) is required to get a token that
+        // actually carries the role.
+        var relogin = await adminClient.PostAsJsonAsync("/api/auth/login", new { email, password = "password123" });
+        var adminAuth = await relogin.Content.ReadFromJsonAsync<AuthResponse>();
+        adminClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminAuth!.Token);
+
+        var reply = await adminClient.PostAsJsonAsync($"/api/admin/reviews/{review.Id}/reply", new { reply = "Sorry about that!" });
+        Assert.Equal(HttpStatusCode.OK, reply.StatusCode);
+
+        var publicList = await client.GetFromJsonAsync<List<ReviewDto>>($"/api/reviews?storeName={storeName}");
+        Assert.Equal("Sorry about that!", Assert.Single(publicList!).AdminReply);
+    }
+
+    [Fact]
+    public async Task SupportTickets_RequireAuthentication()
+    {
+        var response = await _factory.CreateClient().GetAsync("/api/support/tickets");
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task SupportTickets_AdminEndpoints_RejectNonAdmin()
+    {
+        var client = _factory.CreateClient();
+        var email = $"it-support-{Guid.NewGuid():N}@test.local";
+        var register = await client.PostAsJsonAsync(
+            "/api/auth/register", new { email, password = "password123", locale = "ar" });
+        var auth = await register.Content.ReadFromJsonAsync<AuthResponse>();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.Token);
+
+        var response = await client.GetAsync("/api/admin/support/tickets");
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task SupportTickets_OwnershipIsolation_UserCannotSeeAnotherUsersTicket()
+    {
+        var clientA = _factory.CreateClient();
+        var emailA = $"it-support-a-{Guid.NewGuid():N}@test.local";
+        var registerA = await clientA.PostAsJsonAsync(
+            "/api/auth/register", new { email = emailA, password = "password123", locale = "ar" });
+        var authA = await registerA.Content.ReadFromJsonAsync<AuthResponse>();
+        clientA.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authA!.Token);
+
+        var created = await clientA.PostAsJsonAsync(
+            "/api/support/tickets", new { subject = "Order issue", message = "My order hasn't arrived." });
+        var ticket = await created.Content.ReadFromJsonAsync<SupportTicketDto>();
+
+        var clientB = _factory.CreateClient();
+        var emailB = $"it-support-b-{Guid.NewGuid():N}@test.local";
+        var registerB = await clientB.PostAsJsonAsync(
+            "/api/auth/register", new { email = emailB, password = "password123", locale = "ar" });
+        var authB = await registerB.Content.ReadFromJsonAsync<AuthResponse>();
+        clientB.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authB!.Token);
+
+        var response = await clientB.GetAsync($"/api/support/tickets/{ticket!.Id}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task SupportTickets_FullCycle_CreateReplyCloseThenCustomerReplyReopens()
+    {
+        var client = _factory.CreateClient();
+        var email = $"it-support-{Guid.NewGuid():N}@test.local";
+        var register = await client.PostAsJsonAsync(
+            "/api/auth/register", new { email, password = "password123", locale = "ar" });
+        var auth = await register.Content.ReadFromJsonAsync<AuthResponse>();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.Token);
+
+        var created = await client.PostAsJsonAsync(
+            "/api/support/tickets", new { subject = "Refund question", message = "How do I get a refund?" });
+        Assert.Equal(HttpStatusCode.OK, created.StatusCode);
+        var ticket = await created.Content.ReadFromJsonAsync<SupportTicketDto>();
+        Assert.False(ticket!.IsClosed);
+
+        using var adminFactory = _factory.WithWebHostBuilder(builder =>
+            builder.ConfigureAppConfiguration((_, config) =>
+                config.AddInMemoryCollection(new Dictionary<string, string?> { ["Admin:Email"] = email })));
+        var adminClient = adminFactory.CreateClient();
+        var relogin = await adminClient.PostAsJsonAsync("/api/auth/login", new { email, password = "password123" });
+        var adminAuth = await relogin.Content.ReadFromJsonAsync<AuthResponse>();
+        adminClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminAuth!.Token);
+
+        // Admin sees it in the inbox and replies.
+        var allTickets = await adminClient.GetFromJsonAsync<List<AdminSupportTicketDto>>("/api/admin/support/tickets");
+        Assert.Contains(allTickets!, t => t.Id == ticket.Id && t.UserEmail == email);
+
+        var reply = await adminClient.PostAsJsonAsync(
+            $"/api/admin/support/tickets/{ticket.Id}/messages", new { body = "Refunds take 3-5 business days." });
+        Assert.Equal(HttpStatusCode.OK, reply.StatusCode);
+
+        // Customer sees the reply.
+        var thread = await client.GetFromJsonAsync<SupportTicketDetailDto>($"/api/support/tickets/{ticket.Id}");
+        Assert.Contains(thread!.Messages, m => m.IsFromAdmin && m.Body == "Refunds take 3-5 business days.");
+
+        // Admin closes it.
+        var close = await adminClient.PostAsync($"/api/admin/support/tickets/{ticket.Id}/close", null);
+        Assert.Equal(HttpStatusCode.NoContent, close.StatusCode);
+        var afterClose = await client.GetFromJsonAsync<SupportTicketDetailDto>($"/api/support/tickets/{ticket.Id}");
+        Assert.True(afterClose!.IsClosed);
+
+        // A customer reply reopens it — no dead-end support experience.
+        var followUp = await client.PostAsJsonAsync(
+            $"/api/support/tickets/{ticket.Id}/messages", new { body = "Thanks, one more question." });
+        Assert.Equal(HttpStatusCode.OK, followUp.StatusCode);
+        var afterReply = await client.GetFromJsonAsync<SupportTicketDetailDto>($"/api/support/tickets/{ticket.Id}");
+        Assert.False(afterReply!.IsClosed);
     }
 }

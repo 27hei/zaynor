@@ -31,6 +31,9 @@ public class ZaynorDbContext : DbContext
     public DbSet<SavedProduct> SavedProducts => Set<SavedProduct>();
     public DbSet<PriceHistory> PriceHistory => Set<PriceHistory>();
     public DbSet<ClickEvent> ClickEvents => Set<ClickEvent>();
+    public DbSet<Review> Reviews => Set<Review>();
+    public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
+    public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,5 +56,13 @@ public class ZaynorDbContext : DbContext
         modelBuilder.Entity<PriceHistory>()
             .Property(p => p.Price)
             .HasPrecision(18, 2);
+
+        // Every review-list query filters by store.
+        modelBuilder.Entity<Review>()
+            .HasIndex(r => r.StoreId);
+
+        // Every thread view filters by ticket.
+        modelBuilder.Entity<SupportMessage>()
+            .HasIndex(m => m.TicketId);
     }
 }

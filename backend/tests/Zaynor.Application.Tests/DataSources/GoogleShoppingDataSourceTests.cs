@@ -79,17 +79,38 @@ public class GoogleShoppingDataSourceTests
     private static string StoresJson(params string[] storeJsonEntries) =>
         "{\"product_results\":{\"stores\":[" + string.Join(",", storeJsonEntries) + "]}}";
 
-    private static string Store(string name, string link, decimal price, string? title = null, double? rating = null, int? reviews = null)
+    /// <summary>A product_results envelope with product-level detail fields (images/brand/description/features) alongside its stores.</summary>
+    private static string RichProductResultsJson(
+        string[] thumbnails, string brand, string aboutDescription, (string Title, string Value)[] features, params string[] storeJsonEntries)
+    {
+        var thumbsJson = string.Join(",", thumbnails.Select(t => $"\"{t}\""));
+        var featuresJson = string.Join(",", features.Select(f => $$"""{"title":"{{f.Title}}","value":"{{f.Value}}"}"""));
+        return $$"""
+            {
+              "product_results": {
+                "thumbnails": [{{thumbsJson}}],
+                "brand": "{{brand}}",
+                "about_the_product": { "description": "{{aboutDescription}}", "features": [{{featuresJson}}] },
+                "stores": [{{string.Join(",", storeJsonEntries)}}]
+              }
+            }
+            """;
+    }
+
+    private static string Store(string name, string link, decimal price, string? title = null, double? rating = null, int? reviews = null, string[]? detailsAndOffers = null)
     {
         var ratingPart = rating is { } r ? $""", "rating": {r}""" : "";
         var reviewsPart = reviews is { } rv ? $""", "reviews": {rv}""" : "";
+        var detailsPart = detailsAndOffers is { Length: > 0 } d
+            ? $""", "details_and_offers": [{string.Join(",", d.Select(x => $"\"{x}\""))}]"""
+            : "";
         return $$"""
             {
               "name": "{{name}}",
               "title": "{{title ?? name}}",
               "link": "{{link}}",
               "price": "SAR {{price}}",
-              "extracted_price": {{price}}{{ratingPart}}{{reviewsPart}}
+              "extracted_price": {{price}}{{ratingPart}}{{reviewsPart}}{{detailsPart}}
             }
             """;
     }
@@ -169,6 +190,63 @@ public class GoogleShoppingDataSourceTests
 
         var boutique = Assert.Single(offers, o => o.StoreName == "Some Random Boutique Store");
         Assert.Equal("https://someboutique.example.com/products/iphone-15", boutique.ProductUrl);
+    }
+
+    [Fact]
+    public async Task WithRichImmersiveFields_PopulatesProductDetails_PerStore()
+    {
+        // The Immersive Product API response (already fetched for the direct
+        // link above — no extra paid call) carries rich fields Zaynor was
+        // discarding: product-level images/brand/description/specs, and each
+        // store's own fulfillment bullets ("In stock online", "Delivery SAR
+        // 29", ...). Captured now so a product-detail page can show them.
+        var immersive = new Dictionary<string, string>
+        {
+            ["t1"] = RichProductResultsJson(
+                thumbnails: ["https://example.com/img1.jpg", "https://example.com/img2.jpg"],
+                brand: "Apple",
+                aboutDescription: "iPhone 15 brings Dynamic Island and a 48MP camera.",
+                features: [("Processor", "A16 Bionic"), ("Water Resistant", "Yes")],
+                storeJsonEntries:
+                [
+                    Store("Jarir Bookstore", "https://www.jarir.com/real-iphone-15", 2799.00m, "Apple iPhone 15",
+                        detailsAndOffers: ["In stock online", "Delivery SAR 29", "3-day returns"]),
+                ]),
+        };
+        var source = new GoogleShoppingDataSource(
+            new StubFactory(new StubHandler(ShoppingJson("t1"), immersive)),
+            Config(("DataSources:SerpApi:ApiKey", "test-key")),
+            NullLogger<GoogleShoppingDataSource>.Instance);
+
+        var offers = await source.SearchAsync("iphone 15");
+
+        var offer = Assert.Single(offers);
+        Assert.NotNull(offer.ProductDetails);
+        Assert.Equal(["https://example.com/img1.jpg", "https://example.com/img2.jpg"], offer.ProductDetails!.Images);
+        Assert.Equal("Apple", offer.ProductDetails.Brand);
+        Assert.Equal("iPhone 15 brings Dynamic Island and a 48MP camera.", offer.ProductDetails.Description);
+        Assert.Equal(["Processor: A16 Bionic", "Water Resistant: Yes"], offer.ProductDetails.Specifications);
+        Assert.Equal(["In stock online", "Delivery SAR 29", "3-day returns"], offer.ProductDetails.StoreHighlights);
+    }
+
+    [Fact]
+    public async Task WithoutRichImmersiveFields_ProductDetailsIsNull()
+    {
+        // No all-null wrapper object when nothing usable was actually
+        // returned — a source with no rich data must not fabricate one.
+        var immersive = new Dictionary<string, string>
+        {
+            ["t1"] = StoresJson(Store("Jarir Bookstore", "https://www.jarir.com/real-iphone-15", 2799.00m, "Apple iPhone 15")),
+        };
+        var source = new GoogleShoppingDataSource(
+            new StubFactory(new StubHandler(ShoppingJson("t1"), immersive)),
+            Config(("DataSources:SerpApi:ApiKey", "test-key")),
+            NullLogger<GoogleShoppingDataSource>.Instance);
+
+        var offers = await source.SearchAsync("iphone 15");
+
+        var offer = Assert.Single(offers);
+        Assert.Null(offer.ProductDetails);
     }
 
     [Fact]

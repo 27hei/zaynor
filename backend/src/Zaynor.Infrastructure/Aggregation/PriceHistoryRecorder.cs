@@ -89,23 +89,8 @@ public sealed class PriceHistoryRecorder : IPriceHistoryRecorder
         return product;
     }
 
-    private async Task<Store> FindOrCreateStoreAsync(AggregatedOffer offer, CancellationToken cancellationToken)
-    {
-        var store = await _db.Stores.FirstOrDefaultAsync(s => s.Name == offer.StoreName, cancellationToken);
-        if (store is not null)
-        {
-            return store;
-        }
-
-        store = new Store
-        {
-            Name = offer.StoreName,
-            BaseUrl = SafeOrigin(offer.ProductUrl),
-        };
-        _db.Stores.Add(store);
-        await _db.SaveChangesAsync(cancellationToken);
-        return store;
-    }
+    private Task<Store> FindOrCreateStoreAsync(AggregatedOffer offer, CancellationToken cancellationToken) =>
+        StoreLookup.FindOrCreateAsync(_db, offer.StoreName, SafeOrigin(offer.ProductUrl), cancellationToken);
 
     /// <summary>
     /// True when a point for this product+store was recorded within

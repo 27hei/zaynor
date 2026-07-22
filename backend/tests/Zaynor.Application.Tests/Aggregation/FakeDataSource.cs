@@ -47,12 +47,13 @@ internal sealed class FakeDataSource : IProductDataSource
         return Task.FromResult(_offers);
     }
 
-    public static StoreOffer Offer(string store, decimal price) => new()
+    public static StoreOffer Offer(string store, decimal price, ProductDetails? productDetails = null) => new()
     {
         StoreName = store,
         ProductTitle = "Test Product",
         Price = price,
         Currency = "SAR",
         ProductUrl = $"https://example.com/{store}",
+        ProductDetails = productDetails,
     };
 }

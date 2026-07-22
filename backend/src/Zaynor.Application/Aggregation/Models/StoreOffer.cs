@@ -43,4 +43,7 @@ public sealed record StoreOffer
     /// <see cref="OutboundLinkSigner"/>.
     /// </summary>
     public string? Signature { get; init; }
+
+    /// <summary>Rich detail fields already fetched during search (GoogleShoppingDataSource only) — null for every other source, never fabricated.</summary>
+    public ProductDetails? ProductDetails { get; init; }
 }

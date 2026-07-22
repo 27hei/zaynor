@@ -1,6 +1,7 @@
 using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Zaynor.Application;
@@ -71,6 +72,18 @@ builder.Services.AddRateLimiter(options =>
                 PermitLimit = 300,
                 Window = TimeSpan.FromMinutes(1),
             }));
+
+    // Tighter, named limit for review/support-ticket submission specifically
+    // (spam prevention) — layered underneath the global limiter above, both
+    // apply. Keyed per-IP like the global limiter, since these actions are
+    // authenticated but a single account spamming from one IP is the actual
+    // abuse pattern this guards against. Generous enough that a real user
+    // replying rapidly back-and-forth on a support ticket never trips it.
+    options.AddFixedWindowLimiter("submission", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = 30;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+    });
 });
 
 var app = builder.Build();
@@ -81,6 +94,21 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ZaynorDbContext>();
     db.Database.Migrate();
+
+    // Admin bootstrap: no self-service admin registration exists anywhere —
+    // the only way to become admin is being the specific email configured
+    // here (Admin:Email / env Admin__Email). Idempotent and safe every
+    // startup; no-ops if unset or that email hasn't registered yet.
+    var adminEmail = builder.Configuration["Admin:Email"]?.Trim().ToLowerInvariant();
+    if (!string.IsNullOrWhiteSpace(adminEmail))
+    {
+        var adminUser = await db.Users.FirstOrDefaultAsync(u => u.Email == adminEmail);
+        if (adminUser is not null && !adminUser.IsAdmin)
+        {
+            adminUser.IsAdmin = true;
+            await db.SaveChangesAsync();
+        }
+    }
 }
 
 // Configure the HTTP request pipeline.

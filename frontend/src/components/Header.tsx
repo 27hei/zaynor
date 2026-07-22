@@ -95,6 +95,11 @@ export function Header() {
           <NavLink to="/about" className={navLinkClass}>
             {t('nav.about')}
           </NavLink>
+          {user?.isAdmin && (
+            <NavLink to="/admin" className={navLinkClass}>
+              {t('nav.admin')}
+            </NavLink>
+          )}
         </nav>
 
         <div className="header-actions">

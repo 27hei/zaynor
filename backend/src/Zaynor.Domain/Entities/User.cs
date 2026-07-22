@@ -17,4 +17,7 @@ public class User
 
     /// <summary>Preferred locale, e.g. "ar" or "en" (spec NFR5, bilingual support).</summary>
     public string Locale { get; set; } = "ar";
+
+    /// <summary>Grants access to admin-only endpoints (reply to reviews, manage support tickets). Set only via the Admin:Email startup bootstrap in Program.cs, never by self-registration.</summary>
+    public bool IsAdmin { get; set; }
 }

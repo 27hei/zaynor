@@ -1,6 +1,15 @@
 // Mirrors the read models returned by the backend (Zaynor.Application.Aggregation.Models).
 // ASP.NET Core serializes with camelCase by default.
 
+/** Rich detail fields already fetched during search (GoogleShoppingDataSource only) — null for every other source, never fabricated. */
+export interface ProductDetails {
+  images: string[] | null
+  brand: string | null
+  description: string | null
+  specifications: string[] | null
+  storeHighlights: string[] | null
+}
+
 export interface AggregatedOffer {
   storeName: string
   productTitle: string
@@ -19,6 +28,7 @@ export interface AggregatedOffer {
   hasAffiliateLink: boolean
   /** Proves to /api/out this link came from a real search result — required for stores outside its static known-domain list. */
   signature: string | null
+  productDetails: ProductDetails | null
 }
 
 export interface Recommendation {
@@ -46,6 +56,7 @@ export interface UserDto {
   email: string
   locale: string
   createdAt: string
+  isAdmin: boolean
 }
 
 export interface AuthResponse {
@@ -77,4 +88,48 @@ export interface AlertDto {
   targetCondition: string
   isActive: boolean
   createdAt: string
+}
+
+/** A customer's rating + comment about a specific store — always public, admin may reply. */
+export interface ReviewDto {
+  id: number
+  storeName: string
+  displayName: string | null
+  rating: number
+  comment: string
+  createdAt: string
+  adminReply: string | null
+  adminReplyAt: string | null
+}
+
+export interface SupportMessageDto {
+  id: number
+  isFromAdmin: boolean
+  body: string
+  createdAt: string
+}
+
+export interface SupportTicketDto {
+  id: number
+  subject: string
+  isClosed: boolean
+  createdAt: string
+  updatedAt: string
+  messageCount: number
+}
+
+export interface SupportTicketDetailDto {
+  id: number
+  subject: string
+  isClosed: boolean
+  createdAt: string
+  messages: SupportMessageDto[]
+}
+
+export interface AdminSupportTicketDto extends SupportTicketDto {
+  userEmail: string
+}
+
+export interface AdminSupportTicketDetailDto extends SupportTicketDetailDto {
+  userEmail: string
 }

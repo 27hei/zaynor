@@ -4,6 +4,7 @@ import { SearchBar } from '../components/SearchBar'
 import { NeutralityBadge } from '../components/NeutralityBadge'
 import { HomeCategories } from '../components/HomeCategories'
 import { LivePricesTeaser } from '../components/LivePricesTeaser'
+import { HomeTestimonials } from '../components/HomeTestimonials'
 import { StoreLogo } from '../components/StoreLogo'
 import { TRACKED_STORE_NAMES } from '../storeBrand'
 import { useTranslation } from '../i18n/useTranslation'
@@ -62,6 +63,7 @@ export function HomePage() {
 
       <LivePricesTeaser onSelect={goToProduct} />
       <HomeCategories onSelect={goToProduct} />
+      <HomeTestimonials />
     </>
   )
 }

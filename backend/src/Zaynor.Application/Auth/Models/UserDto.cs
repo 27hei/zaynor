@@ -10,4 +10,6 @@ public sealed record UserDto
     public required string Locale { get; init; }
 
     public required DateTimeOffset CreatedAt { get; init; }
+
+    public required bool IsAdmin { get; init; }
 }

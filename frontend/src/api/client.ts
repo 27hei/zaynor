@@ -1,9 +1,15 @@
 import type {
+  AdminSupportTicketDetailDto,
+  AdminSupportTicketDto,
   AlertDto,
   AuthResponse,
   PriceHistoryResponse,
+  ReviewDto,
   SavedProductDto,
   SearchResult,
+  SupportMessageDto,
+  SupportTicketDetailDto,
+  SupportTicketDto,
   UserDto,
 } from './types'
 import { getToken } from '../auth/token'
@@ -211,4 +217,104 @@ export async function createAlert(
 
 export async function removeAlert(id: number): Promise<void> {
   await authFetch(`/api/alerts/${id}`, { method: 'DELETE' })
+}
+
+// --- Store reviews ---
+
+export async function getStoreReviews(storeName: string): Promise<ReviewDto[]> {
+  const response = await fetch(`${API_BASE_URL}/api/reviews?storeName=${encodeURIComponent(storeName)}`)
+  if (!response.ok) return []
+  return (await response.json()) as ReviewDto[]
+}
+
+/** A small curated highlight for the homepage — not a filter on what's visible on a store's own review list. */
+export async function getFeaturedReviews(): Promise<ReviewDto[]> {
+  const response = await fetch(`${API_BASE_URL}/api/reviews/featured`)
+  if (!response.ok) return []
+  return (await response.json()) as ReviewDto[]
+}
+
+export async function submitReview(
+  storeName: string,
+  rating: number,
+  comment: string,
+  displayName: string | null,
+): Promise<ReviewDto> {
+  const response = await authFetch('/api/reviews', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ storeName, rating, comment, displayName }),
+  })
+  return (await response.json()) as ReviewDto
+}
+
+// --- Admin: reviews ---
+
+export async function getAllReviews(): Promise<ReviewDto[]> {
+  const response = await authFetch('/api/admin/reviews')
+  return (await response.json()) as ReviewDto[]
+}
+
+export async function replyToReview(reviewId: number, reply: string): Promise<ReviewDto> {
+  const response = await authFetch(`/api/admin/reviews/${reviewId}/reply`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reply }),
+  })
+  return (await response.json()) as ReviewDto
+}
+
+// --- Support tickets ---
+
+export async function getMyTickets(): Promise<SupportTicketDto[]> {
+  const response = await authFetch('/api/support/tickets')
+  return (await response.json()) as SupportTicketDto[]
+}
+
+export async function createTicket(subject: string, message: string): Promise<SupportTicketDto> {
+  const response = await authFetch('/api/support/tickets', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ subject, message }),
+  })
+  return (await response.json()) as SupportTicketDto
+}
+
+export async function getMyTicket(id: number): Promise<SupportTicketDetailDto> {
+  const response = await authFetch(`/api/support/tickets/${id}`)
+  return (await response.json()) as SupportTicketDetailDto
+}
+
+export async function addTicketMessage(id: number, body: string): Promise<SupportMessageDto> {
+  const response = await authFetch(`/api/support/tickets/${id}/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ body }),
+  })
+  return (await response.json()) as SupportMessageDto
+}
+
+// --- Admin: support tickets ---
+
+export async function getAllTickets(): Promise<AdminSupportTicketDto[]> {
+  const response = await authFetch('/api/admin/support/tickets')
+  return (await response.json()) as AdminSupportTicketDto[]
+}
+
+export async function getAdminTicket(id: number): Promise<AdminSupportTicketDetailDto> {
+  const response = await authFetch(`/api/admin/support/tickets/${id}`)
+  return (await response.json()) as AdminSupportTicketDetailDto
+}
+
+export async function addAdminReply(id: number, body: string): Promise<SupportMessageDto> {
+  const response = await authFetch(`/api/admin/support/tickets/${id}/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ body }),
+  })
+  return (await response.json()) as SupportMessageDto
+}
+
+export async function closeTicket(id: number): Promise<void> {
+  await authFetch(`/api/admin/support/tickets/${id}/close`, { method: 'POST' })
 }

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import type { AggregatedOffer } from '../api/types'
-import { formatPrice } from '../format'
+import { formatPrice, shippingLabel } from '../format'
 import { useTranslation } from '../i18n/useTranslation'
 import { StoreLogo } from './StoreLogo'
 import { StoreRating } from './StoreRating'
@@ -11,9 +12,10 @@ type SortMode = 'price' | 'delivery'
 
 interface OfferListProps {
   offers: AggregatedOffer[]
+  query: string
 }
 
-export function OfferList({ offers }: OfferListProps) {
+export function OfferList({ offers, query }: OfferListProps) {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const [sortMode, setSortMode] = useState<SortMode>('price')
@@ -37,21 +39,6 @@ export function OfferList({ offers }: OfferListProps) {
   const hasMore = sortedOffers.length > VISIBLE_BY_DEFAULT
   const visibleOffers = expanded ? sortedOffers : sortedOffers.slice(0, VISIBLE_BY_DEFAULT)
   const hiddenCount = sortedOffers.length - VISIBLE_BY_DEFAULT
-
-  function shippingLabel(offer: AggregatedOffer): string | null {
-    const parts: string[] = []
-    if (offer.freeShipping) {
-      parts.push(t('offer.freeShipping'))
-    }
-    if (offer.deliveryDays != null) {
-      parts.push(
-        offer.deliveryDays <= 1
-          ? t('offer.deliveryNextDay')
-          : t('offer.delivery', { days: offer.deliveryDays }),
-      )
-    }
-    return parts.length > 0 ? parts.join(' · ') : null
-  }
 
   return (
     <>
@@ -86,14 +73,14 @@ export function OfferList({ offers }: OfferListProps) {
 
       <ul className="offer-list">
         {visibleOffers.map((offer, index) => {
-          const shipping = shippingLabel(offer)
+          const shipping = shippingLabel(offer, t)
 
           return (
             <li
               key={`${offer.storeName}-${index}`}
               className={offer.isLowestPrice ? 'offer offer-lowest' : 'offer'}
             >
-              <div className="offer-main">
+              <Link to="/product/details" state={{ offer, query }} className="offer-main offer-main-link">
                 {offer.imageUrl && (
                   <img className="offer-thumb" src={offer.imageUrl} alt="" aria-hidden="true" loading="lazy" />
                 )}
@@ -119,7 +106,7 @@ export function OfferList({ offers }: OfferListProps) {
                   </span>
                   {shipping && <span className="offer-shipping">{shipping}</span>}
                 </div>
-              </div>
+              </Link>
               <div className="offer-side">
                 <span className="offer-price">{formatPrice(offer.price, offer.currency)}</span>
                 <span className="offer-link-wrap">

@@ -85,6 +85,7 @@ public sealed class AuthService : IAuthService
         Email = user.Email,
         Locale = user.Locale,
         CreatedAt = user.CreatedAt,
+        IsAdmin = user.IsAdmin,
     };
 
     private static string NormalizeLocale(string locale) =>

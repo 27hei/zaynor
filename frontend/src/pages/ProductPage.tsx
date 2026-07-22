@@ -268,7 +268,7 @@ export function ProductPage() {
             </div>
           </div>
 
-          <OfferList offers={result!.offers} />
+          <OfferList offers={result!.offers} query={result!.query} />
 
           {!hasNoonOffer && <NoonFallbackLink query={result!.query} />}
 

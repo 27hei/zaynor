@@ -105,14 +105,15 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
             // Independent calls — run together so total latency stays close
             // to one round trip instead of stacking sequentially.
             var expansions = await Task.WhenAll(toExpand.Select(p =>
-                FetchStoresAsync(client, p.ImmersiveProductPageToken!, cancellationToken)));
+                FetchProductResultsAsync(client, p.ImmersiveProductPageToken!, cancellationToken)));
 
             var bestPerMerchant = new Dictionary<string, StoreOffer>(StringComparer.OrdinalIgnoreCase);
 
             for (var i = 0; i < toExpand.Count; i++)
             {
                 var product = toExpand[i];
-                foreach (var store in expansions[i])
+                var productResults = expansions[i];
+                foreach (var store in productResults?.Stores ?? [])
                 {
                     var listingTitle = string.IsNullOrWhiteSpace(store.Title) ? product.Title : store.Title;
 
@@ -151,6 +152,7 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
                             Rating = store.Rating is { } r ? (decimal)r : product.Rating is { } pr ? (decimal)pr : null,
                             RatingCount = store.Reviews ?? product.Reviews,
                             Signature = OutboundLinkSigner.Sign(store.Link!, _linkSigningKey),
+                            ProductDetails = BuildProductDetails(productResults, store),
                         };
                     }
                 }
@@ -175,14 +177,62 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
         return envelope?.ShoppingResults ?? [];
     }
 
-    private async Task<List<SerpApiStore>> FetchStoresAsync(
+    private async Task<SerpApiProductResults?> FetchProductResultsAsync(
         HttpClient client, string pageToken, CancellationToken cancellationToken)
     {
         var url = $"{Endpoint}?engine=google_immersive_product&page_token={Uri.EscapeDataString(pageToken)}&more_stores=true&api_key={Uri.EscapeDataString(_apiKey!)}";
         var response = await client.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
         var envelope = await response.Content.ReadFromJsonAsync<SerpApiImmersiveEnvelope>(cancellationToken: cancellationToken);
-        return envelope?.ProductResults?.Stores ?? [];
+        return envelope?.ProductResults;
+    }
+
+    // A cap, not a completeness guarantee — some products carry dozens of
+    // spec features (verified live: a real iPhone 15 response had 40+), far
+    // more than a detail page needs to be useful.
+    private const int MaxSpecifications = 12;
+
+    /// <summary>
+    /// Builds detail fields from data already fetched (never fabricated,
+    /// never an extra API call) — null when nothing usable is present so no
+    /// offer carries an all-empty wrapper object. Images/brand/description/
+    /// specs are product-level (shared across every store of this product);
+    /// StoreHighlights is this specific store's own fulfillment info.
+    /// </summary>
+    private static ProductDetails? BuildProductDetails(SerpApiProductResults? productResults, SerpApiStore store)
+    {
+        if (productResults is null)
+        {
+            return null;
+        }
+
+        var images = productResults.Thumbnails is { Count: > 0 } t ? t : null;
+        var brand = string.IsNullOrWhiteSpace(productResults.Brand) ? null : productResults.Brand;
+        var description = string.IsNullOrWhiteSpace(productResults.AboutTheProduct?.Description)
+            ? null
+            : productResults.AboutTheProduct.Description;
+        var specs = productResults.AboutTheProduct?.Features is { Count: > 0 } features
+            ? features
+                .Where(f => !string.IsNullOrWhiteSpace(f.Title) && !string.IsNullOrWhiteSpace(f.Value))
+                .Take(MaxSpecifications)
+                .Select(f => $"{f.Title}: {f.Value}")
+                .ToList()
+            : null;
+        var highlights = store.DetailsAndOffers is { Count: > 0 } h ? h : null;
+
+        if (images is null && brand is null && description is null && specs is not { Count: > 0 } && highlights is null)
+        {
+            return null;
+        }
+
+        return new ProductDetails
+        {
+            Images = images,
+            Brand = brand,
+            Description = description,
+            Specifications = specs is { Count: > 0 } ? specs : null,
+            StoreHighlights = highlights,
+        };
     }
 
     /// <summary>SerpApi provides a parsed <c>extracted_price</c> number; the raw "SAR X.XX" string is only a fallback.</summary>
@@ -385,7 +435,19 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
         [property: JsonPropertyName("product_results")] SerpApiProductResults? ProductResults);
 
     private sealed record SerpApiProductResults(
-        [property: JsonPropertyName("stores")] List<SerpApiStore>? Stores);
+        [property: JsonPropertyName("stores")] List<SerpApiStore>? Stores,
+        [property: JsonPropertyName("thumbnails")] List<string>? Thumbnails,
+        [property: JsonPropertyName("brand")] string? Brand,
+        [property: JsonPropertyName("about_the_product")] SerpApiAboutTheProduct? AboutTheProduct);
+
+    /// <summary>Google's own "about this product" reference card — verified live: its link/title often points at a DIFFERENT listing (e.g. the manufacturer's own page) than any store in our results, so only the general description/features are usable here, never its link.</summary>
+    private sealed record SerpApiAboutTheProduct(
+        [property: JsonPropertyName("description")] string? Description,
+        [property: JsonPropertyName("features")] List<SerpApiFeature>? Features);
+
+    private sealed record SerpApiFeature(
+        [property: JsonPropertyName("title")] string? Title,
+        [property: JsonPropertyName("value")] string? Value);
 
     private sealed record SerpApiStore(
         [property: JsonPropertyName("name")] string? Name,
@@ -394,5 +456,6 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
         [property: JsonPropertyName("price")] string? Price,
         [property: JsonPropertyName("extracted_price")] double? ExtractedPrice,
         [property: JsonPropertyName("rating")] double? Rating,
-        [property: JsonPropertyName("reviews")] int? Reviews);
+        [property: JsonPropertyName("reviews")] int? Reviews,
+        [property: JsonPropertyName("details_and_offers")] List<string>? DetailsAndOffers);
 }

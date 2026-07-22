@@ -158,6 +158,7 @@ public sealed class AggregationService : IAggregationService
                 IsLowestPrice = i == 0,
                 HasAffiliateLink = AffiliateEligibility.IsMonetized(offer.ProductUrl, affiliateSettings),
                 Signature = offer.Signature,
+                ProductDetails = offer.ProductDetails,
             });
         }
 
