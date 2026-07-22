@@ -1591,11 +1591,6 @@ html[lang='ar'] {
   gap: 0.3rem;
 }
 
-.offer-link-note {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-}
-
 .offer-lowest .offer-link {
   color: #fff;
   background: var(--accent);

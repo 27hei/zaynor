@@ -131,13 +131,6 @@ export function OfferList({ offers }: OfferListProps) {
                   >
                     {t('results.goToStore')}
                   </a>
-                  {/* Most non-Noon merchants only have a Google compare-prices
-                      link (no verified direct site URL) — say so plainly
-                      rather than implying a direct store link (spec: trust
-                      is the product). */}
-                  {offer.productUrl.includes('google.com') && (
-                    <span className="offer-link-note">{t('results.viaGoogle')}</span>
-                  )}
                 </span>
               </div>
             </li>

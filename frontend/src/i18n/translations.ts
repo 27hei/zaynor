@@ -64,7 +64,6 @@ export const translations: Record<Lang, Record<string, string>> = {
       'The first request can take up to a minute while the server wakes up — thanks for your patience.',
     'results.noonFallbackText': "Noon isn't in these results yet — search for it directly on Noon.",
     'results.noonFallbackCta': 'Search on Noon',
-    'results.viaGoogle': 'via Google Shopping',
     'results.tryInstead': 'Try searching for:',
     'results.correctedQuery': 'Showing results for {corrected}',
 
@@ -307,7 +306,6 @@ export const translations: Record<Lang, Record<string, string>> = {
       'قد يستغرق أول طلب حتى دقيقة ريثما يستيقظ الخادم — شكرًا لصبرك.',
     'results.noonFallbackText': 'نون غير موجود ضمن هذي النتائج — ابحث عنه مباشرة في نون.',
     'results.noonFallbackCta': 'ابحث في نون',
-    'results.viaGoogle': 'عبر Google Shopping',
     'results.tryInstead': 'جرّب البحث عن:',
     'results.correctedQuery': 'تعرض النتائج الآن لـ {corrected}',
 

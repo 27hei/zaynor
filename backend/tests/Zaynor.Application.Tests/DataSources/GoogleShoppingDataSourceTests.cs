@@ -108,12 +108,53 @@ public class GoogleShoppingDataSourceTests
         Assert.Equal("https://www.google.com/search?ibp=oshop&prds=extra", extra.ProductUrl);
         Assert.Null(extra.Rating); // no rating field in the stub for this item — never fabricated
 
-        // Amazon deduped to the cheaper of its two listings.
+        // Amazon deduped to the cheaper of its two listings. Its URL is our
+        // own amazon.sa site-search, not Google's fragile compare-prices
+        // link — real reported bug: that Google link often shows "no
+        // details available for this product" when opened fresh.
         var amazon = Assert.Single(offers, o => o.StoreName == "Amazon");
         Assert.Equal(1880.00m, amazon.Price);
-        Assert.Equal("https://www.google.com/search?ibp=oshop&prds=amazon-a", amazon.ProductUrl);
+        Assert.StartsWith("https://www.amazon.sa/s?k=", amazon.ProductUrl);
 
         Assert.Equal("test-key", handler.LastRequest!.Headers.GetValues("X-API-KEY").Single());
+    }
+
+    [Fact]
+    public async Task BuildsADirectSiteSearchUrlForRecognizedMerchants_InsteadOfGooglesFragileLink()
+    {
+        // Real reported bug: clicking through to a store like eBay landed on
+        // a blank Google page saying "no details available for this
+        // product" — Google's own compare-prices link is a client-side
+        // product-panel overlay tied to the search session that generated
+        // it, and often fails to resolve when opened fresh. For merchants
+        // with a verified, stable site-search pattern, build that instead
+        // so the click always lands on a real page.
+        const string json = """
+        {
+          "shopping": [
+            { "title": "iPhone 15", "source": "eBay - seller1", "price": "SAR 2000.00", "link": "https://www.google.com/search?ibp=oshop&prds=a" },
+            { "title": "iPhone 15", "source": "AliExpress", "price": "SAR 2100.00", "link": "https://www.google.com/search?ibp=oshop&prds=b" },
+            { "title": "iPhone 15", "source": "Some Random Boutique Store", "price": "SAR 2200.00", "link": "https://www.google.com/search?ibp=oshop&prds=c" }
+          ]
+        }
+        """;
+        var source = new GoogleShoppingDataSource(
+            new StubFactory(new StubHandler(json)),
+            Config(("DataSources:Serper:ApiKey", "test-key")),
+            NullLogger<GoogleShoppingDataSource>.Instance);
+
+        var offers = await source.SearchAsync("iphone 15");
+
+        var ebay = Assert.Single(offers, o => o.StoreName == "eBay - seller1");
+        Assert.StartsWith("https://www.ebay.com/sch/i.html?_nkw=", ebay.ProductUrl);
+
+        var aliexpress = Assert.Single(offers, o => o.StoreName == "AliExpress");
+        Assert.StartsWith("https://www.aliexpress.com/wholesale?SearchText=", aliexpress.ProductUrl);
+
+        // No verified pattern for this one — Google's link remains the
+        // fallback, same as before this fix.
+        var boutique = Assert.Single(offers, o => o.StoreName == "Some Random Boutique Store");
+        Assert.Equal("https://www.google.com/search?ibp=oshop&prds=c", boutique.ProductUrl);
     }
 
     [Fact]

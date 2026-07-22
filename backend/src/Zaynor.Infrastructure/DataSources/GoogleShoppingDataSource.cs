@@ -119,12 +119,18 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
                 var isNoon = IsNoon(item.Source);
                 var storeName = isNoon ? "Noon" : item.Source!;
 
-                // Noon: build our own taggable site-search URL (see class
-                // remarks). Everyone else: Google's compare-prices link is
-                // the only URL we have for them.
-                var productUrl = isNoon
-                    ? $"https://www.noon.com/saudi-en/search/?q={Uri.EscapeDataString(item.Title!)}"
-                    : item.Link;
+                // Real reported bug: Google's own compare-prices link
+                // ("prds=" deep link) is a client-side product-panel overlay
+                // tied to the search session that generated it — opened
+                // fresh (a new tab, a different device, after time passes)
+                // it frequently shows "no details available for this
+                // product" instead of the offer. For every merchant whose
+                // own site has a stable, verifiable search-URL pattern, build
+                // that instead, so the click lands on a real page every
+                // time. Google's link remains the fallback only for
+                // merchants with no recognized pattern (mostly small
+                // resellers), same as before.
+                var productUrl = BuildDirectStoreUrl(item.Source!, item.Title!) ?? item.Link;
 
                 if (string.IsNullOrWhiteSpace(productUrl))
                 {
@@ -195,6 +201,38 @@ public sealed class GoogleShoppingDataSource : IProductDataSource
 
     private static bool IsNoon(string? source) =>
         !string.IsNullOrWhiteSpace(source) && source.Contains("noon", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Direct site-search URL builders for merchants whose search-page
+    /// pattern is stable and verified — checked in order, first match wins.
+    /// Deliberately NOT a complete list of every store Google Shopping
+    /// returns: several other real merchant names were tried (Jarir, eXtra,
+    /// desertcart) and each either 404'd, hit a generic error page, or
+    /// silently redirected to a homepage instead of real search results —
+    /// shipping a wrong direct link is worse than Google's own page, which
+    /// at least sometimes resolves. Only add an entry here once it's been
+    /// verified to land on real search results.
+    /// </summary>
+    private static readonly (string Match, Func<string, string> Build)[] DirectStoreUrlBuilders =
+    [
+        ("noon", title => $"https://www.noon.com/saudi-en/search/?q={Uri.EscapeDataString(title)}"),
+        ("amazon", title => $"https://www.amazon.sa/s?k={Uri.EscapeDataString(title)}"),
+        ("aliexpress", title => $"https://www.aliexpress.com/wholesale?SearchText={Uri.EscapeDataString(title)}"),
+        ("ebay", title => $"https://www.ebay.com/sch/i.html?_nkw={Uri.EscapeDataString(title)}"),
+    ];
+
+    private static string? BuildDirectStoreUrl(string source, string title)
+    {
+        foreach (var (match, build) in DirectStoreUrlBuilders)
+        {
+            if (source.Contains(match, StringComparison.OrdinalIgnoreCase))
+            {
+                return build(title);
+            }
+        }
+
+        return null;
+    }
 
     private static readonly string[] StopWords = ["a", "an", "the", "for", "of", "with", "and", "in", "on", "to", "by"];
     private static readonly char[] TokenSeparators = [' ', '-', '_', ',', '.', '/', '(', ')'];
