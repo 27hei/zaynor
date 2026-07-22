@@ -7,6 +7,7 @@ import type {
   ReviewDto,
   SavedProductDto,
   SearchResult,
+  SiteReviewDto,
   SupportMessageDto,
   SupportTicketDetailDto,
   SupportTicketDto,
@@ -317,4 +318,26 @@ export async function addAdminReply(id: number, body: string): Promise<SupportMe
 
 export async function closeTicket(id: number): Promise<void> {
   await authFetch(`/api/admin/support/tickets/${id}/close`, { method: 'POST' })
+}
+
+// --- Site reviews (reviews of Zaynor itself) ---
+
+export async function getSiteReviews(): Promise<SiteReviewDto[]> {
+  const response = await fetch(`${API_BASE_URL}/api/site-reviews`)
+  if (!response.ok) return []
+  return (await response.json()) as SiteReviewDto[]
+}
+
+export async function submitSiteReview(rating: number, comment: string, displayName: string | null): Promise<SiteReviewDto> {
+  const response = await authFetch('/api/site-reviews', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rating, comment, displayName }),
+  })
+  return (await response.json()) as SiteReviewDto
+}
+
+/** Admin-only: deletes an insulting/inappropriate review of Zaynor itself. */
+export async function deleteSiteReview(id: number): Promise<void> {
+  await authFetch(`/api/site-reviews/${id}`, { method: 'DELETE' })
 }

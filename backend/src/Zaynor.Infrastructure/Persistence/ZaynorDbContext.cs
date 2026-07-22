@@ -34,6 +34,7 @@ public class ZaynorDbContext : DbContext
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
     public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
+    public DbSet<SiteReview> SiteReviews => Set<SiteReview>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

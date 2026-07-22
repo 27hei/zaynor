@@ -262,6 +262,35 @@ namespace Zaynor.Infrastructure.Migrations.Postgres
                     b.ToTable("SavedProducts");
                 });
 
+            modelBuilder.Entity("Zaynor.Domain.Entities.SiteReview", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SiteReviews");
+                });
+
             modelBuilder.Entity("Zaynor.Domain.Entities.Store", b =>
                 {
                     b.Property<int>("Id")

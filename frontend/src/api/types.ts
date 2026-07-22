@@ -133,3 +133,12 @@ export interface AdminSupportTicketDto extends SupportTicketDto {
 export interface AdminSupportTicketDetailDto extends SupportTicketDetailDto {
   userEmail: string
 }
+
+/** A customer's rating + comment about Zaynor itself — always public. */
+export interface SiteReviewDto {
+  id: number
+  displayName: string | null
+  rating: number
+  comment: string
+  createdAt: string
+}

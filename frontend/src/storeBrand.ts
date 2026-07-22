@@ -1,6 +1,6 @@
 // The stores Zaynor actively compares (spec Section 6, 20.3) — the single
 // source of truth for the hero trust row and the footer trust row.
-export const TRACKED_STORE_NAMES = ['Amazon.sa', 'Noon', 'Jarir', 'Extra', 'AliExpress']
+export const TRACKED_STORE_NAMES = ['Amazon.sa', 'Noon', 'Jarir', 'Extra', 'AliExpress', 'eBay']
 
 // Recognizable store identity colors (competitive analysis Section 6.C) —
 // shared by the offer rows and the price-history chart legend. Logo doubles
@@ -12,6 +12,7 @@ export const STORE_BRAND: Record<string, { bg: string; fg: string; logo: string 
   Jarir: { bg: '#d71920', fg: '#ffffff', logo: '/store-logos/jarir.png' },
   Extra: { bg: '#0057b8', fg: '#ffffff', logo: '/store-logos/extra.png' },
   AliExpress: { bg: '#e43225', fg: '#ffffff', logo: '/store-logos/aliexpress.png' },
+  eBay: { bg: '#0064d2', fg: '#ffffff', logo: '/store-logos/ebay.png' },
 }
 
 /** A stroke color for charts: the store's strongest identity color. */

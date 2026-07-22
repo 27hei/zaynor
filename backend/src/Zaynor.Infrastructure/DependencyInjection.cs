@@ -6,6 +6,7 @@ using Zaynor.Application.Aggregation;
 using Zaynor.Application.Auth;
 using Zaynor.Application.ImageSearch;
 using Zaynor.Application.Reviews;
+using Zaynor.Application.SiteReviews;
 using Zaynor.Application.Support;
 using Zaynor.Application.UserItems;
 using Zaynor.Infrastructure.Aggregation;
@@ -15,6 +16,7 @@ using Zaynor.Infrastructure.DataSources;
 using Zaynor.Infrastructure.ImageSearch;
 using Zaynor.Infrastructure.Persistence;
 using Zaynor.Infrastructure.Reviews;
+using Zaynor.Infrastructure.SiteReviews;
 using Zaynor.Infrastructure.Support;
 using Zaynor.Infrastructure.UserItems;
 
@@ -75,6 +77,7 @@ public static class DependencyInjection
         services.AddScoped<IUserItemsService, UserItemsService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<ISupportTicketService, SupportTicketService>();
+        services.AddScoped<ISiteReviewService, SiteReviewService>();
 
         // Real curated catalog first (spec 9.4 manual entry); mock is the
         // flagged fallback for uncovered queries.

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Zaynor.Infrastructure.Persistence;
 
@@ -10,9 +11,11 @@ using Zaynor.Infrastructure.Persistence;
 namespace Zaynor.Infrastructure.Migrations
 {
     [DbContext(typeof(ZaynorDbContext))]
-    partial class ZaynorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260722150855_AddSiteReviews")]
+    partial class AddSiteReviews
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");

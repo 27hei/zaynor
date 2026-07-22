@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Zaynor.Application.Aggregation.Models;
 using Zaynor.Application.Auth.Models;
 using Zaynor.Application.Reviews.Models;
+using Zaynor.Application.SiteReviews.Models;
 using Zaynor.Application.Support.Models;
 using Zaynor.Application.UserItems.Models;
 
@@ -548,5 +549,72 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
         Assert.Equal(HttpStatusCode.OK, followUp.StatusCode);
         var afterReply = await client.GetFromJsonAsync<SupportTicketDetailDto>($"/api/support/tickets/{ticket.Id}");
         Assert.False(afterReply!.IsClosed);
+    }
+
+    [Fact]
+    public async Task SiteReviews_PublicList_RequiresNoAuth()
+    {
+        var response = await _factory.CreateClient().GetAsync("/api/site-reviews");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task SiteReviews_SubmitRequiresAuth()
+    {
+        var response = await _factory.CreateClient().PostAsJsonAsync(
+            "/api/site-reviews", new { rating = 5, comment = "Great site!" });
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task SiteReviews_FullCycle_SubmitThenListShowsIt_EvenWhenNegative()
+    {
+        var client = _factory.CreateClient();
+        var email = $"it-sitereview-{Guid.NewGuid():N}@test.local";
+        var register = await client.PostAsJsonAsync(
+            "/api/auth/register", new { email, password = "password123", locale = "ar" });
+        var auth = await register.Content.ReadFromJsonAsync<AuthResponse>();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.Token);
+
+        var submit = await client.PostAsJsonAsync(
+            "/api/site-reviews", new { rating = 2, comment = "The search results are sometimes slow.", displayName = "Honest User" });
+        Assert.Equal(HttpStatusCode.OK, submit.StatusCode);
+        var created = await submit.Content.ReadFromJsonAsync<SiteReviewDto>();
+
+        var list = await client.GetFromJsonAsync<List<SiteReviewDto>>("/api/site-reviews");
+        Assert.Contains(list!, r => r.Id == created!.Id && r.Rating == 2 && r.DisplayName == "Honest User");
+    }
+
+    [Fact]
+    public async Task SiteReviews_Delete_RequiresAdminRole_AndRemovesItPublicly()
+    {
+        var client = _factory.CreateClient();
+        var email = $"it-sitereview-{Guid.NewGuid():N}@test.local";
+        var register = await client.PostAsJsonAsync(
+            "/api/auth/register", new { email, password = "password123", locale = "ar" });
+        var auth = await register.Content.ReadFromJsonAsync<AuthResponse>();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.Token);
+
+        var submit = await client.PostAsJsonAsync(
+            "/api/site-reviews", new { rating = 1, comment = "Insulting spam comment." });
+        var created = await submit.Content.ReadFromJsonAsync<SiteReviewDto>();
+
+        // Non-admin cannot delete.
+        var forbidden = await client.DeleteAsync($"/api/site-reviews/{created!.Id}");
+        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+
+        using var adminFactory = _factory.WithWebHostBuilder(builder =>
+            builder.ConfigureAppConfiguration((_, config) =>
+                config.AddInMemoryCollection(new Dictionary<string, string?> { ["Admin:Email"] = email })));
+        var adminClient = adminFactory.CreateClient();
+        var relogin = await adminClient.PostAsJsonAsync("/api/auth/login", new { email, password = "password123" });
+        var adminAuth = await relogin.Content.ReadFromJsonAsync<AuthResponse>();
+        adminClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminAuth!.Token);
+
+        var delete = await adminClient.DeleteAsync($"/api/site-reviews/{created.Id}");
+        Assert.Equal(HttpStatusCode.NoContent, delete.StatusCode);
+
+        var afterDelete = await client.GetFromJsonAsync<List<SiteReviewDto>>("/api/site-reviews");
+        Assert.DoesNotContain(afterDelete!, r => r.Id == created.Id);
     }
 }
