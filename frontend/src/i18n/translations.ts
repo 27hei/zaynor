@@ -85,8 +85,6 @@ export const translations: Record<Lang, Record<string, string>> = {
     'results.sortPrice': 'Lowest price',
     'results.sortDelivery': 'Fastest delivery',
     'results.hideOutOfStock': 'Hide out of stock',
-    'results.colStore': 'Store',
-    'results.colPrice': 'Price',
     'results.goToStore': 'Go to store',
     'productDetail.backToResults': '← Back to results',
     'productDetail.brand': 'Brand: {brand}',
@@ -118,11 +116,6 @@ export const translations: Record<Lang, Record<string, string>> = {
     'history.title': 'Price history',
     'history.accumulating':
       'Zaynor is still collecting price history for this product — every search adds to it. Check back soon.',
-
-    'reco.badge': 'Best deal',
-    'reco.saveUpTo': 'Save up to {amount}',
-    'reco.message': 'Buy from {store} at {price} — save {savings} versus {comparedStore} at {comparedPrice}.',
-    'reco.cta': 'Go to best price',
 
     'offer.freeShipping': 'Free shipping',
     'offer.deliveryNextDay': 'Next-day delivery',
@@ -370,8 +363,6 @@ export const translations: Record<Lang, Record<string, string>> = {
     'results.sortPrice': 'الأقل سعرًا',
     'results.sortDelivery': 'الأسرع توصيلًا',
     'results.hideOutOfStock': 'إخفاء غير المتوفر',
-    'results.colStore': 'المتجر',
-    'results.colPrice': 'السعر',
     'results.goToStore': 'اذهب للمتجر',
     'productDetail.backToResults': '← رجوع للنتائج',
     'productDetail.brand': 'الماركة: {brand}',
@@ -403,11 +394,6 @@ export const translations: Record<Lang, Record<string, string>> = {
     'history.title': 'تاريخ السعر',
     'history.accumulating':
       'ما زال زينور يجمع تاريخ الأسعار لهذا المنتج — كل عملية بحث تضيف إليه. عد قريبًا.',
-
-    'reco.badge': 'أفضل عرض',
-    'reco.saveUpTo': 'وفّر حتى {amount}',
-    'reco.message': 'اشترِ من {store} بسعر {price} — ووفّر {savings} مقارنةً بـ {comparedStore} بسعر {comparedPrice}.',
-    'reco.cta': 'اذهب لأفضل سعر',
 
     'offer.freeShipping': 'شحن مجاني',
     'offer.deliveryNextDay': 'توصيل في اليوم التالي',

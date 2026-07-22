@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { createAlert, getSuggestions, outboundUrl, saveProduct, searchProducts } from '../api/client'
+import { createAlert, getSuggestions, saveProduct, searchProducts } from '../api/client'
 import type { SearchResult } from '../api/types'
 import { CATEGORY_SEEDS } from '../categories'
 import { SearchBar } from '../components/SearchBar'
-import { RecommendationBanner } from '../components/RecommendationBanner'
 import { OfferList } from '../components/OfferList'
 import { OfferListSkeleton } from '../components/OfferListSkeleton'
 import { NoonFallbackLink } from '../components/NoonFallbackLink'
@@ -235,16 +234,6 @@ export function ProductPage() {
           )}
 
           <ProductSummary query={result!.query} offers={result!.offers} />
-
-          {result!.recommendation && (
-            <RecommendationBanner
-              recommendation={result!.recommendation}
-              bestUrl={(() => {
-                const best = result!.offers.find((o) => o.isLowestPrice)
-                return best ? outboundUrl(best.productUrl, best.storeName, result!.query, best.signature) : undefined
-              })()}
-            />
-          )}
 
           <div className="results-toolbar">
             <h2 className="results-heading">

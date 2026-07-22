@@ -10,7 +10,7 @@ interface NoonFallbackLinkProps {
 /**
  * Noon isn't a real-time data source (spec: no official search API) — when
  * it isn't already among the offers, this links straight to Noon's own
- * search results for the query instead. Styled as an offer row (same
+ * search results for the query instead. Styled as an offer card (same
  * classes as OfferList) so it reads as "one more store to check", not a
  * separate/lesser element. The link rides through /api/out, which tags any
  * noon.com URL with the affiliate suffix automatically, so every search
@@ -22,29 +22,20 @@ export function NoonFallbackLink({ query }: NoonFallbackLinkProps) {
   const noonSearchUrl = `https://www.noon.com/saudi-en/search/?q=${encodeURIComponent(query)}`
 
   return (
-    <div className="offer offer-noon-fallback">
-      <div className="offer-main">
-        <span className="offer-thumb offer-thumb-search" aria-hidden="true">
-          <DiscoveryIcon />
-        </span>
+    <a
+      className="offer-card offer-noon-fallback"
+      href={outboundUrl(noonSearchUrl, 'Noon', query)}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+    >
+      <span className="offer-card-image offer-card-image-search" aria-hidden="true">
+        <DiscoveryIcon />
+      </span>
+      <span className="offer-card-store">
         <StoreLogo storeName="Noon" />
-        <div className="offer-info">
-          <span className="offer-store-row">
-            <span className="offer-store">Noon</span>
-          </span>
-          <span className="offer-shipping">{t('results.noonFallbackText')}</span>
-        </div>
-      </div>
-      <div className="offer-side">
-        <a
-          className="offer-link"
-          href={outboundUrl(noonSearchUrl, 'Noon', query)}
-          target="_blank"
-          rel="noopener noreferrer sponsored"
-        >
-          {t('results.goToStore')}
-        </a>
-      </div>
-    </div>
+        <span className="offer-card-store-name">Noon</span>
+      </span>
+      <span className="offer-card-price offer-card-price-search">{t('results.noonFallbackText')}</span>
+    </a>
   )
 }
