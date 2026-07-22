@@ -1,13 +1,21 @@
 import { useNavigate } from 'react-router-dom'
-import { BrandMark } from '../components/BrandMark'
 import { SearchBar } from '../components/SearchBar'
 import { NeutralityBadge } from '../components/NeutralityBadge'
 import { HomeCategories } from '../components/HomeCategories'
 import { LivePricesTeaser } from '../components/LivePricesTeaser'
 import { HomeTestimonials } from '../components/HomeTestimonials'
 import { SiteReviewsSection } from '../components/SiteReviewsSection'
-import { StoreLogo } from '../components/StoreLogo'
-import { TRACKED_STORE_NAMES } from '../storeBrand'
+import { PhoneMockup } from '../components/PhoneMockup'
+import {
+  ShieldCheckIcon,
+  SavingsIcon,
+  IntelligenceIcon,
+  RefreshIcon,
+  DiscoveryIcon,
+  TrustIcon,
+  PlayGlyphIcon,
+  AppleGlyphIcon,
+} from '../components/icons'
 import { useTranslation } from '../i18n/useTranslation'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useRecentSearches } from '../hooks/useRecentSearches'
@@ -17,7 +25,7 @@ import { useState } from 'react'
  * A pure landing/discovery page: hero, search box, and browse-by-category
  * shortcuts. Every search (typed here, or a category/live-price card) opens
  * that product's own page at /product?q=... — Home never renders results
- * itself (spec: "لكل منتج وضع صفحة منفصله").
+ * itself (spec: "لكل منتج وضع صفحه منفصله").
  */
 export function HomePage() {
   const { t } = useTranslation()
@@ -33,37 +41,91 @@ export function HomePage() {
 
   return (
     <>
-      <section className="hero">
-        <div className="hero-mark">
-          <BrandMark size={64} detailed />
-        </div>
-        <p className="hero-eyebrow">{t('hero.eyebrow')}</p>
-        <h1 className="hero-title">{t('hero.title')}</h1>
-        <p className="hero-subtitle">{t('hero.subtitle')}</p>
+      <section className="hero hero-split">
+        <div className="hero-split-inner">
+          <div className="hero-content">
+            <p className="hero-eyebrow">{t('hero.eyebrow')}</p>
+            <h1 className="hero-title">{t('hero.title')}</h1>
+            <p className="hero-subtitle">{t('hero.subtitle')}</p>
 
-        <SearchBar
-          value={query}
-          onChange={setQuery}
-          onSearch={goToProduct}
-          recentSearches={recent}
-          onClearRecent={clearRecent}
-        />
-        <NeutralityBadge />
+            <SearchBar
+              value={query}
+              onChange={setQuery}
+              onSearch={goToProduct}
+              recentSearches={recent}
+              onClearRecent={clearRecent}
+            />
+            <NeutralityBadge />
 
-        <div className="hero-trust">
-          <span className="hero-trust-label">{t('hero.trustLine')}</span>
-          <div className="hero-trust-logos">
-            {TRACKED_STORE_NAMES.map((store) => (
-              <span key={store} className="hero-trust-logo" title={store}>
-                <StoreLogo storeName={store} />
+            <div className="hero-features-row">
+              <span className="hero-feature">
+                <SavingsIcon />
+                {t('feature.saveTimeMoney')}
               </span>
-            ))}
+              <span className="hero-feature">
+                <IntelligenceIcon />
+                {t('feature.smartRecommendations')}
+              </span>
+              <span className="hero-feature">
+                <RefreshIcon />
+                {t('feature.livePrices')}
+              </span>
+            </div>
+
+            <div className="hero-app-download">
+              <div className="hero-app-badges">
+                <span className="app-badge" title={t('app.comingSoon')}>
+                  <PlayGlyphIcon className="app-badge-icon" />
+                  <span className="app-badge-text">
+                    <small>GET IT ON</small>
+                    Google Play
+                  </span>
+                </span>
+                <span className="app-badge" title={t('app.comingSoon')}>
+                  <AppleGlyphIcon className="app-badge-icon" />
+                  <span className="app-badge-text">
+                    <small>Download on the</small>
+                    App Store
+                  </span>
+                </span>
+              </div>
+              <p className="hero-app-text">
+                <strong>{t('app.downloadTitle')}</strong> {t('app.downloadSubtitle')}
+              </p>
+            </div>
+          </div>
+
+          <div className="hero-visual">
+            <div className="hero-trust-floating">
+              <ShieldCheckIcon />
+              <span>{t('hero.trustBadge')}</span>
+            </div>
+            <PhoneMockup />
           </div>
         </div>
       </section>
 
-      <LivePricesTeaser onSelect={goToProduct} />
+      <div className="hero-stats-bar">
+        <div className="hero-stat">
+          <SavingsIcon />
+          <span>{t('stats.saveUpTo')}</span>
+        </div>
+        <div className="hero-stat">
+          <DiscoveryIcon />
+          <span>{t('stats.searchCount')}</span>
+        </div>
+        <div className="hero-stat">
+          <TrustIcon />
+          <span>{t('stats.storeCount')}</span>
+        </div>
+        <div className="hero-stat">
+          <RefreshIcon />
+          <span>{t('stats.productCount')}</span>
+        </div>
+      </div>
+
       <HomeCategories onSelect={goToProduct} />
+      <LivePricesTeaser onSelect={goToProduct} />
       <HomeTestimonials />
       <SiteReviewsSection />
     </>

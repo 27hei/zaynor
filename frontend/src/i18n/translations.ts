@@ -59,11 +59,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     'nav.menu': 'Menu',
 
     'hero.eyebrow': "Saudi Arabia's smart price comparison",
-    'hero.title': 'Compare prices. Buy with confidence.',
+    'hero.title': 'Compare. Save. Shop smart.',
     'hero.subtitle':
-      'Search once — Zaynor checks every store, finds the lowest price, and tells you where to buy.',
-    'hero.searchPlaceholder': 'Search for a product, e.g. Sony PlayStation 5',
-    'hero.searchButton': 'Search',
+      "Zaynor is your smart shopping assistant — we search thousands of stores to find you the best prices, all in one place.",
+    'hero.searchPlaceholder': 'Search for any product...',
+    'hero.searchButton': 'Compare Prices',
     'hero.neutrality': '100% impartial — every store ranked by price alone, never by commission',
     'hero.recentLabel': 'Recent searches',
     'hero.clearRecent': 'Clear',
@@ -73,6 +73,32 @@ export const translations: Record<Lang, Record<string, string>> = {
     'hero.listening': 'Listening…',
     'hero.imageSearch': 'Search by photo',
     'hero.analyzingImage': 'Analyzing photo…',
+    'hero.trustBadge': "We guarantee you the best prices from trusted stores",
+
+    'promo.banner': "Shop smart, buy with confidence — we save you time and money by comparing prices across the best stores",
+
+    'feature.saveTimeMoney': 'Save time and money',
+    'feature.smartRecommendations': 'Smart recommendations',
+    'feature.livePrices': 'Prices updated live',
+
+    'app.downloadTitle': 'Download the Zaynor app',
+    'app.downloadSubtitle': 'and compare prices wherever you are',
+    'app.comingSoon': 'Coming soon',
+    'app.getItOnGooglePlay': 'GET IT ON Google Play',
+    'app.downloadOnAppStore': 'Download on the App Store',
+
+    'stats.saveUpTo': 'Save up to %70',
+    'stats.searchCount': '+1M searches',
+    'stats.storeCount': '+1000 trusted stores',
+    'stats.productCount': '+500K products',
+
+    'phoneMockup.searchPlaceholder': 'Search for a product...',
+    'phoneMockup.dealOfDay': "Today's best deal",
+    'phoneMockup.saveAmount': 'Save {amount} SAR',
+    'phoneMockup.seller': 'Saudi Arabia',
+    'phoneMockup.viewDeal': 'View deal',
+    'phoneMockup.trustedStores': 'Trusted stores',
+    'currency.sar': 'SAR',
 
     'results.searching': 'Searching stores…',
     'results.noResults': 'No offers found for "{query}".',
@@ -183,6 +209,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'account.logout': 'Log out',
 
     'categories.title': 'Browse by category',
+    'categories.homeTitle': 'Browse our most searched categories',
+    'categories.viewAll': 'View all categories',
     'catalog.from': 'from {price}',
     'teaser.title': 'Real prices, right now',
     'categories.subtitle': 'Category browsing is expanding — start with a search for now.',
@@ -193,6 +221,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'category.computers': 'Computers',
     'category.tv': 'TV & Audio',
     'category.appliances': 'Home Appliances',
+    'category.fashion': 'Fashion',
+    'category.personalCare': 'Personal Care',
 
     'about.title': 'About Zaynor',
     'about.p1':
@@ -337,11 +367,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     'nav.menu': 'القائمة',
 
     'hero.eyebrow': 'مقارنة الأسعار الذكية في السعودية',
-    'hero.title': 'قارن الأسعار. اشترِ بثقة.',
+    'hero.title': 'قارن. وفّر. اشترِ بذكاء.',
     'hero.subtitle':
-      'ابحث مرة واحدة — يفحص زينور كل المتاجر، يجد أقل سعر، ويخبرك من أين تشتري.',
-    'hero.searchPlaceholder': 'ابحث عن منتج، مثل سوني بلايستيشن ٥',
-    'hero.searchButton': 'بحث',
+      'زينور هو مساعدك الذكي للتسوق، نبحث لك عن أفضل الأسعار من آلاف المتاجر في مكان واحد.',
+    'hero.searchPlaceholder': 'ابحث عن أي منتج...',
+    'hero.searchButton': 'قارن الأسعار',
     'hero.neutrality': 'محايد ١٠٠٪ — كل متجر يُرتَّب حسب السعر فقط، لا حسب العمولة',
     'hero.recentLabel': 'بحثت مؤخرًا',
     'hero.clearRecent': 'مسح',
@@ -351,6 +381,32 @@ export const translations: Record<Lang, Record<string, string>> = {
     'hero.listening': 'أستمع…',
     'hero.imageSearch': 'البحث بالصورة',
     'hero.analyzingImage': 'يحلل الصورة…',
+    'hero.trustBadge': 'نضمن لك أفضل الأسعار من متاجر موثوقة',
+
+    'promo.banner': 'وفّر بذكاء، تسوّق بثقة — نوفر لك الوقت والمال من خلال مقارنة الأسعار من أفضل المتاجر',
+
+    'feature.saveTimeMoney': 'وفر الوقت والمال',
+    'feature.smartRecommendations': 'توصيات ذكية',
+    'feature.livePrices': 'أسعار محدثة لحظيًا',
+
+    'app.downloadTitle': 'حمّل تطبيق زينور',
+    'app.downloadSubtitle': 'وقارن الأسعار أينما كنت',
+    'app.comingSoon': 'قريبًا',
+    'app.getItOnGooglePlay': 'GET IT ON Google Play',
+    'app.downloadOnAppStore': 'Download on the App Store',
+
+    'stats.saveUpTo': 'وفر حتى %70',
+    'stats.searchCount': '+1 مليون عملية بحث',
+    'stats.storeCount': '+1000 متجر موثوق',
+    'stats.productCount': '+500 ألف منتج',
+
+    'phoneMockup.searchPlaceholder': 'ابحث عن منتج...',
+    'phoneMockup.dealOfDay': 'أفضل صفقة اليوم',
+    'phoneMockup.saveAmount': 'وفر {amount} ر.س',
+    'phoneMockup.seller': 'السعودية',
+    'phoneMockup.viewDeal': 'عرض الصفقة',
+    'phoneMockup.trustedStores': 'متاجر موثوقة',
+    'currency.sar': 'ر.س',
 
     'results.searching': 'جارٍ البحث في المتاجر…',
     'results.noResults': 'لا توجد عروض لـ "{query}".',
@@ -461,6 +517,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'account.logout': 'تسجيل الخروج',
 
     'categories.title': 'تصفّح حسب الفئة',
+    'categories.homeTitle': 'تصفح الفئات الأكثر بحثًا',
+    'categories.viewAll': 'عرض جميع الفئات',
     'catalog.from': 'يبدأ من {price}',
     'teaser.title': 'أسعار حقيقية، الآن',
     'categories.subtitle': 'تصفّح الفئات في توسّع مستمر — ابدأ بالبحث الآن.',
@@ -471,6 +529,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'category.computers': 'حواسيب',
     'category.tv': 'تلفزيونات وصوتيات',
     'category.appliances': 'أجهزة منزلية',
+    'category.fashion': 'الموضة',
+    'category.personalCare': 'العناية الشخصية',
 
     'about.title': 'عن زينور',
     'about.p1':

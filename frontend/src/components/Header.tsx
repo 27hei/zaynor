@@ -4,8 +4,8 @@ import { BrandMark } from './BrandMark'
 import { LanguageToggle } from './LanguageToggle'
 import { ThemeToggle } from './ThemeToggle'
 import { HeaderSearch } from './HeaderSearch'
-import { CartIcon } from './icons'
-import { getSavedProducts } from '../api/client'
+import { HeartIcon, BellIcon } from './icons'
+import { getSavedProducts, getAlerts } from '../api/client'
 import { useTranslation } from '../i18n/useTranslation'
 import { useAuth } from '../auth/useAuth'
 
@@ -15,6 +15,7 @@ export function Header() {
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [savedCount, setSavedCount] = useState(0)
+  const [activeAlertCount, setActiveAlertCount] = useState(0)
   const [scrolled, setScrolled] = useState(false)
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -33,8 +34,9 @@ export function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Powers the cart-style saved-products shortcut; re-checked on navigation
-  // so the badge stays right after saving/removing a product elsewhere.
+  // Powers the wishlist-style saved-products shortcut; re-checked on
+  // navigation so the badge stays right after saving/removing a product
+  // elsewhere.
   useEffect(() => {
     if (!user) {
       setSavedCount(0)
@@ -47,6 +49,26 @@ export function Header() {
       })
       .catch(() => {
         if (!cancelled) setSavedCount(0)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user, location.pathname])
+
+  // The bell's badge is a real count of active price-drop alerts (FR8) —
+  // never a placeholder number.
+  useEffect(() => {
+    if (!user) {
+      setActiveAlertCount(0)
+      return
+    }
+    let cancelled = false
+    getAlerts()
+      .then((list) => {
+        if (!cancelled) setActiveAlertCount(list.filter((a) => a.isActive).length)
+      })
+      .catch(() => {
+        if (!cancelled) setActiveAlertCount(0)
       })
     return () => {
       cancelled = true
@@ -107,8 +129,15 @@ export function Header() {
 
           {user && (
             <Link to="/account" className="header-cart" aria-label={t('account.savedTitle')} onClick={close}>
-              <CartIcon />
+              <HeartIcon />
               {savedCount > 0 && <span className="header-cart-badge">{savedCount}</span>}
+            </Link>
+          )}
+
+          {user && (
+            <Link to="/account" className="header-cart" aria-label={t('account.alertsTitle')} onClick={close}>
+              <BellIcon />
+              {activeAlertCount > 0 && <span className="header-cart-badge">{activeAlertCount}</span>}
             </Link>
           )}
 

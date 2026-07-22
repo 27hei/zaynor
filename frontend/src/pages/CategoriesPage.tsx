@@ -9,20 +9,25 @@ import { CATEGORY_SEEDS, type CategoryKey } from '../categories'
 import {
   AnalysisIcon,
   DiscoveryIcon,
-  IntelligenceIcon,
-  SavingsIcon,
-  AlertsIcon,
   TrustIcon,
+  ShoeIcon,
+  PerfumeIcon,
+  GameControllerIcon,
+  PhoneDeviceIcon,
+  LaptopIcon,
+  ApplianceIcon,
 } from '../components/icons'
 import { Reveal } from '../components/Reveal'
 
 const CATEGORY_ICONS: Record<CategoryKey, typeof DiscoveryIcon> = {
-  electronics: DiscoveryIcon,
-  gaming: IntelligenceIcon,
-  phones: SavingsIcon,
+  fashion: ShoeIcon,
+  personalCare: PerfumeIcon,
+  electronics: LaptopIcon,
+  gaming: GameControllerIcon,
+  phones: PhoneDeviceIcon,
   computers: AnalysisIcon,
   tv: TrustIcon,
-  appliances: AlertsIcon,
+  appliances: ApplianceIcon,
 }
 
 /**
