@@ -136,6 +136,25 @@ public class ApiIntegrationTests : IClassFixture<ZaynorApiFactory>
     }
 
     [Fact]
+    public async Task Outbound_EbayLink_Redirects()
+    {
+        // Real reported bug: GoogleShoppingDataSource started building direct
+        // ebay.com search links (instead of Google's fragile compare-prices
+        // panel), but /api/out's host allowlist hadn't been updated to
+        // match — every eBay click came back "Unknown store link." instead
+        // of reaching the store.
+        var client = _factory.CreateClient(
+            new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var url = "https://www.ebay.com/sch/i.html?_nkw=iphone+15";
+        var response = await client.GetAsync(
+            $"/api/out?u={Uri.EscapeDataString(url)}&store=eBay&product=Test");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal(url, response.Headers.Location!.ToString());
+    }
+
+    [Fact]
     public async Task Outbound_AmazonLink_CarriesTheAssociatesTag()
     {
         var client = _factory.CreateClient(
