@@ -112,10 +112,16 @@ public static class DependencyInjection
         // got a chance to complete). 40s gives real headroom above the
         // slowest observed case.
         services.AddHttpClient(nameof(DataForSeoAmazonDataSource), c => c.Timeout = TimeSpan.FromSeconds(40));
+        // Oxylabs' real-time endpoint is a single synchronous call (no
+        // multi-step expansion like GoogleShopping's), but real-world Amazon
+        // scraper response times commonly run 10-20s — matching the
+        // DataForSEO source's budget rather than the shorter default.
+        services.AddHttpClient(nameof(OxylabsAmazonDataSource), c => c.Timeout = TimeSpan.FromSeconds(30));
         services.AddScoped<IProductDataSource, RainforestAmazonDataSource>();
         services.AddScoped<IProductDataSource, AliExpressProductDataSource>();
         services.AddScoped<IProductDataSource, GoogleShoppingDataSource>();
         services.AddScoped<IProductDataSource, DataForSeoAmazonDataSource>();
+        services.AddScoped<IProductDataSource, OxylabsAmazonDataSource>();
 
         // "Search by photo" — Serper's reverse-image (Lens) endpoint. Its own
         // account/key (DataSources:Serper:ApiKey), separate from

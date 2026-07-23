@@ -143,6 +143,23 @@ public class AggregationServiceTests
     }
 
     [Fact]
+    public async Task SearchAsync_DeduplicatesSameStoreAcrossSources_KeepingTheCheaperOffer()
+    {
+        // Two independent Amazon sources (e.g. DataForSeoAmazonDataSource and
+        // OxylabsAmazonDataSource) both hardcode StoreName = "Amazon.sa" and
+        // now run simultaneously — without deduplication the same store would
+        // appear twice with two different prices.
+        var service = CreateService(
+            FakeDataSource.Returning(FakeDataSource.Offer("Amazon.sa", 900m)),
+            FakeDataSource.ExpensiveReturning(FakeDataSource.Offer("Amazon.sa", 849m)));
+
+        var result = await service.SearchAsync("samsung galaxy watch 7");
+
+        var amazonOffer = Assert.Single(result.Offers, o => o.StoreName == "Amazon.sa");
+        Assert.Equal(849m, amazonOffer.Price);
+    }
+
+    [Fact]
     public async Task SearchAsync_SkipsFailingSourceAndStillReturnsOthers()
     {
         var service = CreateService(

@@ -53,7 +53,7 @@ public sealed class AggregationService : IAggregationService
             return new SearchResult { Query = trimmed, Offers = Array.Empty<AggregatedOffer>(), CorrectedQuery = correctedQuery };
         }
 
-        var ranked = RankOffers(offers, _affiliateSettings);
+        var ranked = RankOffers(DeduplicateByStore(offers), _affiliateSettings);
         var recommendation = BuildRecommendation(ranked);
 
         return new SearchResult
@@ -127,6 +127,33 @@ public sealed class AggregationService : IAggregationService
             _logger.LogWarning(ex, "Data source {Source} failed for query {Query}; skipping it", source.SourceName, query);
             return Array.Empty<StoreOffer>();
         }
+    }
+
+    /// <summary>
+    /// Keeps the cheapest offer per store name across ALL sources combined.
+    /// Individual sources already dedupe within themselves (e.g.
+    /// GoogleShoppingDataSource's own bestPerMerchant), but with more than one
+    /// independent source now able to return the same store (RainforestAmazonDataSource,
+    /// DataForSeoAmazonDataSource, and OxylabsAmazonDataSource all hardcode
+    /// StoreName = "Amazon.sa" — a deliberate design: real production
+    /// redundancy so one vendor's outage doesn't remove Amazon from results
+    /// entirely, see OxylabsAmazonDataSource's remarks), nothing previously
+    /// stopped the same store from appearing twice with two different prices
+    /// once a second source went live. A user comparing prices "across
+    /// stores" should never see one store listed twice.
+    /// </summary>
+    private static List<StoreOffer> DeduplicateByStore(IEnumerable<StoreOffer> offers)
+    {
+        var bestPerStore = new Dictionary<string, StoreOffer>(StringComparer.OrdinalIgnoreCase);
+        foreach (var offer in offers)
+        {
+            if (!bestPerStore.TryGetValue(offer.StoreName, out var existing) || offer.Price < existing.Price)
+            {
+                bestPerStore[offer.StoreName] = offer;
+            }
+        }
+
+        return bestPerStore.Values.ToList();
     }
 
     /// <summary>Sorts offers cheapest-first (spec FR4) and flags the lowest (spec FR5).</summary>
