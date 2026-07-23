@@ -13,6 +13,17 @@ html {
      content is never intentionally wider than the viewport, so this only
      ever removes unwanted scroll, never legitimate content. */
   overflow-x: hidden;
+  /* The forced width=1440 viewport (so mobile matches desktop pixel-for-
+     pixel) makes some mobile browsers report an inflated window.innerHeight
+     — proportionally scaled to that width — taller than the actual page
+     content. Without an explicit background here, the leftover strip below
+     the real content/footer falls back to the browser's own default (black
+     in dark mode), showing as a stray dark patch under the footer. The
+     footer (always the last element on every page) is painted in the
+     fixed, theme-invariant --brand-ink regardless of light/dark mode, so
+     matching that here means any leftover strip reads as a seamless
+     continuation of the footer instead of a mismatched color band. */
+  background: var(--brand-ink);
 }
 
 body {
