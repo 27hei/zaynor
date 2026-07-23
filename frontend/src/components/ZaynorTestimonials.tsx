@@ -12,14 +12,14 @@ interface Testimonial {
 
 const TESTIMONIALS: Testimonial[] = [
   {
-    quote: 'وفّرت أكثر من 600 ريال في شراء جوالي الجديد. المقارنة كانت سريعة والأسعار فعلًا محدثة.',
+    quote: 'وفّرت 600 ريال بضغطة وحدة!',
     name: 'نورة العتيبي',
     place: 'الرياض، السعودية',
     avatarInitial: 'ن',
     avatarClass: 'avatar-green',
   },
   {
-    quote: 'ZAYNOR made it effortless to find the best deal. The price alert saved me money at exactly the right time.',
+    quote: 'Found the best deal, instantly.',
     lang: 'en',
     name: 'Ahmed Alharbi',
     place: 'Jeddah, Saudi Arabia',
@@ -28,21 +28,21 @@ const TESTIMONIALS: Testimonial[] = [
     featured: true,
   },
   {
-    quote: 'أحببت تنبيهات انخفاض الأسعار. واجهة بسيطة، ومتاجر موثوقة، وقرار شراء أسهل بكثير.',
+    quote: 'واجهة بسيطة ومتاجر موثوقة.',
     name: 'لولوة السالم',
     place: 'الخبر، السعودية',
     avatarInitial: 'ل',
     avatarClass: 'avatar-gold',
   },
   {
-    quote: 'قارنت بين خمسة متاجر لتلفزيون جديد خلال دقيقتين بدل ساعات تصفح. النتيجة كانت أرخص بـ٤٠٠ ريال من أول متجر فكرت فيه.',
+    quote: 'قارنت 5 متاجر خلال دقيقتين!',
     name: 'عبدالله الشمري',
     place: 'الدمام، السعودية',
     avatarInitial: 'ع',
     avatarClass: 'avatar-purple',
   },
   {
-    quote: 'I was skeptical at first, but the price history chart convinced me — I could actually see it wasn’t a fake discount.',
+    quote: 'Real prices, not fake deals.',
     lang: 'en',
     name: 'Sara Al-Qahtani',
     place: 'Riyadh, Saudi Arabia',
@@ -50,7 +50,7 @@ const TESTIMONIALS: Testimonial[] = [
     avatarClass: 'avatar-teal',
   },
   {
-    quote: 'خدمة الدعم ردّت علي بسرعة لما استفسرت عن عرض معيّن. أحسست إني أتعامل مع فريق حقيقي، مو موقع آلي بس.',
+    quote: 'دعم سريع ومحترف جدًا.',
     name: 'ريم القحطاني',
     place: 'جدة، السعودية',
     avatarInitial: 'ر',

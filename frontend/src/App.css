@@ -1372,6 +1372,13 @@ html[lang='ar'] {
 
 /* ============ Zaynor testimonials (curated, matches design reference) ============ */
 .testimonials {
+  /* Breaks out of .content's narrower centered column — otherwise a
+     3-column card grid ends up with ~140px-wide cards, nowhere near
+     enough room for even a short one-line quote. */
+  width: 100vw;
+  position: relative;
+  inset-inline-start: 50%;
+  margin-inline-start: -50vw;
   padding: 100px max(6.5vw, 28px) 105px;
   background: linear-gradient(180deg, #fff 0%, #f6fbf9 100%);
   text-align: center;
@@ -1422,7 +1429,7 @@ html[lang='ar'] {
 
 .testimonial-card {
   position: relative;
-  min-height: 250px;
+  min-height: 165px;
   padding: 30px 26px 21px;
   display: flex;
   flex-direction: column;
@@ -1472,17 +1479,19 @@ html[lang='ar'] {
 .testimonial-card blockquote {
   margin: 19px 0 23px;
   color: #354a48;
-  font-size: 14px;
-  line-height: 2.05;
+  font-size: 13px;
+  line-height: 1.5;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .testimonial-card blockquote[lang='en'] {
   direction: ltr;
   text-align: left;
-  line-height: 1.9;
   font-family: Arial, sans-serif;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .reviewer {
@@ -1566,7 +1575,7 @@ html[lang='ar'] {
   }
 
   .testimonial-card {
-    min-height: 205px;
+    min-height: 150px;
   }
 }
 
