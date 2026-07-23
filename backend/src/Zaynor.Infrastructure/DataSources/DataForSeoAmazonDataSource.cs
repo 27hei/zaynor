@@ -54,7 +54,11 @@ public sealed class DataForSeoAmazonDataSource : IProductDataSource
         _login = configuration["DataSources:DataForSeo:Login"];
         _password = configuration["DataSources:DataForSeo:Password"];
         _locationName = configuration["DataSources:DataForSeo:LocationName"] ?? "Saudi Arabia";
-        _languageName = configuration["DataSources:DataForSeo:LanguageName"] ?? "Arabic";
+        // "Arabic"/"Arabic (Saudi Arabia)" are rejected as invalid by this
+        // endpoint (confirmed against the live API) — "English (United
+        // States)" is the documented, verified-working value and still
+        // returns the same amazon.sa marketplace/currency/listings.
+        _languageName = configuration["DataSources:DataForSeo:LanguageName"] ?? "English (United States)";
     }
 
     public string SourceName => "DataForSeoAmazon";
