@@ -74,10 +74,6 @@ export const translations: Record<Lang, Record<string, string>> = {
     'hero.analyzingImage': 'Analyzing photo…',
     'hero.trustBadge': "We guarantee you the best prices from trusted stores",
 
-    'promo.ariaLabel': 'Announcement',
-    'promo.title': 'Shop smart, buy with confidence',
-    'promo.subtitle': 'We save you time and money by comparing prices across the best stores',
-
     'feature.saveTimeMoney': 'Save time and money',
     'feature.smartRecommendations': 'Smart recommendations',
     'feature.livePrices': 'Prices updated live',
@@ -396,10 +392,6 @@ export const translations: Record<Lang, Record<string, string>> = {
     'hero.imageSearch': 'البحث بالصورة',
     'hero.analyzingImage': 'يحلل الصورة…',
     'hero.trustBadge': 'نضمن لك أفضل الأسعار من متاجر موثوقة',
-
-    'promo.ariaLabel': 'إعلان',
-    'promo.title': 'وفّر بذكاء، تسوّق بثقة',
-    'promo.subtitle': 'نوفر لك الوقت والمال من خلال مقارنة الأسعار من أفضل المتاجر',
 
     'feature.saveTimeMoney': 'وفر الوقت والمال',
     'feature.smartRecommendations': 'توصيات ذكية',

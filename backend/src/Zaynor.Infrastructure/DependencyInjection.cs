@@ -103,9 +103,14 @@ public static class DependencyInjection
         // links (see its own remarks) — a longer timeout than the other
         // single-call sources so that round trip isn't cut short.
         services.AddHttpClient(nameof(GoogleShoppingDataSource), c => c.Timeout = TimeSpan.FromSeconds(15));
+        // DataForSEO's Amazon live/advanced endpoint routinely takes ~17s
+        // (their own documented example), so it needs the same longer budget
+        // as GoogleShoppingDataSource rather than the default 8s.
+        services.AddHttpClient(nameof(DataForSeoAmazonDataSource), c => c.Timeout = TimeSpan.FromSeconds(20));
         services.AddScoped<IProductDataSource, RainforestAmazonDataSource>();
         services.AddScoped<IProductDataSource, AliExpressProductDataSource>();
         services.AddScoped<IProductDataSource, GoogleShoppingDataSource>();
+        services.AddScoped<IProductDataSource, DataForSeoAmazonDataSource>();
 
         // "Search by photo" — Serper's reverse-image (Lens) endpoint. Its own
         // account/key (DataSources:Serper:ApiKey), separate from

@@ -87,7 +87,7 @@ export function Header() {
         {/* A plain <a>, not <Link> — a full page reload back to a clean
             home state is the point here, not client-side navigation. */}
         <a href="/" className="header-brand" aria-label="Zaynor home">
-          <BrandMark size={scrolled ? 28 : 34} />
+          <BrandMark size={scrolled ? 32 : 40} />
           <img src="/zaynor-wordmark.png" alt="Zaynor" className="header-logo-word" />
         </a>
 
