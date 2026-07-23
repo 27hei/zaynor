@@ -740,7 +740,7 @@ html[lang='ar'] {
 .hero-split {
   text-align: center;
   padding: 0;
-  min-height: 780px;
+  min-height: 960px;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -756,18 +756,18 @@ html[lang='ar'] {
   content: '';
   z-index: -1;
   position: absolute;
-  height: 920px;
-  width: 920px;
+  height: 1080px;
+  width: 1080px;
   border-radius: 50%;
-  inset-inline-start: -320px;
-  top: 110px;
+  inset-inline-start: -360px;
+  top: 130px;
   background: radial-gradient(circle at 62% 37%, rgba(0, 174, 117, 0.45), rgba(0, 89, 71, 0.2) 47%, transparent 48%);
 }
 
 .hero-split-inner {
-  max-width: 1560px;
+  max-width: 1760px;
   margin: 0 auto;
-  padding: 100px 1.5rem 80px;
+  padding: 120px 1.5rem 100px;
   display: grid;
   grid-template-columns: 4fr 3fr;
   align-items: center;
@@ -779,19 +779,19 @@ html[lang='ar'] {
 }
 
 .hero-split .hero-title {
-  margin: 0 auto 1.1rem;
+  margin: 0 auto 1.2rem;
   max-width: none;
   color: #061e25;
   font-weight: 900;
   letter-spacing: -0.045em;
-  font-size: clamp(2.6rem, 4.6vw, 4.1rem);
+  font-size: clamp(3rem, 5.2vw, 5rem);
 }
 
 .hero-split .hero-subtitle {
-  margin: 14px auto 28px;
+  margin: 16px auto 32px;
   max-width: none;
   color: #51606a;
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1.8;
   font-weight: 500;
 }
@@ -802,29 +802,29 @@ html[lang='ar'] {
 
 .hero-split .search-bar {
   margin-inline: auto;
-  max-width: 980px;
-  gap: 18px;
+  max-width: 1180px;
+  gap: 20px;
 }
 
 .hero-split .search-field {
-  min-height: 80px;
+  min-height: 96px;
 }
 
 .hero-split .search-input {
   border: 2px solid #00a971;
-  border-radius: 22px;
+  border-radius: 26px;
   box-shadow: 0 8px 16px rgba(0, 125, 89, 0.13);
-  min-height: 80px;
-  font-size: 1.25rem;
+  min-height: 96px;
+  font-size: 1.4rem;
 }
 
 .hero-split .search-button {
-  min-width: 190px;
-  height: 68px;
-  padding: 0 26px;
+  min-width: 220px;
+  height: 84px;
+  padding: 0 32px;
   background: linear-gradient(135deg, #06b978, #008c5d);
   box-shadow: 0 8px 15px rgba(0, 150, 96, 0.2);
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 800;
   align-self: center;
 }
@@ -3311,14 +3311,8 @@ html[lang='ar'] {
   min-height: 148px;
   padding: 8px 8px 10px;
   font-family: inherit;
-  /* Fixed light tile regardless of site theme (like the avatar/rating
-     colors elsewhere): the icon crops below have an opaque white backdrop
-     baked into the source art, so a dark-mode-adaptive card background
-     would leave that backdrop looking like a mismatched box. Framing the
-     whole card as an intentional light chip keeps it looking deliberate
-     in both themes instead. */
-  background: #ffffff;
-  border: 1px solid #e9edef;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
   border-radius: 16px;
   display: flex;
   flex-direction: column;
@@ -3334,43 +3328,28 @@ html[lang='ar'] {
 }
 
 .home-category-card b {
-  color: #16211d;
+  color: var(--ink);
   font-size: 11px;
 }
 
+/* Vector glyphs (same set as the full Categories page) instead of cropped
+   product photos — always whole, and adapts to dark mode via currentColor
+   instead of carrying a baked-in white photo backdrop. */
 .category-image {
   width: 100%;
   height: 92px;
-  display: block;
+  display: flex;
   flex: 0 0 92px;
+  align-items: center;
+  justify-content: center;
   border-radius: 10px;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
+  background: var(--brand-tint);
+  color: var(--brand-strong);
 }
 
-.category-image.laptop {
-  background-image: url('/reference/categories/laptop.png');
-}
-
-.category-image.phone {
-  background-image: url('/reference/categories/phone.png');
-}
-
-.category-image.game {
-  background-image: url('/reference/categories/game.png');
-}
-
-.category-image.washer {
-  background-image: url('/reference/categories/washer.png');
-}
-
-.category-image.perfume {
-  background-image: url('/reference/categories/perfume.png');
-}
-
-.category-image.shoe {
-  background-image: url('/reference/categories/shoe.png');
+.category-image svg {
+  width: 40px;
+  height: 40px;
 }
 
 .all-categories {
@@ -3394,6 +3373,83 @@ html[lang='ar'] {
 
 .all-categories span {
   font-size: 20px;
+}
+
+/* ============ Noon homepage banner ============ */
+.noon-home-banner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  max-width: 1235px;
+  margin: 40px auto 0;
+  padding: 22px 28px;
+  border-radius: 18px;
+  background: linear-gradient(120deg, #feee00 0%, #fff6b0 100%);
+  color: #201f1a;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(180, 160, 0, 0.18);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.noon-home-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(180, 160, 0, 0.24);
+}
+
+.noon-home-banner-store .offer-avatar {
+  width: 56px;
+  height: 56px;
+}
+
+.noon-home-banner-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: start;
+}
+
+.noon-home-banner-copy strong {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.noon-home-banner-copy span {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.noon-home-banner-cta {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border-radius: 12px;
+  background: #201f1a;
+  color: #feee00;
+  font-weight: 800;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.noon-home-banner-cta svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 800px) {
+  .noon-home-banner {
+    margin: 32px 16px 0;
+    padding: 18px;
+    flex-wrap: wrap;
+  }
+
+  .noon-home-banner-cta {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 800px) {

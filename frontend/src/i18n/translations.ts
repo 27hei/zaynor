@@ -140,8 +140,12 @@ export const translations: Record<Lang, Record<string, string>> = {
       'Sample data — this product is not covered by our price catalog yet, so these are demonstration prices, not market prices.',
     'results.wakeHint':
       'The first request can take up to a minute while the server wakes up — thanks for your patience.',
-    'results.noonFallbackText': "Noon isn't in these results yet — search for it directly on Noon.",
-    'results.noonFallbackCta': 'Search on Noon',
+    'results.noonFallbackText': "Noon isn't in these results yet — check it directly on Noon.",
+    'results.noonFallbackCta': 'Shop on Noon',
+    'results.amazonFallbackText': "Amazon.sa isn't in these results yet — search for it directly on Amazon.",
+    'noonBanner.title': 'Shop Noon',
+    'noonBanner.subtitle': 'Millions of products, fast delivery across Saudi Arabia.',
+    'noonBanner.cta': 'Visit Noon',
     'results.tryInstead': 'Try searching for:',
     'results.correctedQuery': 'Showing results for {corrected}',
 
@@ -459,8 +463,12 @@ export const translations: Record<Lang, Record<string, string>> = {
       'بيانات تجريبية — هذا المنتج غير مغطى في كتالوج الأسعار بعد، فهذه أسعار توضيحية وليست أسعار السوق.',
     'results.wakeHint':
       'قد يستغرق أول طلب حتى دقيقة ريثما يستيقظ الخادم — شكرًا لصبرك.',
-    'results.noonFallbackText': 'نون غير موجود ضمن هذي النتائج — ابحث عنه مباشرة في نون.',
-    'results.noonFallbackCta': 'ابحث في نون',
+    'results.noonFallbackText': 'نون غير موجود ضمن هذي النتائج — تصفّحه مباشرة على نون.',
+    'results.noonFallbackCta': 'تسوّق من نون',
+    'results.amazonFallbackText': 'أمازون غير موجود ضمن هذي النتائج — ابحث عنه مباشرة في أمازون.',
+    'noonBanner.title': 'تسوّق من نون',
+    'noonBanner.subtitle': 'ملايين المنتجات، وتوصيل سريع لجميع مناطق السعودية.',
+    'noonBanner.cta': 'زيارة نون',
     'results.tryInstead': 'جرّب البحث عن:',
     'results.correctedQuery': 'تعرض النتائج الآن لـ {corrected}',
 

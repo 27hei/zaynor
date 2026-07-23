@@ -8,23 +8,27 @@ interface NoonFallbackLinkProps {
 }
 
 /**
- * Noon isn't a real-time data source (spec: no official search API) — when
- * it isn't already among the offers, this links straight to Noon's own
- * search results for the query instead. Styled as an offer card (same
- * classes as OfferList) so it reads as "one more store to check", not a
- * separate/lesser element. The link rides through /api/out, which tags any
- * noon.com URL with the affiliate suffix automatically, so every search
- * stays monetizable even when it's outside the curated catalog and live
- * feeds.
+ * Noon's affiliate network (Impact-style) attributes commission through its
+ * own tracking short-link (s.noon.com/...), not by appending params to a
+ * plain noon.com URL — so when Noon isn't already among the offers, this
+ * sends visitors through the real campaign link rather than an untagged
+ * noon.com search URL that would never earn anything. It's a general
+ * storefront link (not query-specific), since generating a per-product
+ * tracking link requires Noon's partner dashboard. Styled as an offer card
+ * (same classes as OfferList) so it reads as "one more store to check".
+ * s.noon.com is covered by /api/out's existing noon.com host allowlist, so
+ * it passes through untouched (pure click logging, no re-tagging needed —
+ * the tracking is already baked into the link itself).
  */
+const NOON_TRACKING_URL = 'https://s.noon.com/dBcC-E2fLJ8'
+
 export function NoonFallbackLink({ query }: NoonFallbackLinkProps) {
   const { t } = useTranslation()
-  const noonSearchUrl = `https://www.noon.com/saudi-en/search/?q=${encodeURIComponent(query)}`
 
   return (
     <a
       className="offer-card offer-noon-fallback"
-      href={outboundUrl(noonSearchUrl, 'Noon', query)}
+      href={outboundUrl(NOON_TRACKING_URL, 'Noon', query)}
       target="_blank"
       rel="noopener noreferrer sponsored"
     >

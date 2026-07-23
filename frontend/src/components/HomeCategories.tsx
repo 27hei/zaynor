@@ -2,16 +2,18 @@ import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CATEGORY_SEEDS, type CategoryKey } from '../categories'
 import { useTranslation } from '../i18n/useTranslation'
+import { ShoeIcon, PerfumeIcon, GameControllerIcon, PhoneDeviceIcon, LaptopIcon, ApplianceIcon } from './icons'
 
-// Real product-photo crops crops from the approved design reference —
-// exact positions transcribed from the founder-supplied template.
-const CATEGORY_IMAGE_CLASS: Partial<Record<CategoryKey, string>> = {
-  electronics: 'laptop',
-  phones: 'phone',
-  gaming: 'game',
-  appliances: 'washer',
-  personalCare: 'perfume',
-  fashion: 'shoe',
+// Same icon set as the full Categories page — clean vector glyphs instead of
+// cropping product photos out of the reference design, so every icon is
+// always whole (never cropped) and adapts to dark mode automatically.
+const CATEGORY_ICONS: Partial<Record<CategoryKey, typeof LaptopIcon>> = {
+  electronics: LaptopIcon,
+  phones: PhoneDeviceIcon,
+  gaming: GameControllerIcon,
+  appliances: ApplianceIcon,
+  personalCare: PerfumeIcon,
+  fashion: ShoeIcon,
 }
 
 // Home shows a curated 6 (all of which have a matching reference-image
@@ -43,12 +45,17 @@ export function HomeCategories({ onSelect }: HomeCategoriesProps) {
           ←
         </button>
         <div className="category-list" ref={railRef}>
-          {shown.map(({ key, seed }) => (
-            <button key={key} type="button" className="home-category-card" onClick={() => onSelect(seed)}>
-              <span className={`category-image ${CATEGORY_IMAGE_CLASS[key] ?? ''}`} aria-hidden="true" />
-              <b>{t(`category.${key}`)}</b>
-            </button>
-          ))}
+          {shown.map(({ key, seed }) => {
+            const Icon = CATEGORY_ICONS[key]
+            return (
+              <button key={key} type="button" className="home-category-card" onClick={() => onSelect(seed)}>
+                <span className="category-image" aria-hidden="true">
+                  {Icon && <Icon />}
+                </span>
+                <b>{t(`category.${key}`)}</b>
+              </button>
+            )
+          })}
         </div>
       </div>
       <button type="button" className="all-categories" onClick={() => navigate('/categories')}>

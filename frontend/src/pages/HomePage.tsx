@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { SearchBar } from '../components/SearchBar'
 import { NeutralityBadge } from '../components/NeutralityBadge'
 import { HomeCategories } from '../components/HomeCategories'
+import { NoonHomeBanner } from '../components/NoonHomeBanner'
 import { ZaynorTestimonials } from '../components/ZaynorTestimonials'
 import { PhoneMockup } from '../components/PhoneMockup'
 import {
@@ -116,6 +117,7 @@ export function HomePage() {
       </div>
 
       <HomeCategories onSelect={goToProduct} />
+      <NoonHomeBanner />
       <ZaynorTestimonials />
     </>
   )

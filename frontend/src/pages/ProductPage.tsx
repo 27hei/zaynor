@@ -7,6 +7,7 @@ import { SearchBar } from '../components/SearchBar'
 import { OfferList } from '../components/OfferList'
 import { OfferListSkeleton } from '../components/OfferListSkeleton'
 import { NoonFallbackLink } from '../components/NoonFallbackLink'
+import { AmazonFallbackLink } from '../components/AmazonFallbackLink'
 import { ProductSummary } from '../components/ProductSummary'
 import { PriceHistorySection } from '../components/PriceHistorySection'
 import { useTranslation } from '../i18n/useTranslation'
@@ -161,6 +162,7 @@ export function ProductPage() {
   // Noon has no live search feed (spec: no official API) — offer a direct
   // search fallback whenever it isn't already one of the real offers shown.
   const hasNoonOffer = !!result && result.offers.some((o) => o.storeName === 'Noon')
+  const hasAmazonOffer = !!result && result.offers.some((o) => o.storeName.toLowerCase().includes('amazon'))
 
   const statusMessage = loading
     ? t('results.searching')
@@ -221,6 +223,7 @@ export function ProductPage() {
               </div>
             </div>
           )}
+          <AmazonFallbackLink query={result.query} />
           <NoonFallbackLink query={result.query} />
         </>
       )}
@@ -259,6 +262,7 @@ export function ProductPage() {
 
           <OfferList offers={result!.offers} query={result!.query} />
 
+          {!hasAmazonOffer && <AmazonFallbackLink query={result!.query} />}
           {!hasNoonOffer && <NoonFallbackLink query={result!.query} />}
 
           <p className="product-page-note">{t('product.pageNote')}</p>
