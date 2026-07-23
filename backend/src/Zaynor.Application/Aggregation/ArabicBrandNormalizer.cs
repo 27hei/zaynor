@@ -86,6 +86,19 @@ public static class ArabicBrandNormalizer
         ["لايت"] = "Lite",
         ["تاب"] = "Tab",
         ["واتش"] = "Watch",
+
+        // Generic category words — real observed failure: unlike "محفظة"
+        // (wallet), which Google Shopping matches fine left in Arabic, a
+        // search for "نظارة" (sunglasses) or "مكياج" (makeup) returned zero
+        // offers even though real listings exist — Google Shopping results
+        // for these categories skew toward English/international-brand
+        // titles ("Ray-Ban Aviator Sunglasses"), which the Arabic query word
+        // never matches, both when Google itself ranks results and in our
+        // own IsRelevant title-token filter. Translating the category word
+        // itself (same mechanism as brand names above) fixes both at once.
+        ["نظارة"] = "Sunglasses",
+        ["نظارات"] = "Sunglasses",
+        ["مكياج"] = "Makeup",
     };
 
     /// <summary>Single Arabic-script words short/common enough that fuzzy matching would be unsafe.</summary>
@@ -102,7 +115,7 @@ public static class ArabicBrandNormalizer
     private static readonly HashSet<string> CommonProductNouns = new(StringComparer.Ordinal)
     {
         // Fashion / accessories
-        "محفظة", "حقيبة", "حذاء", "احذية", "ساعة", "نظارة", "نظارات",
+        "محفظة", "حقيبة", "حذاء", "احذية", "ساعة",
         // Personal care
         "عطر", "عطور", "كريم", "شامبو",
         // Home appliances

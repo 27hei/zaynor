@@ -45,6 +45,19 @@ public class ArabicBrandNormalizerTests
     }
 
     [Fact]
+    public void TranslatesAGenericCategoryWord_UnlikeAPlainProductNoun()
+    {
+        // Real observed failure: "نظارة" returned zero offers even though
+        // real listings exist — Google Shopping results for this category
+        // skew English/international-brand ("Ray-Ban Aviator Sunglasses"),
+        // which the Arabic word never matches. Translating fixes both the
+        // Google query and our own title-relevance filter.
+        Assert.Equal("Sunglasses", ArabicBrandNormalizer.Normalize("نظارة"));
+        Assert.Equal("Sunglasses", ArabicBrandNormalizer.Normalize("نظارات"));
+        Assert.Equal("Makeup", ArabicBrandNormalizer.Normalize("مكياج"));
+    }
+
+    [Fact]
     public void LeavesUnrelatedArabicTextAlone()
     {
         const string query = "جهاز تكييف عادي";
