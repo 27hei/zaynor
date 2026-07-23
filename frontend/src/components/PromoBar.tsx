@@ -5,8 +5,13 @@ export function PromoBar() {
   const { t } = useTranslation()
 
   return (
-    <div className="promo-bar" role="note">
-      <span>✨ {t('promo.banner')} 🔥</span>
+    <div className="announcement" aria-label={t('promo.ariaLabel')}>
+      <div className="announcement-inner">
+        <strong>🔥 {t('promo.title')}</strong>
+        <span>
+          {t('promo.subtitle')} <b>✨</b>
+        </span>
+      </div>
     </div>
   )
 }

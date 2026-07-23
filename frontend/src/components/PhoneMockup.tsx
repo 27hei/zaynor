@@ -1,62 +1,52 @@
-import { StoreLogo } from './StoreLogo'
+import { useState } from 'react'
 import { useTranslation } from '../i18n/useTranslation'
 
 /**
- * A decorative illustration of the site inside a phone frame — hero art,
- * not a live view. The store logos are real (StoreLogo/STORE_BRAND), but the
- * product/price shown is a static example, like any marketing screenshot.
+ * A decorative preview of the Zaynor app inside a 3D phone frame — hero art,
+ * not a live view. The "screen" is a cropped still from the approved design
+ * reference (an illustration, like any marketing screenshot), animated
+ * between two crops to suggest scrolling; captions fade in sync. Clicking
+ * pauses the motion (mirrors the original template's app.js behavior).
  */
 export function PhoneMockup() {
   const { t } = useTranslation()
+  const [paused, setPaused] = useState(false)
 
   return (
-    <div className="phone-mockup" aria-hidden="true">
-      <div className="phone-mockup-notch" />
-      <div className="phone-mockup-screen">
-        <div className="phone-mockup-topbar">
-          <span className="phone-mockup-brand">ZAYNOR</span>
-          <span className="phone-mockup-chevron">›</span>
-        </div>
-
-        <div className="phone-mockup-search">
-          <span>{t('phoneMockup.searchPlaceholder')}</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            <circle cx="10.5" cy="10.5" r="6.5" />
-            <path d="m19.5 19.5-4-4" />
-          </svg>
-        </div>
-
-        <p className="phone-mockup-label">🔥 {t('phoneMockup.dealOfDay')}</p>
-
-        <div className="phone-mockup-card">
-          <div className="phone-mockup-card-image">
-            <img src="/product-art/phone.svg" alt="" aria-hidden="true" />
-          </div>
-          <div className="phone-mockup-card-info">
-            <span className="phone-mockup-card-title">iPhone 15 Pro Max 256GB</span>
-            <span className="phone-mockup-card-price-row">
-              <span className="phone-mockup-card-price">4,299 {t('currency.sar')}</span>
-              <span className="phone-mockup-card-price-old">4,999 {t('currency.sar')}</span>
+    <div className="phone-side" aria-label={t('phoneMockup.previewLabel')}>
+      <div className={paused ? 'phone-3d is-paused' : 'phone-3d'} role="group" aria-label={t('phoneMockup.previewLabel')}>
+        <button
+          type="button"
+          className="phone-screen"
+          aria-pressed={paused}
+          aria-label={paused ? t('phoneMockup.resumeMotion') : t('phoneMockup.pauseMotion')}
+          onClick={() => setPaused((v) => !v)}
+        >
+          <span className="phone-live-status" aria-hidden="true">
+            <span className="phone-state state-search">
+              <i /> {t('phoneMockup.stateSearch')}
             </span>
-            <span className="phone-mockup-card-save">{t('phoneMockup.saveAmount', { amount: '700' })}</span>
-            <span className="phone-mockup-card-seller">
-              <StoreLogo storeName="Amazon.sa" />
-              <span>{t('phoneMockup.seller')}</span>
-              <span className="phone-mockup-card-rating">★ 4.8</span>
+            <span className="phone-state state-found">
+              <i /> {t('phoneMockup.stateFound')}
             </span>
-            <span className="phone-mockup-card-cta">{t('phoneMockup.viewDeal')}</span>
-          </div>
-        </div>
-
-        <p className="phone-mockup-label">{t('phoneMockup.trustedStores')}</p>
-        <div className="phone-mockup-stores">
-          {['Amazon.sa', 'Noon', 'Extra', 'Jarir'].map((name) => (
-            <span key={name} className="phone-mockup-store" title={name}>
-              <StoreLogo storeName={name} />
+            <span className="phone-state state-save">
+              <i /> {t('phoneMockup.stateSave')}
             </span>
-          ))}
-        </div>
+          </span>
+          <span className="price-alert" aria-hidden="true">
+            <b>↓ 12%</b> {t('phoneMockup.priceAlert')}
+          </span>
+          <span className="screen-hint" aria-hidden="true">
+            {paused ? t('phoneMockup.resumeMotion') : t('phoneMockup.pauseMotion')}
+          </span>
+        </button>
       </div>
+      <aside className="guarantee-card">
+        <span className="shield">✓</span>
+        <p>{t('phoneMockup.guaranteeWe')}</p>
+        <strong>{t('phoneMockup.guaranteeBest')}</strong>
+        <p>{t('phoneMockup.guaranteeFrom')}</p>
+      </aside>
     </div>
   )
 }

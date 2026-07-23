@@ -4,10 +4,9 @@ import { NeutralityBadge } from '../components/NeutralityBadge'
 import { HomeCategories } from '../components/HomeCategories'
 import { LivePricesTeaser } from '../components/LivePricesTeaser'
 import { HomeTestimonials } from '../components/HomeTestimonials'
-import { SiteReviewsSection } from '../components/SiteReviewsSection'
+import { ZaynorTestimonials } from '../components/ZaynorTestimonials'
 import { PhoneMockup } from '../components/PhoneMockup'
 import {
-  ShieldCheckIcon,
   SavingsIcon,
   IntelligenceIcon,
   RefreshIcon,
@@ -95,13 +94,7 @@ export function HomePage() {
             </div>
           </div>
 
-          <div className="hero-visual">
-            <div className="hero-trust-floating">
-              <ShieldCheckIcon />
-              <span>{t('hero.trustBadge')}</span>
-            </div>
-            <PhoneMockup />
-          </div>
+          <PhoneMockup />
         </div>
       </section>
 
@@ -125,9 +118,9 @@ export function HomePage() {
       </div>
 
       <HomeCategories onSelect={goToProduct} />
+      <ZaynorTestimonials />
       <LivePricesTeaser onSelect={goToProduct} />
       <HomeTestimonials />
-      <SiteReviewsSection />
     </>
   )
 }
