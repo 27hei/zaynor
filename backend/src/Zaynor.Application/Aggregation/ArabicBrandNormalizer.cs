@@ -91,6 +91,29 @@ public static class ArabicBrandNormalizer
     /// <summary>Single Arabic-script words short/common enough that fuzzy matching would be unsafe.</summary>
     private static readonly HashSet<string> FuzzyExcluded = new(StringComparer.Ordinal) { "برو", "نوت", "تاب" };
 
+    /// <summary>
+    /// Common Arabic product nouns spelled correctly. Unlike <see cref="BrandNames"/>
+    /// these are never translated to English — Google Shopping matches correctly-spelled
+    /// Arabic product nouns fine (confirmed: "محفظة" returns real results) — the failure
+    /// mode here is purely a single-letter typo in ordinary Arabic (e.g. "محفضة" with ض
+    /// instead of ظ) producing zero results with no correction offered. Fuzzy-matching
+    /// against this list corrects the spelling and keeps the query in Arabic.
+    /// </summary>
+    private static readonly HashSet<string> CommonProductNouns = new(StringComparer.Ordinal)
+    {
+        // Fashion / accessories
+        "محفظة", "حقيبة", "حذاء", "احذية", "ساعة", "نظارة", "نظارات",
+        // Personal care
+        "عطر", "عطور", "كريم", "شامبو",
+        // Home appliances
+        "غسالة", "ثلاجة", "مكيف", "مروحة", "مكنسة", "فرن", "مايكرويف", "خلاط", "مكواة",
+        // Electronics / computers
+        "جوال", "هاتف", "لابتوب", "حاسوب", "تابلت", "شاشة", "طابعة", "كاميرا", "سماعة", "سماعات",
+        "شاحن", "كابل",
+        // TV / audio
+        "تلفزيون", "تلفاز",
+    };
+
     /// <summary>Replaces any known Arabic term (exact) or a close misspelling of one (fuzzy) with its English form.</summary>
     public static string Normalize(string query)
     {
@@ -102,7 +125,10 @@ public static class ArabicBrandNormalizer
 
         // Then fuzzy-match whatever Arabic-script words remain (i.e. weren't
         // already replaced above) against the same dictionary, catching
-        // spelling variants we haven't seen and hardcoded yet.
+        // spelling variants we haven't seen and hardcoded yet. Words that
+        // aren't a brand/tier match (or a close misspelling of one) are then
+        // checked against common product nouns instead, correcting ordinary
+        // typos ("محفضة" → "محفظة") while staying in Arabic.
         var words = query.Split(' ');
         for (var i = 0; i < words.Length; i++)
         {
@@ -111,37 +137,51 @@ public static class ArabicBrandNormalizer
                 continue;
             }
 
-            var closest = FindClosestBrandTerm(words[i]);
-            if (closest is not null)
+            var closestBrand = FindClosestBrandTerm(words[i]);
+            if (closestBrand is not null)
             {
-                words[i] = closest;
+                words[i] = closestBrand;
+                continue;
+            }
+
+            var closestNoun = FindClosestTerm(words[i], CommonProductNouns);
+            if (closestNoun is not null)
+            {
+                words[i] = closestNoun;
             }
         }
 
         return string.Join(' ', words);
     }
 
-    private static string? FindClosestBrandTerm(string word)
+    private static string? FindClosestBrandTerm(string word) =>
+        FindClosestTerm(word, BrandNames.Keys, arabic => BrandNames[arabic], arabic => arabic.Contains(' ') || FuzzyExcluded.Contains(arabic));
+
+    private static string? FindClosestTerm(string word, IEnumerable<string> candidates) =>
+        FindClosestTerm(word, candidates, static c => c, static _ => false);
+
+    private static string? FindClosestTerm(
+        string word, IEnumerable<string> candidates, Func<string, string> resultSelector, Func<string, bool> skip)
     {
         string? best = null;
         var bestDistance = int.MaxValue;
 
-        foreach (var (arabic, english) in BrandNames)
+        foreach (var candidate in candidates)
         {
             // Multi-word phrases ("بلاي ستيشن") can't fuzzy-match a single
             // split word, and very short/common words are too risky to
             // fuzzy-match at all (too easy to coincidentally sit 1 edit
             // away from unrelated Arabic text).
-            if (arabic.Contains(' ') || FuzzyExcluded.Contains(arabic))
+            if (skip(candidate))
             {
                 continue;
             }
 
-            var distance = LevenshteinDistance(word, arabic);
+            var distance = LevenshteinDistance(word, candidate);
             // Scales with word length: an exact/near-exact hit on a longer,
             // more distinctive word is a safe correction; the same edit
             // count on a short word is far more likely a coincidence.
-            var threshold = arabic.Length switch
+            var threshold = candidate.Length switch
             {
                 <= 4 => 0,
                 <= 6 => 1,
@@ -151,7 +191,7 @@ public static class ArabicBrandNormalizer
             if (distance <= threshold && distance < bestDistance)
             {
                 bestDistance = distance;
-                best = english;
+                best = resultSelector(candidate);
             }
         }
 

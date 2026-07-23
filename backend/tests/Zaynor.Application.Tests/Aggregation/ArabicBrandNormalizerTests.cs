@@ -35,6 +35,16 @@ public class ArabicBrandNormalizerTests
     }
 
     [Fact]
+    public void FuzzyMatchesACommonProductNounTypo()
+    {
+        // Real observed failure: "محفضة" (ض instead of ظ) returned zero
+        // results with no correction offered. Unlike brand words, common
+        // nouns stay in Arabic — Google matches the correctly-spelled noun
+        // fine, so only the spelling itself needs fixing.
+        Assert.Equal("محفظة", ArabicBrandNormalizer.Normalize("محفضة"));
+    }
+
+    [Fact]
     public void LeavesUnrelatedArabicTextAlone()
     {
         const string query = "جهاز تكييف عادي";

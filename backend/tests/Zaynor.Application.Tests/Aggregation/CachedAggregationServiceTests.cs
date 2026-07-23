@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Zaynor.Application.Aggregation;
 using Zaynor.Application.Aggregation.Models;
@@ -51,8 +52,18 @@ public class CachedAggregationServiceTests
         var inner = new AggregationService([source], new AffiliateSettings(), NullLogger<AggregationService>.Instance);
         var recorder = new CountingRecorder();
         var cache = new MemoryCache(new MemoryCacheOptions());
+
+        // CachedAggregationService resolves IPriceHistoryRecorder from its own
+        // DI scope (spec: fire-and-forget history writes), so the fake needs a
+        // real scope factory to resolve from — registering the same recorder
+        // instance keeps it observable to the test.
+        var scopeFactory = new ServiceCollection()
+            .AddScoped<IPriceHistoryRecorder>(_ => recorder)
+            .BuildServiceProvider()
+            .GetRequiredService<IServiceScopeFactory>();
+
         var service = new CachedAggregationService(
-            inner, cache, recorder, NullLogger<CachedAggregationService>.Instance);
+            inner, cache, scopeFactory, NullLogger<CachedAggregationService>.Instance);
 
         return (service, source, recorder);
     }
@@ -64,6 +75,14 @@ public class CachedAggregationServiceTests
 
         var first = await service.SearchAsync("ps5");
         var second = await service.SearchAsync("ps5");
+
+        // History recording is fire-and-forget (spec: doesn't block the
+        // response), so wait for the dispatched background task before
+        // asserting on its side effect instead of racing it.
+        if (service.LastBackgroundRecordingTask is { } recordingTask)
+        {
+            await recordingTask;
+        }
 
         Assert.Equal(1, source.Calls);
         Assert.Equal(1, recorder.Calls);

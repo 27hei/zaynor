@@ -1380,7 +1380,7 @@ html[lang='ar'] {
   inset-inline-start: 50%;
   margin-inline-start: -50vw;
   padding: 100px max(6.5vw, 28px) 105px;
-  background: linear-gradient(180deg, #fff 0%, #f6fbf9 100%);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--canvas) 100%);
   text-align: center;
 }
 
@@ -1391,30 +1391,30 @@ html[lang='ar'] {
 
 .section-kicker {
   display: inline-flex;
-  color: #008f60;
+  color: var(--brand-strong);
   padding: 5px 12px;
   border-radius: 99px;
-  background: #dcf7ec;
+  background: var(--brand-tint);
   font-size: 11px;
   font-weight: 800;
 }
 
 .section-heading h2 {
   margin: 9px 0 5px;
-  color: #102f2f;
+  color: var(--ink);
   font-size: 27px;
   line-height: 1.55;
   font-weight: 900;
 }
 
 .section-heading h2 em {
-  color: #00a66d;
+  color: var(--brand-strong);
   font-style: normal;
 }
 
 .section-heading p {
   margin: 0;
-  color: #73827f;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -1434,9 +1434,9 @@ html[lang='ar'] {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid #e7efec;
+  border: 1px solid var(--hairline);
   border-radius: 18px;
-  background: white;
+  background: var(--surface);
   box-shadow: 0 15px 32px rgba(1, 74, 58, 0.07);
   transition: transform 0.22s, box-shadow 0.22s;
 }
@@ -1453,7 +1453,7 @@ html[lang='ar'] {
   font-family: Georgia, serif;
   font-size: 90px;
   line-height: 1;
-  color: #eaf7f1;
+  color: var(--brand-tint);
   z-index: 0;
   pointer-events: none;
 }
@@ -1464,7 +1464,7 @@ html[lang='ar'] {
 }
 
 .featured-review {
-  border-color: #afe8d3;
+  border-color: var(--brand-tint-2);
   box-shadow: 0 18px 37px rgba(0, 144, 93, 0.12);
 }
 
