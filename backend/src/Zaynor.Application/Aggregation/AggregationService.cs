@@ -134,10 +134,11 @@ public sealed class AggregationService : IAggregationService
     /// Individual sources already dedupe within themselves (e.g.
     /// GoogleShoppingDataSource's own bestPerMerchant), but with more than one
     /// independent source now able to return the same store (RainforestAmazonDataSource,
-    /// DataForSeoAmazonDataSource, and OxylabsAmazonDataSource all hardcode
-    /// StoreName = "Amazon.sa" — a deliberate design: real production
-    /// redundancy so one vendor's outage doesn't remove Amazon from results
-    /// entirely, see OxylabsAmazonDataSource's remarks), nothing previously
+    /// DataForSeoAmazonDataSource, OxylabsAmazonDataSource, and
+    /// BrightDataAmazonDataSource all hardcode StoreName = "Amazon.sa" — a
+    /// deliberate design: real production redundancy so one vendor's outage
+    /// doesn't remove Amazon from results entirely, see
+    /// OxylabsAmazonDataSource's remarks), nothing previously
     /// stopped the same store from appearing twice with two different prices
     /// once a second source went live. A user comparing prices "across
     /// stores" should never see one store listed twice.

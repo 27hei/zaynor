@@ -117,11 +117,19 @@ public static class DependencyInjection
         // scraper response times commonly run 10-20s — matching the
         // DataForSEO source's budget rather than the shorter default.
         services.AddHttpClient(nameof(OxylabsAmazonDataSource), c => c.Timeout = TimeSpan.FromSeconds(30));
+        // BrightDataAmazonDataSource polls its own job internally (trigger +
+        // repeated snapshot GETs) with its own ~40s budget — this HttpClient
+        // timeout only needs to cover each individual trigger/poll request,
+        // not the whole job, so the default liveSourceTimeout would be too
+        // short for nothing here; a slightly longer per-call timeout gives
+        // headroom for a slow individual poll response.
+        services.AddHttpClient(nameof(BrightDataAmazonDataSource), c => c.Timeout = TimeSpan.FromSeconds(15));
         services.AddScoped<IProductDataSource, RainforestAmazonDataSource>();
         services.AddScoped<IProductDataSource, AliExpressProductDataSource>();
         services.AddScoped<IProductDataSource, GoogleShoppingDataSource>();
         services.AddScoped<IProductDataSource, DataForSeoAmazonDataSource>();
         services.AddScoped<IProductDataSource, OxylabsAmazonDataSource>();
+        services.AddScoped<IProductDataSource, BrightDataAmazonDataSource>();
 
         // "Search by photo" — Serper's reverse-image (Lens) endpoint. Its own
         // account/key (DataSources:Serper:ApiKey), separate from
