@@ -152,7 +152,13 @@ html[lang='ar'] {
 }
 
 .page {
-  min-height: 100vh;
+  /* Not 100vh: the forced width=1440 viewport (so mobile matches desktop
+     pixel-for-pixel) makes some mobile browsers recompute vh proportionally
+     to that width, inflating this well past the real screen height and
+     shoving the footer far below the actual content — any viewport-relative
+     unit (vh, or % chained back to the viewport) has the same problem, so
+     this intentionally has no minimum height at all; the footer just
+     follows the real content instead of being pinned to a tall viewport. */
   display: flex;
   flex-direction: column;
   background: var(--canvas);
@@ -1415,10 +1421,12 @@ html[lang='ar'] {
 }
 
 .testimonial-card {
+  position: relative;
   min-height: 250px;
-  padding: 26px 26px 21px;
+  padding: 30px 26px 21px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   border: 1px solid #e7efec;
   border-radius: 18px;
   background: white;
@@ -1429,6 +1437,23 @@ html[lang='ar'] {
 .testimonial-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 20px 39px rgba(1, 74, 58, 0.14);
+}
+
+.testimonial-quote-mark {
+  position: absolute;
+  top: -18px;
+  inset-inline-end: 14px;
+  font-family: Georgia, serif;
+  font-size: 90px;
+  line-height: 1;
+  color: #eaf7f1;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.testimonial-card > :not(.testimonial-quote-mark) {
+  position: relative;
+  z-index: 1;
 }
 
 .featured-review {
@@ -1489,6 +1514,18 @@ html[lang='ar'] {
 
 .avatar-gold {
   background: linear-gradient(145deg, #e3b45c, #9e7127);
+}
+
+.avatar-purple {
+  background: linear-gradient(145deg, #9b6fd6, #5c3a94);
+}
+
+.avatar-teal {
+  background: linear-gradient(145deg, #2bc4c4, #16787d);
+}
+
+.avatar-coral {
+  background: linear-gradient(145deg, #f0806a, #c74a38);
 }
 
 .reviewer div {
@@ -2468,70 +2505,6 @@ html[lang='ar'] {
   100% {
     background-position: -100% 0;
   }
-}
-
-/* ============ Feature highlights ============ */
-.live-teaser {
-  margin-top: 3rem;
-}
-
-.live-teaser-title {
-  margin: 0 0 1rem;
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--ink);
-}
-
-.live-teaser-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 1rem;
-}
-
-.live-teaser-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.6rem;
-  padding: 1.1rem;
-  font-family: inherit;
-  text-align: start;
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-xs);
-  cursor: pointer;
-  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
-}
-
-.live-teaser-card:hover {
-  box-shadow: var(--shadow-md);
-  border-color: var(--brand);
-  transform: translateY(-3px);
-}
-
-.live-teaser-art {
-  width: 100%;
-  height: 96px;
-  object-fit: contain;
-  background: var(--surface-2);
-  border-radius: 10px;
-  padding: 0.5rem;
-}
-
-.live-teaser-name {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--ink);
-  line-height: 1.35;
-}
-
-.live-teaser-price {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--brand-strong);
 }
 
 .features {

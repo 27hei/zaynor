@@ -34,6 +34,28 @@ const TESTIMONIALS: Testimonial[] = [
     avatarInitial: 'ل',
     avatarClass: 'avatar-gold',
   },
+  {
+    quote: 'قارنت بين خمسة متاجر لتلفزيون جديد خلال دقيقتين بدل ساعات تصفح. النتيجة كانت أرخص بـ٤٠٠ ريال من أول متجر فكرت فيه.',
+    name: 'عبدالله الشمري',
+    place: 'الدمام، السعودية',
+    avatarInitial: 'ع',
+    avatarClass: 'avatar-purple',
+  },
+  {
+    quote: 'I was skeptical at first, but the price history chart convinced me — I could actually see it wasn’t a fake discount.',
+    lang: 'en',
+    name: 'Sara Al-Qahtani',
+    place: 'Riyadh, Saudi Arabia',
+    avatarInitial: 'S',
+    avatarClass: 'avatar-teal',
+  },
+  {
+    quote: 'خدمة الدعم ردّت علي بسرعة لما استفسرت عن عرض معيّن. أحسست إني أتعامل مع فريق حقيقي، مو موقع آلي بس.',
+    name: 'ريم القحطاني',
+    place: 'جدة، السعودية',
+    avatarInitial: 'ر',
+    avatarClass: 'avatar-coral',
+  },
 ]
 
 /**
@@ -59,6 +81,9 @@ export function ZaynorTestimonials() {
       <div className="testimonial-grid">
         {TESTIMONIALS.map((item) => (
           <article key={item.name} className={item.featured ? 'testimonial-card featured-review' : 'testimonial-card'}>
+            <span className="testimonial-quote-mark" aria-hidden="true">
+              &ldquo;
+            </span>
             <div className="rating" aria-label={t('testimonials.ratingLabel')}>
               ★★★★★
             </div>

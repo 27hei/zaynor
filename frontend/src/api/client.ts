@@ -228,13 +228,6 @@ export async function getStoreReviews(storeName: string): Promise<ReviewDto[]> {
   return (await response.json()) as ReviewDto[]
 }
 
-/** A small curated highlight for the homepage — not a filter on what's visible on a store's own review list. */
-export async function getFeaturedReviews(): Promise<ReviewDto[]> {
-  const response = await fetch(`${API_BASE_URL}/api/reviews/featured`)
-  if (!response.ok) return []
-  return (await response.json()) as ReviewDto[]
-}
-
 export async function submitReview(
   storeName: string,
   rating: number,
