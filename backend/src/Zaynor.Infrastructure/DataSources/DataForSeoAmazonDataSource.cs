@@ -99,8 +99,25 @@ public sealed class DataForSeoAmazonDataSource : IProductDataSource
             using var response = await client.SendAsync(request, cancellationToken);
             var body = await response.Content.ReadFromJsonAsync<DataForSeoResponse>(cancellationToken: cancellationToken);
 
+            var task = body?.Tasks?.FirstOrDefault();
             var offers = new List<StoreOffer>();
-            var items = body?.Tasks?.FirstOrDefault()?.Result?.FirstOrDefault()?.Items ?? [];
+            var items = task?.Result?.FirstOrDefault()?.Items ?? [];
+
+            // DataForSEO wraps most errors (insufficient balance, rate limits,
+            // invalid params) inside an HTTP 200 with a non-20000 task-level
+            // status_code rather than a 4xx/5xx — a real observed bug: this
+            // source silently returned zero offers for queries DataForSEO
+            // genuinely had data for, because a fast, no-cost per-task error
+            // response looks identical to "no matches" without logging these
+            // fields. Logged whenever there are no items so a config/billing
+            // problem shows up in production logs immediately instead of
+            // requiring a manual API call to diagnose.
+            if (items.Count == 0)
+            {
+                _logger.LogWarning(
+                    "DataForSEO Amazon returned no items for {Query}: top-level {TopCode} {TopMessage}; task {TaskCode} {TaskMessage} (cost {Cost})",
+                    query, body?.StatusCode, body?.StatusMessage, task?.StatusCode, task?.StatusMessage, task?.Cost);
+            }
             foreach (var item in items)
             {
                 // "amazon_paid" (and other non-"amazon_serp" rows) are sponsored
@@ -143,9 +160,16 @@ public sealed class DataForSeoAmazonDataSource : IProductDataSource
         }
     }
 
-    private sealed record DataForSeoResponse([property: JsonPropertyName("tasks")] List<DataForSeoTask>? Tasks);
+    private sealed record DataForSeoResponse(
+        [property: JsonPropertyName("status_code")] int? StatusCode,
+        [property: JsonPropertyName("status_message")] string? StatusMessage,
+        [property: JsonPropertyName("tasks")] List<DataForSeoTask>? Tasks);
 
-    private sealed record DataForSeoTask([property: JsonPropertyName("result")] List<DataForSeoResult>? Result);
+    private sealed record DataForSeoTask(
+        [property: JsonPropertyName("status_code")] int? StatusCode,
+        [property: JsonPropertyName("status_message")] string? StatusMessage,
+        [property: JsonPropertyName("cost")] decimal? Cost,
+        [property: JsonPropertyName("result")] List<DataForSeoResult>? Result);
 
     private sealed record DataForSeoResult([property: JsonPropertyName("items")] List<DataForSeoItem>? Items);
 
