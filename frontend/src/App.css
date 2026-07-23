@@ -200,11 +200,11 @@ html[lang='ar'] {
 .header-inner {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 1.3rem 2rem;
+  padding: 1.3rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.25rem;
+  gap: 1rem;
   flex-wrap: wrap;
   transition: padding 0.2s ease;
 }
@@ -246,15 +246,15 @@ html[lang='ar'] {
 .header-nav {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.15rem;
   flex-wrap: wrap;
   order: 3;
   width: 100%;
 }
 
 .nav-link {
-  padding: 0.65rem 1.1rem;
-  font-size: 1rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: var(--text-muted);
   text-decoration: none;
@@ -286,15 +286,15 @@ html[lang='ar'] {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
 /* Header action buttons (login/register/logout) read bigger and more
    deliberate here than the same .btn used inline in page content. */
 .header-actions .btn {
-  padding: 0.75rem 1.6rem;
-  font-size: 1rem;
+  padding: 0.65rem 1.3rem;
+  font-size: 0.95rem;
   border-radius: 12px;
 }
 
@@ -309,8 +309,8 @@ html[lang='ar'] {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   color: var(--text);
   background: transparent;
   border: 1px solid var(--hairline-strong);
@@ -376,10 +376,10 @@ html[lang='ar'] {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   font-family: var(--font-display);
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #fff;
   background: var(--brand-strong);
