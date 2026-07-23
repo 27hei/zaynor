@@ -740,7 +740,7 @@ html[lang='ar'] {
 .hero-split {
   text-align: center;
   padding: 0;
-  min-height: 553px;
+  min-height: 640px;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -767,7 +767,7 @@ html[lang='ar'] {
 .hero-split-inner {
   max-width: 1360px;
   margin: 0 auto;
-  padding: 55px 1.5rem 40px;
+  padding: 78px 1.5rem 60px;
   display: grid;
   grid-template-columns: 4fr 3fr;
   align-items: center;
@@ -801,28 +801,29 @@ html[lang='ar'] {
 
 .hero-split .search-bar {
   margin-inline: auto;
-  max-width: 754px;
-  gap: 16px;
+  max-width: 860px;
+  gap: 18px;
 }
 
 .hero-split .search-field {
-  min-height: 60px;
+  min-height: 72px;
 }
 
 .hero-split .search-input {
   border: 2px solid #00a971;
   border-radius: 21px;
   box-shadow: 0 8px 16px rgba(0, 125, 89, 0.13);
-  min-height: 60px;
+  min-height: 72px;
+  font-size: 1.15rem;
 }
 
 .hero-split .search-button {
-  min-width: 153px;
-  height: 48px;
-  padding: 0 17px;
+  min-width: 172px;
+  height: 60px;
+  padding: 0 22px;
   background: linear-gradient(135deg, #06b978, #008c5d);
   box-shadow: 0 8px 15px rgba(0, 150, 96, 0.2);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   align-self: center;
 }
@@ -1478,7 +1479,7 @@ html[lang='ar'] {
 
 .testimonial-card blockquote {
   margin: 19px 0 23px;
-  color: #354a48;
+  color: var(--ink);
   font-size: 13px;
   line-height: 1.5;
   font-weight: 600;
@@ -1544,18 +1545,18 @@ html[lang='ar'] {
 }
 
 .reviewer strong {
-  color: #203837;
+  color: var(--ink);
   font-size: 12px;
 }
 
 .reviewer small {
-  color: #84928f;
+  color: var(--text-muted);
   font-size: 10px;
 }
 
 .reviewer .verified {
   margin-inline-start: auto;
-  color: #15976d;
+  color: var(--brand-strong);
   font-size: 10px;
   font-weight: 800;
 }
@@ -3306,15 +3307,21 @@ html[lang='ar'] {
 }
 
 .home-category-card {
-  min-height: 117px;
-  padding: 10px 5px 9px;
+  min-height: 148px;
+  padding: 8px 8px 10px;
   font-family: inherit;
-  background: var(--surface);
+  /* Fixed light tile regardless of site theme (like the avatar/rating
+     colors elsewhere): the icon crops below have an opaque white backdrop
+     baked into the source art, so a dark-mode-adaptive card background
+     would leave that backdrop looking like a mismatched box. Framing the
+     whole card as an intentional light chip keeps it looking deliberate
+     in both themes instead. */
+  background: #ffffff;
   border: 1px solid #e9edef;
   border-radius: 16px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 8px;
   align-items: center;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -3326,42 +3333,43 @@ html[lang='ar'] {
 }
 
 .home-category-card b {
-  color: var(--ink);
+  color: #16211d;
   font-size: 11px;
 }
 
 .category-image {
-  width: 112px;
-  height: 70px;
+  width: 100%;
+  height: 92px;
   display: block;
-  flex: 0 0 70px;
-  background-image: url('/reference/zaynor-home-reference.png');
+  flex: 0 0 92px;
+  border-radius: 10px;
   background-repeat: no-repeat;
-  background-size: 1536px 1024px;
+  background-size: cover;
+  background-position: center;
 }
 
 .category-image.laptop {
-  background-position: -1225px -859px;
+  background-image: url('/reference/categories/laptop.png');
 }
 
 .category-image.phone {
-  background-position: -1025px -859px;
+  background-image: url('/reference/categories/phone.png');
 }
 
 .category-image.game {
-  background-position: -803px -859px;
+  background-image: url('/reference/categories/game.png');
 }
 
 .category-image.washer {
-  background-position: -603px -859px;
+  background-image: url('/reference/categories/washer.png');
 }
 
 .category-image.perfume {
-  background-position: -406px -859px;
+  background-image: url('/reference/categories/perfume.png');
 }
 
 .category-image.shoe {
-  background-position: -204px -859px;
+  background-image: url('/reference/categories/shoe.png');
 }
 
 .all-categories {
