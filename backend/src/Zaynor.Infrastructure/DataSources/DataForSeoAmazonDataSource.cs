@@ -78,12 +78,19 @@ public sealed class DataForSeoAmazonDataSource : IProductDataSource
 
         try
         {
+            // A real observed failure: a bare Arabic category word ("نظارة")
+            // returned nothing, because it was sent to DataForSEO as-is —
+            // this endpoint's own results skew English/international-brand
+            // titled, so the untranslated Arabic keyword matches nothing.
+            // Same normalization GoogleShoppingDataSource applies itself.
+            var effectiveQuery = ArabicBrandNormalizer.Normalize(query);
+
             var client = _httpClientFactory.CreateClient(nameof(DataForSeoAmazonDataSource));
             using var request = new HttpRequestMessage(HttpMethod.Post, Endpoint)
             {
                 Content = JsonContent.Create(new object[]
                 {
-                    new { keyword = query, location_name = _locationName, language_name = _languageName },
+                    new { keyword = effectiveQuery, location_name = _locationName, language_name = _languageName },
                 }),
             };
             request.Headers.Authorization = new AuthenticationHeaderValue(

@@ -103,10 +103,15 @@ public static class DependencyInjection
         // links (see its own remarks) — a longer timeout than the other
         // single-call sources so that round trip isn't cut short.
         services.AddHttpClient(nameof(GoogleShoppingDataSource), c => c.Timeout = TimeSpan.FromSeconds(15));
-        // DataForSEO's Amazon live/advanced endpoint routinely takes ~17s
-        // (their own documented example), so it needs the same longer budget
-        // as GoogleShoppingDataSource rather than the default 8s.
-        services.AddHttpClient(nameof(DataForSeoAmazonDataSource), c => c.Timeout = TimeSpan.FromSeconds(20));
+        // DataForSEO's Amazon live/advanced endpoint's documented example
+        // takes ~17s, but a real measured call (a broader keyword, larger
+        // result set) took 28.9s — 20s was cutting real, valid responses off
+        // as silent timeouts (a real observed bug: "sunglasses" genuinely
+        // has 100 real Amazon.sa listings, confirmed by calling the API
+        // directly, yet the site returned zero because the request never
+        // got a chance to complete). 40s gives real headroom above the
+        // slowest observed case.
+        services.AddHttpClient(nameof(DataForSeoAmazonDataSource), c => c.Timeout = TimeSpan.FromSeconds(40));
         services.AddScoped<IProductDataSource, RainforestAmazonDataSource>();
         services.AddScoped<IProductDataSource, AliExpressProductDataSource>();
         services.AddScoped<IProductDataSource, GoogleShoppingDataSource>();
