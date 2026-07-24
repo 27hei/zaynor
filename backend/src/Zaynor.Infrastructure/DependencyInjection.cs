@@ -141,12 +141,16 @@ public static class DependencyInjection
         // short for nothing here; a slightly longer per-call timeout gives
         // headroom for a slow individual poll response.
         services.AddHttpClient(nameof(BrightDataAmazonDataSource), c => c.Timeout = TimeSpan.FromSeconds(15));
+        // Same two-step (shopping search + per-product immersive expansion)
+        // shape as GoogleShoppingDataSource, so the same longer timeout.
+        services.AddHttpClient(nameof(HasDataShoppingDataSource), c => c.Timeout = TimeSpan.FromSeconds(15));
         services.AddScoped<IProductDataSource, RainforestAmazonDataSource>();
         services.AddScoped<IProductDataSource, AliExpressProductDataSource>();
         services.AddScoped<IProductDataSource, GoogleShoppingDataSource>();
         services.AddScoped<IProductDataSource, DataForSeoAmazonDataSource>();
         services.AddScoped<IProductDataSource, OxylabsAmazonDataSource>();
         services.AddScoped<IProductDataSource, BrightDataAmazonDataSource>();
+        services.AddScoped<IProductDataSource, HasDataShoppingDataSource>();
 
         // "Search by photo" — Serper's reverse-image (Lens) endpoint. Its own
         // account/key (DataSources:Serper:ApiKey), separate from
