@@ -118,7 +118,6 @@ export const translations: Record<Lang, Record<string, string>> = {
     'results.sortPrice': 'Lowest price',
     'results.sortDelivery': 'Fastest delivery',
     'results.hideOutOfStock': 'Hide out of stock',
-    'results.listingsCount': '{count} listings',
     'results.prevPage': 'Previous',
     'results.nextPage': 'Next',
     'results.pageOf': 'Page {page} of {totalPages}',

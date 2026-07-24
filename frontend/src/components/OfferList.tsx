@@ -17,14 +17,16 @@ interface OfferListProps {
 }
 
 /**
- * Offer cards grouped by store — a store can now return more than one
- * genuinely different listing per search (e.g. several product variants),
- * so listings are clustered under one store header instead of repeating the
- * store logo/name on every card. Cards themselves still show only
- * image/price/badge; everything else (shipping, rating, stock, affiliate
- * disclosure, the actual "go to store" action) lives on the product detail
- * page a card links to, so a shopper isn't shown the same "here's the best
- * deal" story twice.
+ * One continuous grid of offer cards, packed tightly (no wasted rows).
+ * Grouping cards under a per-store section header used to leave a long,
+ * mostly-empty row for every store with just 1-2 listings once many
+ * different merchants started appearing — the store name/logo lives on
+ * each card instead, same as before a store could return multiple
+ * listings. Cards themselves still show only image/store/price/badge;
+ * everything else (shipping, rating, stock, affiliate disclosure, the
+ * actual "go to store" action) lives on the product detail page a card
+ * links to, so a shopper isn't shown the same "here's the best deal"
+ * story twice.
  */
 export function OfferList({ offers, query, page, totalPages, onPageChange }: OfferListProps) {
   const { t } = useTranslation()
@@ -45,21 +47,6 @@ export function OfferList({ offers, query, page, totalPages, onPageChange }: Off
       return a.deliveryDays - b.deliveryDays
     })
   }, [offers, sortMode, hideOutOfStock])
-
-  // Groups preserve each store's own best rank position — a store's group
-  // appears where its highest-ranked listing would have.
-  const storeGroups = useMemo(() => {
-    const order: string[] = []
-    const groups = new Map<string, AggregatedOffer[]>()
-    for (const offer of sortedOffers) {
-      if (!groups.has(offer.storeName)) {
-        groups.set(offer.storeName, [])
-        order.push(offer.storeName)
-      }
-      groups.get(offer.storeName)!.push(offer)
-    }
-    return order.map((storeName) => ({ storeName, listings: groups.get(storeName)! }))
-  }, [sortedOffers])
 
   return (
     <>
@@ -85,39 +72,28 @@ export function OfferList({ offers, query, page, totalPages, onPageChange }: Off
         </div>
       )}
 
-      <div className="offer-store-groups">
-        {storeGroups.map(({ storeName, listings }) => (
-          <div key={storeName}>
-            <div className="offer-store-group-header">
-              <StoreLogo storeName={storeName} />
-              <span className="offer-store-group-name">{storeName}</span>
-              {listings.length > 1 && (
-                <span className="offer-store-group-count">
-                  {t('results.listingsCount', { count: listings.length })}
-                </span>
-              )}
-            </div>
-            <div className="offer-grid">
-              {listings.map((offer) => (
-                <Link
-                  key={offer.listingId}
-                  to="/product/details"
-                  state={{ offer, query }}
-                  className={offer.isLowestPrice ? 'offer-card offer-card-lowest' : 'offer-card'}
-                >
-                  {offer.isLowestPrice && <span className="offer-card-badge">{t('results.lowestPrice')}</span>}
-                  <img
-                    className={offer.inStock ? 'offer-card-image' : 'offer-card-image offer-card-image-oos'}
-                    src={offer.imageUrl ?? productArtFor(offer.productTitle)}
-                    alt=""
-                    aria-hidden="true"
-                    loading="lazy"
-                  />
-                  <span className="offer-card-price">{formatPrice(offer.price, offer.currency)}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
+      <div className="offer-grid">
+        {sortedOffers.map((offer) => (
+          <Link
+            key={offer.listingId}
+            to="/product/details"
+            state={{ offer, query }}
+            className={offer.isLowestPrice ? 'offer-card offer-card-lowest' : 'offer-card'}
+          >
+            {offer.isLowestPrice && <span className="offer-card-badge">{t('results.lowestPrice')}</span>}
+            <img
+              className={offer.inStock ? 'offer-card-image' : 'offer-card-image offer-card-image-oos'}
+              src={offer.imageUrl ?? productArtFor(offer.productTitle)}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+            />
+            <span className="offer-card-store">
+              <StoreLogo storeName={offer.storeName} />
+              <span className="offer-card-store-name">{offer.storeName}</span>
+            </span>
+            <span className="offer-card-price">{formatPrice(offer.price, offer.currency)}</span>
+          </Link>
         ))}
       </div>
 
