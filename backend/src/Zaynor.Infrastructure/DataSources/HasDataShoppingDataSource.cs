@@ -101,10 +101,19 @@ public sealed class HasDataShoppingDataSource : IProductDataSource
                 .Take(MaxProductsToExpand)
                 .ToList();
 
-            // Independent calls — run together so total latency stays close
-            // to one round trip instead of stacking sequentially.
-            var expansions = await Task.WhenAll(toExpand.Select(p =>
-                FetchProductResultsAsync(client, p.HasdataLink!, cancellationToken)));
+            // Sequential, not parallel (unlike GoogleShoppingDataSource's own
+            // expansion step) — a real observed failure: HasData's free/
+            // trial plan enforces a concurrency limit of 1 in-flight
+            // request, so firing all expansions at once got 3 of 4 rejected
+            // with 429 Too Many Requests. Each call also fails soft on its
+            // own (catches its own error, contributes nothing) rather than
+            // letting one bad expansion — via Task.WhenAll — discard every
+            // other one that already succeeded.
+            var expansions = new List<HasDataProductResults?>(toExpand.Count);
+            foreach (var p in toExpand)
+            {
+                expansions.Add(await FetchProductResultsSafelyAsync(client, p.HasdataLink!, query, cancellationToken));
+            }
 
             var bestPerMerchant = new Dictionary<string, StoreOffer>(StringComparer.OrdinalIgnoreCase);
 
@@ -180,6 +189,27 @@ public sealed class HasDataShoppingDataSource : IProductDataSource
         response.EnsureSuccessStatusCode();
         var envelope = await response.Content.ReadFromJsonAsync<HasDataShoppingEnvelope>(cancellationToken: cancellationToken);
         return envelope?.ShoppingResults ?? [];
+    }
+
+    /// <summary>
+    /// Wraps <see cref="FetchProductResultsAsync"/> so one candidate
+    /// product's expansion failing (rate limit, transient error) only costs
+    /// that one product's listings, not the whole search — matches the same
+    /// fail-soft principle every other source in this codebase already
+    /// follows (spec NFR4).
+    /// </summary>
+    private async Task<HasDataProductResults?> FetchProductResultsSafelyAsync(
+        HttpClient client, string hasdataLink, string query, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await FetchProductResultsAsync(client, hasdataLink, cancellationToken);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogWarning(ex, "HasData Shopping product expansion failed for query {Query}; skipping this product", query);
+            return null;
+        }
     }
 
     private async Task<HasDataProductResults?> FetchProductResultsAsync(
