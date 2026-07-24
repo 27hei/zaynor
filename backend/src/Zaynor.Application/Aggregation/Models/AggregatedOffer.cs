@@ -60,4 +60,33 @@ public sealed record AggregatedOffer
 
     /// <summary>Rich detail fields already fetched during search (GoogleShoppingDataSource only) — null for every other source, never fabricated.</summary>
     public ProductDetails? ProductDetails { get; init; }
+
+    /// <summary>The vendor's own product id (e.g. an Amazon ASIN), when available; null otherwise.</summary>
+    public string? ExternalId { get; init; }
+
+    /// <summary>
+    /// A stable id for this specific listing (store + product), for the
+    /// frontend to key/link on — <see cref="StoreOffer"/> has no natural
+    /// identity of its own, and a store can now return more than one listing
+    /// per search. Built from <see cref="StoreName"/> and
+    /// <see cref="ExternalId"/> (falling back to <see cref="NormalizedKey"/>
+    /// when no vendor id is available). Set by RankOffers; empty only if
+    /// something bypasses it, which nothing should.
+    /// </summary>
+    public string ListingId { get; init; } = string.Empty;
+
+    /// <summary>
+    /// When this whole search batch was fetched. Deliberately batch-level,
+    /// not per-listing — no vendor exposes a genuine per-listing freshness
+    /// signal today. Used as a minor, honestly-thin ranking factor (a fresh
+    /// batch ranks slightly above a batch served from a near-expiry cache).
+    /// </summary>
+    public DateTimeOffset FetchedAt { get; init; }
+
+    /// <summary>
+    /// The computed multi-factor rank score (0-1) this offer was ranked by —
+    /// see <c>OfferScorer</c>. Exposed for transparency/debugging, not just
+    /// used internally to sort.
+    /// </summary>
+    public double Score { get; init; }
 }

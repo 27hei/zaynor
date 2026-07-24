@@ -40,10 +40,6 @@ public sealed class BrightDataAmazonDataSource : IProductDataSource
 {
     private const string TriggerEndpoint = "https://api.brightdata.com/datasets/v3/trigger";
 
-    // One real, relevant offer per query — same reasoning as every other
-    // Amazon source here.
-    private const int MaxResults = 1;
-
     // Real observed timing: a search job finished in ~5s on one run. Poll
     // every 3s up to a ~40s total budget (matching DataForSeoAmazonDataSource's
     // timeout budget) so this source doesn't become the new slowest one in
@@ -59,6 +55,7 @@ public sealed class BrightDataAmazonDataSource : IProductDataSource
     private readonly string _datasetId;
     private readonly string _domain;
     private readonly TimeSpan _pollInterval;
+    private readonly int _maxResults;
 
     public BrightDataAmazonDataSource(
         IHttpClientFactory httpClientFactory,
@@ -76,6 +73,10 @@ public sealed class BrightDataAmazonDataSource : IProductDataSource
         _pollInterval = double.TryParse(configuration["DataSources:BrightData:PollIntervalMs"], out var ms)
             ? TimeSpan.FromMilliseconds(ms)
             : DefaultPollInterval;
+        // A store can now show more than one genuinely different listing per
+        // search — but not unbounded (this is a paid, per-request API), so a
+        // shared, config-driven cap across all single-call sources.
+        _maxResults = int.TryParse(configuration["DataSources:MaxListingsPerSource"], out var max) ? max : 10;
     }
 
     public string SourceName => "BrightDataAmazon";
@@ -85,6 +86,9 @@ public sealed class BrightDataAmazonDataSource : IProductDataSource
 
     /// <summary>Paid per-request quota — queried on every search, alongside the curated catalog and other live feeds.</summary>
     public bool IsExpensiveLive => true;
+
+    /// <summary>A direct Amazon.sa scraper, verified against real listings this session.</summary>
+    public double Confidence => 0.85;
 
     public async Task<IReadOnlyList<StoreOffer>> SearchAsync(string query, CancellationToken cancellationToken = default)
     {
@@ -110,7 +114,7 @@ public sealed class BrightDataAmazonDataSource : IProductDataSource
             }
 
             var items = await PollForResultsAsync(client, snapshotId, query, cancellationToken);
-            return MapToOffers(items);
+            return MapToOffers(items, query, effectiveQuery, _maxResults);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -179,14 +183,19 @@ public sealed class BrightDataAmazonDataSource : IProductDataSource
         }
     }
 
-    private static List<StoreOffer> MapToOffers(List<BrightDataItem> items)
+    private static List<StoreOffer> MapToOffers(List<BrightDataItem> items, string query, string effectiveQuery, int maxResults)
     {
         var offers = new List<StoreOffer>();
         foreach (var item in items)
         {
             if (item.FinalPrice is not { } price || price <= 0
                 || string.IsNullOrWhiteSpace(item.Url)
-                || string.IsNullOrWhiteSpace(item.Name))
+                || string.IsNullOrWhiteSpace(item.Name)
+                // Now that more than one listing per query can survive,
+                // apply the same precision filters GoogleShoppingDataSource
+                // needed once it stopped taking just a single top result.
+                || (!ListingRelevanceFilter.IsRelevant(query, item.Name) && !ListingRelevanceFilter.IsRelevant(effectiveQuery, item.Name))
+                || ListingRelevanceFilter.IsAccessoryMismatch(query, effectiveQuery, item.Name))
             {
                 continue;
             }
@@ -204,20 +213,22 @@ public sealed class BrightDataAmazonDataSource : IProductDataSource
                 DeliveryDays = null,
                 Rating = item.Rating is { } r ? (decimal)r : null,
                 RatingCount = item.NumRatings,
+                ExternalId = item.Asin,
             });
 
-            if (offers.Count >= MaxResults)
+            if (offers.Count >= maxResults)
             {
                 break;
             }
         }
 
-        return offers;
+        return ListingRelevanceFilter.RemovePriceOutliers(offers);
     }
 
     private sealed record TriggerResponse([property: JsonPropertyName("snapshot_id")] string? SnapshotId);
 
     private sealed record BrightDataItem(
+        [property: JsonPropertyName("asin")] string? Asin,
         [property: JsonPropertyName("name")] string? Name,
         [property: JsonPropertyName("final_price")] decimal? FinalPrice,
         [property: JsonPropertyName("currency")] string? Currency,

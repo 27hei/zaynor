@@ -46,4 +46,13 @@ public sealed record StoreOffer
 
     /// <summary>Rich detail fields already fetched during search (GoogleShoppingDataSource only) — null for every other source, never fabricated.</summary>
     public ProductDetails? ProductDetails { get; init; }
+
+    /// <summary>
+    /// The vendor's own product id (e.g. an Amazon ASIN), when the source's
+    /// API exposes one. Used to tell genuinely different listings from the
+    /// same store apart, and to recognize the same physical listing returned
+    /// by two independent sources (see AggregationService.MergeDuplicateListings).
+    /// Null for sources with no such id — never fabricated.
+    /// </summary>
+    public string? ExternalId { get; init; }
 }

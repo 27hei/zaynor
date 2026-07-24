@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { AggregatedOffer } from '../api/types'
+import type { AggregatedOffer, Recommendation } from '../api/types'
 import { formatPrice } from '../format'
 import { productArtFor } from '../productImage'
 import { useTranslation } from '../i18n/useTranslation'
@@ -8,6 +8,8 @@ import { StoreRating } from './StoreRating'
 interface ProductSummaryProps {
   query: string
   offers: AggregatedOffer[]
+  recommendation: Recommendation | null
+  totalCount: number
 }
 
 const MAX_THUMBNAILS = 6
@@ -20,21 +22,27 @@ const MAX_THUMBNAILS = 6
  * The rating shown is the best-priced offer's own rating (a real, per-store
  * figure) — never an invented cross-store average.
  */
-export function ProductSummary({ query, offers }: ProductSummaryProps) {
+export function ProductSummary({ query, offers, recommendation, totalCount }: ProductSummaryProps) {
   const { t } = useTranslation()
 
-  const best = offers.find((o) => o.isLowestPrice) ?? offers[0]
+  // The price/store count line reads off `recommendation` (always computed
+  // from the FULL result, every page) rather than scanning `offers` — with
+  // pagination, the true cheapest offer isn't guaranteed to be on this page,
+  // so a page-scoped scan could understate or misname the best deal.
+  const bestOnThisPage = offers.find((o) => o.isLowestPrice) ?? offers[0]
   const fallbackArt = productArtFor(query)
 
-  // Distinct real photos across every store's listing (several stores often
-  // reuse the same manufacturer photo, so dedupe by URL).
+  // Distinct real photos across every store's listing on this page (several
+  // stores often reuse the same manufacturer photo, so dedupe by URL) — the
+  // gallery/rating below are page-scoped, a minor, acceptable simplification
+  // since they're illustrative rather than the deal itself.
   const gallery = [...new Set(offers.map((o) => o.imageUrl).filter((url): url is string => !!url))].slice(
     0,
     MAX_THUMBNAILS,
   )
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const activeImage = selectedImage ?? best?.imageUrl ?? fallbackArt
+  const activeImage = selectedImage ?? bestOnThisPage?.imageUrl ?? fallbackArt
 
   return (
     <div className="product-summary">
@@ -58,16 +66,16 @@ export function ProductSummary({ query, offers }: ProductSummaryProps) {
       </div>
       <div className="product-summary-info">
         <h2 className="product-summary-title">{query}</h2>
-        {best && (
+        {recommendation && (
           <p className="product-summary-meta">
             {t('summary.meta', {
-              count: offers.length,
-              price: formatPrice(best.price, best.currency),
+              count: totalCount,
+              price: formatPrice(recommendation.bestPrice, recommendation.currency),
             })}
           </p>
         )}
-        {best?.rating != null && (
-          <StoreRating rating={best.rating} ratingCount={best.ratingCount} />
+        {bestOnThisPage?.rating != null && (
+          <StoreRating rating={bestOnThisPage.rating} ratingCount={bestOnThisPage.ratingCount} />
         )}
       </div>
     </div>

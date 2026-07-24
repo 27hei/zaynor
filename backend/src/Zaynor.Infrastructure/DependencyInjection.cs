@@ -72,6 +72,23 @@ public static class DependencyInjection
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
         });
 
+        // How much each OfferScorer factor counts toward an offer's rank —
+        // config-only, like everything else here, so the founder can retune
+        // ranking (Ranking__Weights__* on Render) without a redeploy.
+        // Defaults (set on RankingWeights itself) apply for any weight left
+        // unset.
+        var weightsSection = configuration.GetSection("Ranking:Weights");
+        services.AddSingleton(new RankingWeights
+        {
+            TitleMatch = double.TryParse(weightsSection["TitleMatch"], out var titleMatch) ? titleMatch : new RankingWeights().TitleMatch,
+            Price = double.TryParse(weightsSection["Price"], out var price) ? price : new RankingWeights().Price,
+            Rating = double.TryParse(weightsSection["Rating"], out var rating) ? rating : new RankingWeights().Rating,
+            ReviewCount = double.TryParse(weightsSection["ReviewCount"], out var reviewCount) ? reviewCount : new RankingWeights().ReviewCount,
+            Confidence = double.TryParse(weightsSection["Confidence"], out var confidence) ? confidence : new RankingWeights().Confidence,
+            Availability = double.TryParse(weightsSection["Availability"], out var availability) ? availability : new RankingWeights().Availability,
+            Freshness = double.TryParse(weightsSection["Freshness"], out var freshness) ? freshness : new RankingWeights().Freshness,
+        });
+
         services.AddScoped<IAuthService, AuthService>();
         services.AddSingleton<ITokenService, JwtTokenService>();
         services.AddScoped<IUserItemsService, UserItemsService>();

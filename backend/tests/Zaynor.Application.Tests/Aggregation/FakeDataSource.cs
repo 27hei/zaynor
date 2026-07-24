@@ -9,12 +9,14 @@ internal sealed class FakeDataSource : IProductDataSource
     private readonly IReadOnlyList<StoreOffer> _offers;
     private readonly Exception? _throws;
 
-    private FakeDataSource(IReadOnlyList<StoreOffer> offers, Exception? throws, bool isFallback = false, bool isExpensiveLive = false)
+    private FakeDataSource(
+        IReadOnlyList<StoreOffer> offers, Exception? throws, bool isFallback = false, bool isExpensiveLive = false, double confidence = 1.0)
     {
         _offers = offers;
         _throws = throws;
         IsFallback = isFallback;
         IsExpensiveLive = isExpensiveLive;
+        Confidence = confidence;
     }
 
     public string SourceName => "Fake";
@@ -22,6 +24,8 @@ internal sealed class FakeDataSource : IProductDataSource
     public bool IsFallback { get; }
 
     public bool IsExpensiveLive { get; }
+
+    public double Confidence { get; }
 
     /// <summary>How many times SearchAsync was actually invoked — lets tests
     /// prove a quota-limited source was (or wasn't) called.</summary>
@@ -32,6 +36,8 @@ internal sealed class FakeDataSource : IProductDataSource
     public static FakeDataSource FallbackReturning(params StoreOffer[] offers) => new(offers, null, isFallback: true);
 
     public static FakeDataSource ExpensiveReturning(params StoreOffer[] offers) => new(offers, null, isExpensiveLive: true);
+
+    public static FakeDataSource WithConfidence(double confidence, params StoreOffer[] offers) => new(offers, null, confidence: confidence);
 
     public static FakeDataSource Throwing(Exception exception) => new(Array.Empty<StoreOffer>(), exception);
 
@@ -47,13 +53,25 @@ internal sealed class FakeDataSource : IProductDataSource
         return Task.FromResult(_offers);
     }
 
-    public static StoreOffer Offer(string store, decimal price, ProductDetails? productDetails = null) => new()
+    public static StoreOffer Offer(
+        string store,
+        decimal price,
+        ProductDetails? productDetails = null,
+        string title = "Test Product",
+        string? externalId = null,
+        string? imageUrl = null,
+        decimal? rating = null,
+        int? ratingCount = null) => new()
     {
         StoreName = store,
-        ProductTitle = "Test Product",
+        ProductTitle = title,
         Price = price,
         Currency = "SAR",
         ProductUrl = $"https://example.com/{store}",
         ProductDetails = productDetails,
+        ExternalId = externalId,
+        ImageUrl = imageUrl,
+        Rating = rating,
+        RatingCount = ratingCount,
     };
 }

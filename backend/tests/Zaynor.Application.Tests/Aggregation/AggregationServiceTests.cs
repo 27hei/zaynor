@@ -7,10 +7,10 @@ namespace Zaynor.Application.Tests.Aggregation;
 public class AggregationServiceTests
 {
     private static AggregationService CreateService(params IProductDataSource[] sources) =>
-        new(sources, new AffiliateSettings(), NullLogger<AggregationService>.Instance);
+        new(sources, new AffiliateSettings(), new RankingWeights(), NullLogger<AggregationService>.Instance);
 
     private static AggregationService CreateService(AffiliateSettings affiliateSettings, params IProductDataSource[] sources) =>
-        new(sources, affiliateSettings, NullLogger<AggregationService>.Instance);
+        new(sources, affiliateSettings, new RankingWeights(), NullLogger<AggregationService>.Instance);
 
     [Fact]
     public async Task SearchAsync_SurfacesTheCorrectedQuery_WhenAColloquialArabicBrandSpellingWasFixed()
@@ -157,6 +157,86 @@ public class AggregationServiceTests
 
         var amazonOffer = Assert.Single(result.Offers, o => o.StoreName == "Amazon.sa");
         Assert.Equal(849m, amazonOffer.Price);
+    }
+
+    [Fact]
+    public async Task SearchAsync_KeepsBothListings_WhenTheSameStoreReturnsGenuinelyDifferentProducts()
+    {
+        // A store can now surface more than one real listing per search
+        // (e.g. two different iPhone variants from Amazon.sa) — different
+        // ExternalId means these are NOT the same physical listing and must
+        // both survive, unlike the store-collapse dedup this replaced.
+        var service = CreateService(
+            FakeDataSource.Returning(
+                FakeDataSource.Offer("Amazon.sa", 900m, externalId: "ASIN-ONE", title: "iPhone 15 128GB"),
+                FakeDataSource.Offer("Amazon.sa", 1200m, externalId: "ASIN-TWO", title: "iPhone 15 256GB")));
+
+        var result = await service.SearchAsync("iphone 15");
+
+        var amazonOffers = result.Offers.Where(o => o.StoreName == "Amazon.sa").ToList();
+        Assert.Equal(2, amazonOffers.Count);
+        Assert.Contains(amazonOffers, o => o.Price == 900m);
+        Assert.Contains(amazonOffers, o => o.Price == 1200m);
+    }
+
+    [Fact]
+    public async Task SearchAsync_MergesSameListingFromTwoSources_BackfillingMissingFields()
+    {
+        // Two independent sources returning the SAME physical listing (same
+        // store, same ExternalId) must collapse to one record — but the
+        // cheaper source here has no image/rating, which the merge should
+        // backfill from the pricier sibling rather than losing them.
+        var service = CreateService(
+            FakeDataSource.Returning(
+                FakeDataSource.Offer("Amazon.sa", 849m, externalId: "ASIN-SAME", title: "Galaxy Watch 7")),
+            FakeDataSource.ExpensiveReturning(
+                FakeDataSource.Offer(
+                    "Amazon.sa", 899m, externalId: "ASIN-SAME", title: "Galaxy Watch 7",
+                    imageUrl: "https://example.com/watch.jpg", rating: 4.6m, ratingCount: 300)));
+
+        var result = await service.SearchAsync("galaxy watch 7");
+
+        var merged = Assert.Single(result.Offers, o => o.StoreName == "Amazon.sa");
+        Assert.Equal(849m, merged.Price); // cheapest is canonical
+        Assert.Equal("https://example.com/watch.jpg", merged.ImageUrl); // backfilled
+        Assert.Equal(4.6m, merged.Rating); // backfilled
+        Assert.Equal(300, merged.RatingCount); // backfilled
+    }
+
+    [Fact]
+    public async Task SearchAsync_RecommendationNamesTruePriceExtremes_EvenWhenTheTopRankedOfferIsntCheapest()
+    {
+        // Ranking is score-based now, so the top-ranked offer isn't
+        // necessarily the cheapest one — the recommendation's "buy X, save Y"
+        // math must still be correct against the real price extremes.
+        var cheapUnrated = FakeDataSource.Offer("CheapStore", 100m, title: "Widget");
+        var pricierWellRated = FakeDataSource.Offer(
+            "GoodStore", 105m, title: "Widget", rating: 5.0m, ratingCount: 5000);
+        var mostExpensive = FakeDataSource.Offer("PricyStore", 200m, title: "Widget");
+        var service = CreateService(FakeDataSource.Returning(cheapUnrated, pricierWellRated, mostExpensive));
+
+        var result = await service.SearchAsync("widget");
+
+        Assert.NotNull(result.Recommendation);
+        Assert.Equal("CheapStore", result.Recommendation!.BestStoreName);
+        Assert.Equal(100m, result.Recommendation.BestPrice);
+        Assert.Equal("PricyStore", result.Recommendation.ComparedStoreName);
+        Assert.Equal(200m, result.Recommendation.ComparedPrice);
+        Assert.Equal(100m, result.Recommendation.Savings);
+    }
+
+    [Fact]
+    public async Task SearchAsync_HigherConfidenceSource_RanksAboveLowerConfidence_AllElseTied()
+    {
+        var lowConfidence = FakeDataSource.WithConfidence(
+            0.5, FakeDataSource.Offer("LowTrustStore", 100m, title: "Widget"));
+        var highConfidence = FakeDataSource.WithConfidence(
+            1.0, FakeDataSource.Offer("HighTrustStore", 100m, title: "Widget"));
+        var service = CreateService(lowConfidence, highConfidence);
+
+        var result = await service.SearchAsync("widget");
+
+        Assert.Equal("HighTrustStore", result.Offers[0].StoreName);
     }
 
     [Fact]

@@ -29,6 +29,12 @@ export interface AggregatedOffer {
   /** Proves to /api/out this link came from a real search result — required for stores outside its static known-domain list. */
   signature: string | null
   productDetails: ProductDetails | null
+  /** The vendor's own product id (e.g. an Amazon ASIN), when available; null otherwise. */
+  externalId: string | null
+  /** Stable id for this listing (store + product) — a store can now return more than one listing per search, so use this (not array index) for keys/links. */
+  listingId: string
+  /** The multi-factor rank score (0-1) this offer was ranked by — see the backend's OfferScorer. */
+  score: number
 }
 
 export interface Recommendation {
@@ -45,10 +51,18 @@ export interface SearchResult {
   query: string
   /** Set only when a colloquial Arabic brand spelling was corrected before searching (e.g. "سامسنج" → "Samsung"). */
   correctedQuery: string | null
+  /** This page's offers only — see totalCount for the full result size. */
   offers: AggregatedOffer[]
+  /** Always reflects the true best/most-expensive offer across ALL pages, not just this one. */
   recommendation: Recommendation | null
   isDemoData: boolean
+  /** Offers on this page only. */
   offerCount: number
+  page: number
+  pageSize: number
+  /** Total offers across every page, before slicing. */
+  totalCount: number
+  totalPages: number
 }
 
 export interface UserDto {

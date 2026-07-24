@@ -105,6 +105,79 @@ public class DataForSeoAmazonDataSourceTests
     }
 
     [Fact]
+    public async Task WithMultipleGenuineListings_ReturnsMoreThanOne()
+    {
+        // Previously capped at exactly 1 result regardless of how many
+        // genuine listings the vendor returned — now a store can show
+        // several genuinely different matching listings per search.
+        const string json = """
+        {
+          "tasks": [
+            {
+              "result": [
+                {
+                  "items": [
+                    { "type": "amazon_serp", "title": "Apple iPhone 15 128GB Black", "url": "https://www.amazon.sa/dp/A1", "price_from": 2561.00, "currency": "SAR" },
+                    { "type": "amazon_serp", "title": "Apple iPhone 15 256GB Blue", "url": "https://www.amazon.sa/dp/A2", "price_from": 2899.00, "currency": "SAR" },
+                    { "type": "amazon_serp", "title": "Apple iPhone 15 512GB Pink", "url": "https://www.amazon.sa/dp/A3", "price_from": 3399.00, "currency": "SAR" }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        """;
+        var handler = new StubHandler(json);
+        var source = new DataForSeoAmazonDataSource(
+            new StubFactory(handler),
+            Config(
+                ("DataSources:DataForSeo:Login", "test@example.com"),
+                ("DataSources:DataForSeo:Password", "test-password")),
+            NullLogger<DataForSeoAmazonDataSource>.Instance);
+
+        var offers = await source.SearchAsync("iphone 15");
+
+        Assert.Equal(3, offers.Count);
+    }
+
+    [Fact]
+    public async Task FiltersOutAccessoryListings_EvenWhenTitleOtherwiseMatches()
+    {
+        // A real observed failure mode elsewhere in the codebase
+        // (GoogleShoppingDataSource): once a source can return more than
+        // its single best guess, cases/repair-parts matching the model
+        // name start surfacing as if they were the product itself.
+        const string json = """
+        {
+          "tasks": [
+            {
+              "result": [
+                {
+                  "items": [
+                    { "type": "amazon_serp", "title": "Apple iPhone 15 128GB Black", "url": "https://www.amazon.sa/dp/A1", "price_from": 2561.00, "currency": "SAR" },
+                    { "type": "amazon_serp", "title": "iPhone 15 Silicone Case Cover", "url": "https://www.amazon.sa/dp/A2", "price_from": 45.00, "currency": "SAR" }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        """;
+        var handler = new StubHandler(json);
+        var source = new DataForSeoAmazonDataSource(
+            new StubFactory(handler),
+            Config(
+                ("DataSources:DataForSeo:Login", "test@example.com"),
+                ("DataSources:DataForSeo:Password", "test-password")),
+            NullLogger<DataForSeoAmazonDataSource>.Instance);
+
+        var offers = await source.SearchAsync("iphone 15");
+
+        var offer = Assert.Single(offers);
+        Assert.Equal("Apple iPhone 15 128GB Black", offer.ProductTitle);
+    }
+
+    [Fact]
     public async Task WithoutCredentials_IsDormant_AndReturnsNothing()
     {
         var handler = new StubHandler("{}");

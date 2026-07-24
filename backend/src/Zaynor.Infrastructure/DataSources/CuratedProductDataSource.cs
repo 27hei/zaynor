@@ -60,6 +60,9 @@ public sealed class CuratedProductDataSource : IProductDataSource
 
     public string SourceName => "CuratedCatalog";
 
+    /// <summary>Hand-entered by the founder — the most authoritative source.</summary>
+    public double Confidence => 1.0;
+
     /// <summary>All covered products with real lowest prices, for the Categories page (FR10).</summary>
     public IReadOnlyList<CatalogSummary> GetSummaries() =>
         _products
@@ -109,57 +112,7 @@ public sealed class CuratedProductDataSource : IProductDataSource
         return Task.FromResult(offers);
     }
 
-    /// <summary>
-    /// Match score: exact key beats query-contains-key beats key-contains-query,
-    /// longer keys beating shorter — so the most specific product wins.
-    /// </summary>
-    private static int Score(IndexedProduct product, string queryKey)
-    {
-        var keys = product.KeywordKeys.Append(product.NameKey).Where(k => k.Length > 0).ToList();
-        var best = 0;
-
-        foreach (var key in keys)
-        {
-            var score = key == queryKey
-                ? 10000 + key.Length
-                : queryKey.Contains(key)
-                    ? 5000 + key.Length
-                    : key.Contains(queryKey)
-                        ? 1000 + queryKey.Length
-                        : 0;
-
-            best = Math.Max(best, score);
-        }
-
-        if (best > 0)
-        {
-            return best;
-        }
-
-        return WordOverlapScore(keys, queryKey);
-    }
-
-    /// <summary>
-    /// Fallback match for queries phrased differently than any single stored
-    /// key — e.g. "samsung 55 tv" won't appear verbatim in the name "Samsung
-    /// 55\" Crystal UHD DU7000 4K Smart TV", but every one of its words does,
-    /// just spread across the name and keywords. A query only matches this way
-    /// when ALL of its words are found somewhere in the product's combined
-    /// vocabulary, so unrelated products (sharing at most one stray word)
-    /// don't get pulled in as false positives.
-    /// </summary>
-    private static int WordOverlapScore(IReadOnlyList<string> keys, string queryKey)
-    {
-        var queryWords = queryKey.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (queryWords.Length < 2)
-        {
-            return 0;
-        }
-
-        var vocabulary = new HashSet<string>(
-            keys.SelectMany(k => k.Split(' ', StringSplitOptions.RemoveEmptyEntries)));
-
-        var matched = queryWords.Count(vocabulary.Contains);
-        return matched == queryWords.Length ? 200 + matched : 0;
-    }
+    /// <summary>Match score for this product against a query — see <see cref="TitleRelevance.Score"/>.</summary>
+    private static int Score(IndexedProduct product, string queryKey) =>
+        TitleRelevance.Score(queryKey, product.KeywordKeys.Append(product.NameKey));
 }

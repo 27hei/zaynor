@@ -2333,6 +2333,67 @@ html[lang='ar'] {
   border-color: var(--brand);
 }
 
+.offer-list-expand:disabled {
+  color: var(--text-muted);
+  background: transparent;
+  border-color: var(--hairline);
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* A store can now return more than one genuinely different listing per
+   search — grouped under one header (logo/name shown once) instead of
+   repeating it on every card, the way a single-listing-per-store result
+   used to. */
+.offer-store-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.offer-store-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.offer-store-group-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.offer-store-group-count {
+  padding: 0.15rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-radius: 999px;
+}
+
+.offer-list-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.offer-list-pagination .offer-list-expand {
+  width: auto;
+  flex: 0 0 auto;
+  margin-top: 0;
+  padding: 0.7rem 1.4rem;
+}
+
+.offer-list-page-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
 /* ============ Noon search fallback (no live Noon feed) ============ */
 /* Reuses .offer's exact layout/spacing so it reads as "one more store to
    check" rather than a separate/lesser element; margin-top replaces the

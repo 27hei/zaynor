@@ -16,6 +16,11 @@ import { usePageTitle } from '../hooks/usePageTitle'
 import { useRecentSearches } from '../hooks/useRecentSearches'
 import { useToast } from '../toast/useToast'
 
+// Matches the backend's own default (SearchController) — kept as one named
+// constant so a page-change request always asks for the same size the
+// initial search did.
+const PAGE_SIZE = 20
+
 /**
  * A product's own page: one URL per search, so a result is something a
  * visitor can bookmark, share, or come back to — not just transient state on
@@ -63,7 +68,7 @@ export function ProductPage() {
     const longTimer = window.setTimeout(() => setLoadingLong(true), 4000)
 
     try {
-      const data = await searchProducts(searchQuery, controller.signal)
+      const data = await searchProducts(searchQuery, controller.signal, 1, PAGE_SIZE)
       setResult(data)
       addRecent(searchQuery)
       if (data.offers.length === 0) {
@@ -78,6 +83,32 @@ export function ProductPage() {
       if (activeRequest.current === controller) {
         setLoading(false)
         setLoadingLong(false)
+      }
+    }
+  }
+
+  // A page turn re-fetches the SAME query at a different page — the backend
+  // never repeats the live vendor fan-out for it (the full ranked result
+  // stays cached), so this is fast. Deliberately doesn't touch the URL,
+  // saved/alertSet state, or recent-searches — it's a lighter operation than
+  // a brand new search.
+  async function handlePageChange(newPage: number) {
+    if (!result || loading) return
+    activeRequest.current?.abort()
+    const controller = new AbortController()
+    activeRequest.current = controller
+    setLoading(true)
+
+    try {
+      const data = await searchProducts(result.query, controller.signal, newPage, PAGE_SIZE)
+      setResult(data)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') return
+      toast.push(t('results.error', { message: (err as Error).message }), 'error')
+    } finally {
+      if (activeRequest.current === controller) {
+        setLoading(false)
       }
     }
   }
@@ -137,9 +168,13 @@ export function ProductPage() {
       navigate('/login')
       return
     }
-    const best = result!.offers.find((o) => o.isLowestPrice)
+    // Read off recommendation, not by scanning offers for isLowestPrice —
+    // offers is now just one page of a possibly larger result, and the true
+    // cheapest offer isn't guaranteed to be on the current page.
+    // recommendation always reflects the full, unpaginated result.
+    const best = result!.recommendation
     try {
-      await createAlert(result!.query, best?.price ?? null, best?.currency ?? null)
+      await createAlert(result!.query, best?.bestPrice ?? null, best?.currency ?? null)
       setAlertSet(true)
       toast.push(t('results.notifySet'), 'success')
     } catch {
@@ -168,7 +203,7 @@ export function ProductPage() {
     ? t('results.searching')
     : result
       ? hasResults
-        ? t('results.heading', { count: result.offerCount, query: result.query })
+        ? t('results.heading', { count: result.totalCount, query: result.query })
         : t('results.noResults', { query: result.query })
       : ''
 
@@ -236,11 +271,16 @@ export function ProductPage() {
             </p>
           )}
 
-          <ProductSummary query={result!.query} offers={result!.offers} />
+          <ProductSummary
+            query={result!.query}
+            offers={result!.offers}
+            recommendation={result!.recommendation}
+            totalCount={result!.totalCount}
+          />
 
           <div className="results-toolbar">
             <h2 className="results-heading">
-              {t('results.heading', { count: result!.offerCount, query: result!.query })}
+              {t('results.heading', { count: result!.totalCount, query: result!.query })}
             </h2>
             <div className="results-actions">
               <button type="button" className="action-chip" onClick={handleShare}>
@@ -260,7 +300,13 @@ export function ProductPage() {
             </div>
           </div>
 
-          <OfferList offers={result!.offers} query={result!.query} />
+          <OfferList
+            offers={result!.offers}
+            query={result!.query}
+            page={result!.page}
+            totalPages={result!.totalPages}
+            onPageChange={handlePageChange}
+          />
 
           {!hasAmazonOffer && <AmazonFallbackLink query={result!.query} />}
           {!hasNoonOffer && <NoonFallbackLink query={result!.query} />}

@@ -83,8 +83,15 @@ public sealed class AlertMonitorService : BackgroundService
 
             foreach (var productGroup in activeAlerts.GroupBy(x => x.CanonicalName))
             {
-                var result = await aggregation.SearchAsync(productGroup.Key, cancellationToken);
-                var lowest = result.Offers.FirstOrDefault(o => o.IsLowestPrice);
+                // Read the lowest price off Recommendation, not by scanning
+                // Offers for IsLowestPrice — Offers is now just one page of a
+                // possibly much larger, score-ranked result, and the true
+                // cheapest offer isn't guaranteed to land on page 1. The
+                // recommendation is always built from the full, unsliced
+                // result (see CachedAggregationService.Paginate), so it's
+                // the one field here that's page-independent.
+                var result = await aggregation.SearchAsync(productGroup.Key, cancellationToken: cancellationToken);
+                var lowest = result.Recommendation;
                 if (lowest is null)
                 {
                     continue;
@@ -93,19 +100,19 @@ public sealed class AlertMonitorService : BackgroundService
                 foreach (var entry in productGroup)
                 {
                     var baseline = AlertConditions.TryParseBaseline(entry.Alert.TargetCondition);
-                    if (baseline is null || lowest.Price >= baseline)
+                    if (baseline is null || lowest.BestPrice >= baseline)
                     {
                         continue;
                     }
 
                     entry.Alert.IsActive = false;
                     entry.Alert.TargetCondition = AlertConditions.BuildTriggered(
-                        lowest.Price, lowest.Currency, entry.Alert.TargetCondition);
+                        lowest.BestPrice, lowest.Currency, entry.Alert.TargetCondition);
                     fired++;
 
                     _logger.LogInformation(
                         "Alert {AlertId} fired: {Product} dropped to {Price} {Currency} (baseline {Baseline})",
-                        entry.Alert.Id, productGroup.Key, lowest.Price, lowest.Currency, baseline);
+                        entry.Alert.Id, productGroup.Key, lowest.BestPrice, lowest.Currency, baseline);
                 }
             }
 

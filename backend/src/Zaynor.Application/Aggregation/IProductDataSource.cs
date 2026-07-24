@@ -33,6 +33,15 @@ public interface IProductDataSource
     bool IsExpensiveLive => false;
 
     /// <summary>
+    /// How much to trust this source's offers relative to others, from 0 to 1,
+    /// used as one factor in multi-factor ranking (see OfferScorer). A rough,
+    /// deliberately coarse tier — not a measured/learned trust score — so it
+    /// stays honest about how little real signal backs it today. Defaults to
+    /// full trust; override only with a stated reason.
+    /// </summary>
+    double Confidence => 1.0;
+
+    /// <summary>
     /// Returns the offers this source has for the given query. Implementations
     /// should fail soft (return an empty list rather than throw) so one bad
     /// source does not break the whole search (spec NFR4).

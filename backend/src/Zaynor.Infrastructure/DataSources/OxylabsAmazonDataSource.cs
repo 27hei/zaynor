@@ -31,10 +31,6 @@ public sealed class OxylabsAmazonDataSource : IProductDataSource
 {
     private const string Endpoint = "https://realtime.oxylabs.io/v1/queries";
 
-    // Same reasoning as every other Amazon source here: one real, relevant
-    // offer per query, not every seller/bundle/accessory variant.
-    private const int MaxResults = 1;
-
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<OxylabsAmazonDataSource> _logger;
     private readonly string? _username;
@@ -42,6 +38,7 @@ public sealed class OxylabsAmazonDataSource : IProductDataSource
     private readonly string _domain;
     private readonly string _geoLocation;
     private readonly string _currency;
+    private readonly int _maxResults;
 
     public OxylabsAmazonDataSource(
         IHttpClientFactory httpClientFactory,
@@ -58,6 +55,10 @@ public sealed class OxylabsAmazonDataSource : IProductDataSource
         _domain = configuration["DataSources:Oxylabs:Domain"] ?? "sa";
         _geoLocation = configuration["DataSources:Oxylabs:GeoLocation"] ?? "Saudi Arabia";
         _currency = configuration["DataSources:Oxylabs:Currency"] ?? "SAR";
+        // A store can now show more than one genuinely different listing per
+        // search — but not unbounded (this is a paid, per-request API), so a
+        // shared, config-driven cap across all single-call sources.
+        _maxResults = int.TryParse(configuration["DataSources:MaxListingsPerSource"], out var max) ? max : 10;
     }
 
     public string SourceName => "OxylabsAmazon";
@@ -67,6 +68,9 @@ public sealed class OxylabsAmazonDataSource : IProductDataSource
 
     /// <summary>Paid per-request quota — queried on every search, alongside the curated catalog and other live feeds.</summary>
     public bool IsExpensiveLive => true;
+
+    /// <summary>A direct Amazon.sa scraper, verified against real listings this session.</summary>
+    public double Confidence => 0.85;
 
     public async Task<IReadOnlyList<StoreOffer>> SearchAsync(string query, CancellationToken cancellationToken = default)
     {
@@ -114,7 +118,12 @@ public sealed class OxylabsAmazonDataSource : IProductDataSource
             {
                 if (item.Price is not { } price || price <= 0
                     || string.IsNullOrWhiteSpace(item.Url)
-                    || string.IsNullOrWhiteSpace(item.Title))
+                    || string.IsNullOrWhiteSpace(item.Title)
+                    // Now that more than one listing per query can survive,
+                    // apply the same precision filters GoogleShoppingDataSource
+                    // needed once it stopped taking just a single top result.
+                    || (!ListingRelevanceFilter.IsRelevant(query, item.Title) && !ListingRelevanceFilter.IsRelevant(effectiveQuery, item.Title))
+                    || ListingRelevanceFilter.IsAccessoryMismatch(query, effectiveQuery, item.Title))
                 {
                     continue;
                 }
@@ -138,15 +147,16 @@ public sealed class OxylabsAmazonDataSource : IProductDataSource
                     FreeShipping = false,
                     DeliveryDays = null,
                     Rating = item.Rating is { } r ? (decimal)r : null,
+                    ExternalId = item.Asin,
                 });
 
-                if (offers.Count >= MaxResults)
+                if (offers.Count >= _maxResults)
                 {
                     break;
                 }
             }
 
-            return offers;
+            return ListingRelevanceFilter.RemovePriceOutliers(offers);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

@@ -18,12 +18,19 @@ import { getToken } from '../auth/token'
 // Configurable per environment (VITE_API_URL at build time); localhost for dev.
 const API_BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:5286'
 
-/** Calls the backend search endpoint and returns the aggregated result. */
+/**
+ * Calls the backend search endpoint and returns one page of the aggregated,
+ * ranked result. Every vendor is only ever queried once per distinct query —
+ * requesting a later page reuses the backend's cached full result rather
+ * than re-fetching live.
+ */
 export async function searchProducts(
   query: string,
   signal?: AbortSignal,
+  page = 1,
+  pageSize = 20,
 ): Promise<SearchResult> {
-  const url = `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`
+  const url = `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}&page=${page}&pageSize=${pageSize}`
   const response = await fetch(url, { signal })
 
   if (!response.ok) {

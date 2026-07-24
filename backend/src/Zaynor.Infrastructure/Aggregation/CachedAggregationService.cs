@@ -43,37 +43,67 @@ public sealed class CachedAggregationService : IAggregationService
         _logger = logger;
     }
 
-    public async Task<SearchResult> SearchAsync(string query, CancellationToken cancellationToken = default)
+    public async Task<SearchResult> SearchAsync(string query, int page = 1, int pageSize = 20, CancellationToken cancellationToken = default)
     {
         var cacheKey = $"search:{ProductNormalizer.Normalize(query ?? string.Empty)}";
 
-        if (_cache.TryGetValue<SearchResult>(cacheKey, out var cached) && cached is not null)
+        if (!_cache.TryGetValue<SearchResult>(cacheKey, out var full) || full is null)
+        {
+            full = await _inner.SearchAsync(query!, cancellationToken);
+
+            if (full.Offers.Count > 0)
+            {
+                // Live observation: accumulate history (spec Sections 13/15, feeds FR12).
+                // Fire-and-forget on its own DI scope/DbContext, not awaited on the
+                // request path: this used to run synchronously here and, with up to
+                // ~30 offers each needing 2 sequential unbatched DB round trips, was
+                // adding several real seconds to every live search. Nothing in the
+                // response depends on history having been written yet, so there's no
+                // reason a slow DB should hold up the user waiting on results. Uses
+                // its own scope (not the request's, which is disposed once the HTTP
+                // response completes) and CancellationToken.None (a client
+                // disconnecting shouldn't abort a write that's already in flight).
+                RecordHistoryInBackground(full.Offers);
+
+                // Only meaningful results are cached; failures/empties retry live.
+                // Cached under the query alone — page/pageSize never affects
+                // which vendors get called, only how this one cached result
+                // gets sliced below, so a page-2 request never repeats a live
+                // fan-out that a page-1 request for the same query just did.
+                _cache.Set(cacheKey, full, CacheDuration);
+            }
+        }
+        else
         {
             _logger.LogDebug("Cache hit for {Query}", query);
-            return cached;
         }
 
-        var result = await _inner.SearchAsync(query!, cancellationToken);
+        return Paginate(full, page, pageSize);
+    }
 
-        if (result.Offers.Count > 0)
+    /// <summary>
+    /// Slices the one fully-computed, already-ranked result to the
+    /// requested page. Real "ask the vendor for page 2" pagination isn't
+    /// viable here — DataForSEO/Bright Data calls alone can take 10-40s and
+    /// are billed per call — so every page turn reuses the same single
+    /// fetch.
+    /// </summary>
+    private static SearchResult Paginate(SearchResult full, int page, int pageSize)
+    {
+        var safePage = Math.Max(1, page);
+        var safePageSize = Math.Clamp(pageSize, 1, 50);
+        var totalCount = full.Offers.Count;
+        var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)safePageSize);
+        var pageOffers = full.Offers.Skip((safePage - 1) * safePageSize).Take(safePageSize).ToList();
+
+        return full with
         {
-            // Live observation: accumulate history (spec Sections 13/15, feeds FR12).
-            // Fire-and-forget on its own DI scope/DbContext, not awaited on the
-            // request path: this used to run synchronously here and, with up to
-            // ~30 offers each needing 2 sequential unbatched DB round trips, was
-            // adding several real seconds to every live search. Nothing in the
-            // response depends on history having been written yet, so there's no
-            // reason a slow DB should hold up the user waiting on results. Uses
-            // its own scope (not the request's, which is disposed once the HTTP
-            // response completes) and CancellationToken.None (a client
-            // disconnecting shouldn't abort a write that's already in flight).
-            RecordHistoryInBackground(result.Offers);
-
-            // Only meaningful results are cached; failures/empties retry live.
-            _cache.Set(cacheKey, result, CacheDuration);
-        }
-
-        return result;
+            Offers = pageOffers,
+            Page = safePage,
+            PageSize = safePageSize,
+            TotalCount = totalCount,
+            TotalPages = totalPages,
+        };
     }
 
     private void RecordHistoryInBackground(IReadOnlyList<AggregatedOffer> offers)

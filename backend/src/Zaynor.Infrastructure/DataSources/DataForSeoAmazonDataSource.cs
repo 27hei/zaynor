@@ -30,19 +30,13 @@ public sealed class DataForSeoAmazonDataSource : IProductDataSource
 {
     private const string Endpoint = "https://api.dataforseo.com/v3/merchant/amazon/products/live/advanced";
 
-    // A live search for one keyword returns many distinct listings (different
-    // sellers/bundles/accessories) — taking more than the single best match
-    // would show them as if they were different stores' prices for the same
-    // product, which they aren't. One real, relevant offer per query, same
-    // reasoning as RainforestAmazonDataSource.
-    private const int MaxResults = 1;
-
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<DataForSeoAmazonDataSource> _logger;
     private readonly string? _login;
     private readonly string? _password;
     private readonly string _locationName;
     private readonly string _languageName;
+    private readonly int _maxResults;
 
     public DataForSeoAmazonDataSource(
         IHttpClientFactory httpClientFactory,
@@ -59,6 +53,10 @@ public sealed class DataForSeoAmazonDataSource : IProductDataSource
         // States)" is the documented, verified-working value and still
         // returns the same amazon.sa marketplace/currency/listings.
         _languageName = configuration["DataSources:DataForSeo:LanguageName"] ?? "English (United States)";
+        // A store can now show more than one genuinely different listing per
+        // search — but not unbounded (this is a paid, per-request API), so a
+        // shared, config-driven cap across all single-call sources.
+        _maxResults = int.TryParse(configuration["DataSources:MaxListingsPerSource"], out var max) ? max : 10;
     }
 
     public string SourceName => "DataForSeoAmazon";
@@ -68,6 +66,9 @@ public sealed class DataForSeoAmazonDataSource : IProductDataSource
 
     /// <summary>Paid per-request quota — queried on every search, alongside the curated catalog and other live feeds.</summary>
     public bool IsExpensiveLive => true;
+
+    /// <summary>A direct Amazon.sa scraper, verified against real listings this session.</summary>
+    public double Confidence => 0.85;
 
     public async Task<IReadOnlyList<StoreOffer>> SearchAsync(string query, CancellationToken cancellationToken = default)
     {
@@ -126,7 +127,12 @@ public sealed class DataForSeoAmazonDataSource : IProductDataSource
                 if (item.Type != "amazon_serp"
                     || item.PriceFrom is not { } price || price <= 0
                     || string.IsNullOrWhiteSpace(item.Url)
-                    || string.IsNullOrWhiteSpace(item.Title))
+                    || string.IsNullOrWhiteSpace(item.Title)
+                    // Now that more than one listing per query can survive,
+                    // apply the same precision filters GoogleShoppingDataSource
+                    // needed once it stopped taking just a single top result.
+                    || (!ListingRelevanceFilter.IsRelevant(query, item.Title) && !ListingRelevanceFilter.IsRelevant(effectiveQuery, item.Title))
+                    || ListingRelevanceFilter.IsAccessoryMismatch(query, effectiveQuery, item.Title))
                 {
                     continue;
                 }
@@ -142,15 +148,16 @@ public sealed class DataForSeoAmazonDataSource : IProductDataSource
                     ImageUrl = item.ImageUrl,
                     FreeShipping = false,
                     DeliveryDays = null,
+                    ExternalId = item.Asin,
                 });
 
-                if (offers.Count >= MaxResults)
+                if (offers.Count >= _maxResults)
                 {
                     break;
                 }
             }
 
-            return offers;
+            return ListingRelevanceFilter.RemovePriceOutliers(offers);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -177,6 +184,7 @@ public sealed class DataForSeoAmazonDataSource : IProductDataSource
         [property: JsonPropertyName("type")] string? Type,
         [property: JsonPropertyName("title")] string? Title,
         [property: JsonPropertyName("url")] string? Url,
+        [property: JsonPropertyName("asin")] string? Asin,
         [property: JsonPropertyName("image_url")] string? ImageUrl,
         [property: JsonPropertyName("price_from")] decimal? PriceFrom,
         [property: JsonPropertyName("currency")] string? Currency);
